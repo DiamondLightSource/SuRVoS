@@ -1,0 +1,24 @@
+---
+title: Workflow
+layout: documentation
+toc-section: 2
+---
+
+SuRVoS Workbench combines the human expert's knowledge with data representation, machine learning and active learning techniques. This workbench is designed to semi-automatically segment large biological volumes with the input of a user and to guide the user through the process. The basic framework of SuRVoS follows these steps:
+
+1. Data Preparation: Data is first loaded into SuRVoS and a region of interest (RoI) is selected.
+
+2. Data Preprocessing: Denoising filters are used to enhance volume information and remove noise that would reduce the segmentation accuracy. Textural filters are used to enhance relevant features of the volume to better discriminate between different cellular components.
+
+3. Data Representation: The volume is partitioned into more meaningful regions using hierarchical layers of super-regions: voxels, supervoxels and megavoxels.
+
+3. Model Training: The user defines an arbitrary number of labels and segments a large amount of data with a few clicks using the super-region hierarchy previously created. With the user annotated data as input, a classifier is trained and applied to the whole volume in real time. The user can then explore the confidence maps of the classifier, accept voxels with high certainty, and iterate through model training to further refine the predictions.
+
+At any point the user can go back to any of the previous steps to improve the pre-processing or data representation steps in order to better highlight new target areas. This allows the user to try various parameter configurations to better segment challenging volume regions.
+
+![]({{site.baseurl}}/images/overview.png)
+
+Applying the user's knowledge to quickly generate training data (in the form of annotations) is a key feature of SuRVoS. With an intuitive and simple interface, the user can annotate volume slices at any of the super-region levels: voxels, supervoxels or megavoxels. Thus, with a single manual annotation, all the voxels, supervoxels or megavoxels that the pen tool passes through are assigned to the selected label. This means the user can annotate vast regions of voxels with a minimal amount of effort. Labels can be created as required to correspond to experimental content and assigned a custom colour and name.
+To make the annotation task more intuitive, SuRVoS uses a Segmentation Label Hierarchy. Segmentation labels can be created as needed and newer labels can be placed within parent labels to intelligently restrict model training and the segmentation space. For example, it may be useful to first segment large regions from each other (nucleus from cytoplasm) before segmenting the nucleoli within the nucleus and the organelles within the cytoplasm. By exploiting this contextual information, which is known to improve the performance of classifiers, individual areas and organelles can be segmented separately in a more efficient manner. In most cases, a two-level label hierarchy is sufficient, separating in the first level large volume areas and assigning to the second layer smaller objects of interest. In SuRVoS, each segmentation label creates a separate annotation mask. This annotation mask can either be directly output, or can be used within SuRVoS to output only the data within the mask for downstream data visualization purposes.
+
+SuRVoS provides the user with three main workflows with which to segment data: manual segmentation, region-based segmentation, and model-based segmentation. As with other available tools, such as Avizo, IMOD, Fiji or Chimera, the user can manually annotate the voxels of the volume directly. This approach, at the expense of extensive manual labour, can enhance segmentation in difficult areas where the following schemes don’t achieve the desired level of segmentation accuracy. The second segmentation approach, using super-regions (both supervoxels and megavoxels), means different areas of the volume can be rapidly annotated without having to manually delineate a region’s boundaries. As super-regions provide good boundary adherence, annotating cell areas is simplified and more time-efficient. Additionally, region annotations can make use of the Segmentation Label Hierarchy to limit a label to a previously defined area of the volume preventing segmentations from exploding outside of an area of interest. The third approach, using descriptors and annotations from previous steps (both manual and region-based annotations), machine learning algorithms can be used to extend annotations to the rest of the volume. This semi-automatic segmentation is aided by a confidence map and can be used to iteratively add to segmentations to train the descriptor. As before, training and predicting of segmentations can be limited to a certain area of the volume by using the Segmentation Label Hierarchy.
