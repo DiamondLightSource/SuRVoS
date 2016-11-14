@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>Super Regions – SuRVoS Workbench – Super Region Volume Segmentation</title>
+
+	    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="Super Region Volume Segmentation">
+    <meta property="og:description" content="Super Region Volume Segmentation" />
+    
+    <meta name="author" content="SuRVoS Workbench" />
+
+    
+    <meta property="og:title" content="Super Regions" />
+    <meta property="twitter:title" content="Super Regions" />
+    
+
+	<!--[if lt IE 9]>
+	  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<!-- Add jQuery library -->
+	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+
+	<!-- Add fancyBox -->
+	<link rel="stylesheet" href="/SuRVoS/fancybox/source/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+	<script type="text/javascript" src="/SuRVoS/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+	<!-- Optionally add helpers - button, thumbnail and/or media -->
+	<link rel="stylesheet" href="/SuRVoS/fancybox/source/helpers/jquery.fancybox-buttons.css?v=1.0.5" type="text/css" media="screen" />
+	<script type="text/javascript" src="/SuRVoS/fancybox/source/helpers/jquery.fancybox-buttons.js?v=1.0.5"></script>
+	<script type="text/javascript" src="/SuRVoS/fancybox/source/helpers/jquery.fancybox-media.js?v=1.0.6"></script>
+
+	<link rel="stylesheet" href="/SuRVoS/fancybox/source/helpers/jquery.fancybox-thumbs.css?v=1.0.7" type="text/css" media="screen" />
+	<script type="text/javascript" src="/SuRVoS/fancybox/source/helpers/jquery.fancybox-thumbs.js?v=1.0.7"></script>
+
+	<link rel="stylesheet" type="text/css" href="/SuRVoS/style.css" />
+	<link rel="alternate" type="application/rss+xml" title="SuRVoS Workbench - Super Region Volume Segmentation" href="/SuRVoS/feed.xml" />
+
+	<!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+  </head>
+
+  <body>
+	<div id="envelope">
+	<div class="wrapper-masthead">
+	  <div class="container">
+		<header class="masthead clearfix">
+		  <!--
+		  <a href="/SuRVoS/" class="site-avatar"><img src="" /></a>
+		  -->
+		  <div class="site-info">
+			<h1 class="site-name"><a href="/SuRVoS/">SuRVoS Workbench</a></h1>
+			<p class="site-description">Super Region Volume Segmentation</p>
+		  </div>
+
+		  <nav class="header">
+			<a href="/SuRVoS/">Home</a>
+			<a href="/SuRVoS/docs/installation">Installation</a>
+			<a href="/SuRVoS/docs">Documentation</a>
+			<a href="/SuRVoS/about">About</a>
+		  </nav>
+		</header>
+	  </div>
+	</div>
+
+	<div id="main" role="main" class="container">
+	  <script type="text/javascript">
+<!--
+	$(document).ready(function() {
+		$("#doc_toc_nav").click(function(ev) {
+			if ( ev.target != this ) {
+				return;
+			}
+			var height = $(this).css('height');
+			$("#doc_toc").toggle();
+			$(this).css('height', height);
+		});
+	});
+//-->
+</script>
+
+<nav id='doc_toc_nav' class="toc">
+	<ul id='doc_toc'>
+
+
+	<!--{"name"=>"", "items"=>[#<Jekyll:Page @name="404.md">, #<Jekyll:Page @name="about.md">, #<Jekyll:Page @name="index.md">, #<Jekyll:Page @name="style.scss">, #<Jekyll:Page @name="feed.xml">, #<Jekyll:Page @name="feed.xslt.xml">], "size"=>6}-->
+	
+
+	<!--{"name"=>"0", "items"=>[#<Jekyll:Page @name="index.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/">
+				0.
+				
+					Introduction
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"1", "items"=>[#<Jekyll:Page @name="installation.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/installation/">
+				1.
+				
+					Installation
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"2", "items"=>[#<Jekyll:Page @name="workflow.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/workflow/">
+				2.
+				
+					Workflow
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"3", "items"=>[#<Jekyll:Page @name="annotations.md">, #<Jekyll:Page @name="export.md">, #<Jekyll:Page @name="features.md">, #<Jekyll:Page @name="index.md">, #<Jekyll:Page @name="label-splitter.md">, #<Jekyll:Page @name="label-statistics.md">, #<Jekyll:Page @name="roi.md">, #<Jekyll:Page @name="super-regions.md">, #<Jekyll:Page @name="training.md">, #<Jekyll:Page @name="visualization.md">], "size"=>10}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/components/">
+				3.
+				
+					Components
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/visualization/">
+				3.1
+				
+					Visualization
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/roi/">
+				3.2
+				
+					Region of Interests
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/features/">
+				3.3
+				
+					Feature Channels
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/super-regions/">
+				3.4
+				
+					Super Regions
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/training/">
+				3.5
+				
+					Model Training
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/annotations/">
+				3.6
+				
+					Annotations
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/export/">
+				3.7
+				
+					Export
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/label-splitter/">
+				3.8
+				
+					Label Splitter
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/label-statistics/">
+				3.9
+				
+					Label Statistics
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"4", "items"=>[#<Jekyll:Page @name="index.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/tutorials/">
+				4.
+				
+					Tutorials
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"5", "items"=>[#<Jekyll:Page @name="about.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/about/">
+				5.
+				
+					About
+				
+				</a>
+			</li>
+		
+	
+
+	</ul>
+</nav>
+
+<article class="page">
+
+  <h1>Super Regions</h1>
+
+  <div class="entry">
+	<p><img src="/SuRVoS/images/components/super-regions/sregions.png" alt="left30" /></p>
+
+<p>The volumetric data is represented as super regions within a 3-layer hierarchical structure. This structure is composed of voxels, supervoxels and megavoxels. Each of these layers is formed by grouping similar and nearby elements of the previous layer. That is, while voxels represent standard volume voxels, supervoxels are groups of adjacent voxels grouped together into a meaningful region that preserves strong volume boundaries (ie. boundaries between different biological features in the image). Similarly, megavoxels are groups of nearby supervoxels that have similar appearance. With this hierarchical partitioning, large areas of the volume belonging to the same object are represented by: a set of thousands of voxels, tens of supervoxels or a few megavoxels (Figure 4). This hierarchical structure has several advantages compared to the standard voxel grid:</p>
+
+<ol>
+  <li>
+    <p>Each of the layers of the hierarchy represents the same volume with many fewer elements than the previous layer, thus, reducing the complexity of annotating or segmenting the volume by several orders of magnitude.</p>
+  </li>
+  <li>
+    <p>Supervoxels and megavoxels are designed to have a strong boundary adherence and are therefore able to represent the same biological feature without significant loss of information.</p>
+  </li>
+  <li>
+    <p>The shape and size of the supervoxels is user-definable in order to properly model volumes or areas with different physical characteristics.</p>
+  </li>
+</ol>
+
+<p>To better understand what super-regions actually do, find bellow a real world image of the <a href="https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/">BSD500 dataset</a> that is easier to visually appreciate the differences.</p>
+
+<p><img src="/SuRVoS/images/components/super-regions/abstract.png" alt="" /></p>
+
+<p>Here, a 2D image (left) is segmented into superpixels that preserver strong image boundaries (middle). These superpixels are then merged into <em>supersegments</em> (2D megavoxels, right) to further represent the image with less regions. This process can be equivalently applied to 3D images to represent it as supervoxels and megavoxels, reducing the amount of representative units (for a 1000x1000x500 image) from 500M voxels to 100-500K supervoxels, and further down to 10-50K megavoxels.</p>
+
+<p><img src="/SuRVoS/images/components/super-regions/super-regions.png" alt="" /></p>
+
+<h2 id="supervoxels">Supervoxels</h2>
+
+<p>TODO: parameters</p>
+
+<h2 id="megavoxels">Megavoxels</h2>
+
+<p>TODO: parameters</p>
+
+  </div>
+</article>
+
+	</div>
+
+	</div>
+	<div class="wrapper-footer">
+	  <div class="container">
+		<footer class="footer">
+		  <div style="position: relative; float: left;">
+			<a href="http://nottingham.ac.uk/">
+				<img src="/SuRVoS/images/nottingham.png" width="200" height="65"/>
+			</a>
+			<a href="http://cvl.cs.nott.ac.uk/">
+				<img src="/SuRVoS/images/aperture2.png" width="65" height="65" />
+			</a>
+		  </div>
+		  
+
+
+
+<a href="https://github.com/DiamondLightSource/SuRVoS"><i class="svg-icon github"></i></a>
+
+
+
+
+
+
+
+
+
+		  <div style="position: relative; float: right;">
+			  <a href="http://www.diamond.ac.uk/Home.html">
+				<img src="/SuRVoS/images/diamond.png" width="200" height="60" />
+			  </a>
+		  </div>
+		</footer>
+	  </div>
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("img").each(function() {
+				if ( $(this).parent().is("a") ) {
+					return;
+				}
+				$(this).fancybox({
+					href    : $(this).attr('src'),
+					type    : 'image',
+					helpers : {
+						overlay: {
+							locked: false
+						}
+					}
+				})
+			});
+		;});
+	</script>
+  </body>
+</html>

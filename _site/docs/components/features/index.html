@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>Feature Channels – SuRVoS Workbench – Super Region Volume Segmentation</title>
+
+	    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="Super Region Volume Segmentation">
+    <meta property="og:description" content="Super Region Volume Segmentation" />
+    
+    <meta name="author" content="SuRVoS Workbench" />
+
+    
+    <meta property="og:title" content="Feature Channels" />
+    <meta property="twitter:title" content="Feature Channels" />
+    
+
+	<!--[if lt IE 9]>
+	  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<!-- Add jQuery library -->
+	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+
+	<!-- Add fancyBox -->
+	<link rel="stylesheet" href="/SuRVoS/fancybox/source/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+	<script type="text/javascript" src="/SuRVoS/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+	<!-- Optionally add helpers - button, thumbnail and/or media -->
+	<link rel="stylesheet" href="/SuRVoS/fancybox/source/helpers/jquery.fancybox-buttons.css?v=1.0.5" type="text/css" media="screen" />
+	<script type="text/javascript" src="/SuRVoS/fancybox/source/helpers/jquery.fancybox-buttons.js?v=1.0.5"></script>
+	<script type="text/javascript" src="/SuRVoS/fancybox/source/helpers/jquery.fancybox-media.js?v=1.0.6"></script>
+
+	<link rel="stylesheet" href="/SuRVoS/fancybox/source/helpers/jquery.fancybox-thumbs.css?v=1.0.7" type="text/css" media="screen" />
+	<script type="text/javascript" src="/SuRVoS/fancybox/source/helpers/jquery.fancybox-thumbs.js?v=1.0.7"></script>
+
+	<link rel="stylesheet" type="text/css" href="/SuRVoS/style.css" />
+	<link rel="alternate" type="application/rss+xml" title="SuRVoS Workbench - Super Region Volume Segmentation" href="/SuRVoS/feed.xml" />
+
+	<!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+  </head>
+
+  <body>
+	<div id="envelope">
+	<div class="wrapper-masthead">
+	  <div class="container">
+		<header class="masthead clearfix">
+		  <!--
+		  <a href="/SuRVoS/" class="site-avatar"><img src="" /></a>
+		  -->
+		  <div class="site-info">
+			<h1 class="site-name"><a href="/SuRVoS/">SuRVoS Workbench</a></h1>
+			<p class="site-description">Super Region Volume Segmentation</p>
+		  </div>
+
+		  <nav class="header">
+			<a href="/SuRVoS/">Home</a>
+			<a href="/SuRVoS/docs/installation">Installation</a>
+			<a href="/SuRVoS/docs">Documentation</a>
+			<a href="/SuRVoS/about">About</a>
+		  </nav>
+		</header>
+	  </div>
+	</div>
+
+	<div id="main" role="main" class="container">
+	  <script type="text/javascript">
+<!--
+	$(document).ready(function() {
+		$("#doc_toc_nav").click(function(ev) {
+			if ( ev.target != this ) {
+				return;
+			}
+			var height = $(this).css('height');
+			$("#doc_toc").toggle();
+			$(this).css('height', height);
+		});
+	});
+//-->
+</script>
+
+<nav id='doc_toc_nav' class="toc">
+	<ul id='doc_toc'>
+
+
+	<!--{"name"=>"", "items"=>[#<Jekyll:Page @name="404.md">, #<Jekyll:Page @name="about.md">, #<Jekyll:Page @name="index.md">, #<Jekyll:Page @name="style.scss">, #<Jekyll:Page @name="feed.xml">, #<Jekyll:Page @name="feed.xslt.xml">], "size"=>6}-->
+	
+
+	<!--{"name"=>"0", "items"=>[#<Jekyll:Page @name="index.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/">
+				0.
+				
+					Introduction
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"1", "items"=>[#<Jekyll:Page @name="installation.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/installation/">
+				1.
+				
+					Installation
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"2", "items"=>[#<Jekyll:Page @name="workflow.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/workflow/">
+				2.
+				
+					Workflow
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"3", "items"=>[#<Jekyll:Page @name="annotations.md">, #<Jekyll:Page @name="export.md">, #<Jekyll:Page @name="features.md">, #<Jekyll:Page @name="index.md">, #<Jekyll:Page @name="label-splitter.md">, #<Jekyll:Page @name="label-statistics.md">, #<Jekyll:Page @name="roi.md">, #<Jekyll:Page @name="super-regions.md">, #<Jekyll:Page @name="training.md">, #<Jekyll:Page @name="visualization.md">], "size"=>10}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/components/">
+				3.
+				
+					Components
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/visualization/">
+				3.1
+				
+					Visualization
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/roi/">
+				3.2
+				
+					Region of Interests
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/features/">
+				3.3
+				
+					Feature Channels
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/super-regions/">
+				3.4
+				
+					Super Regions
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/training/">
+				3.5
+				
+					Model Training
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/annotations/">
+				3.6
+				
+					Annotations
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/export/">
+				3.7
+				
+					Export
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/label-splitter/">
+				3.8
+				
+					Label Splitter
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/label-statistics/">
+				3.9
+				
+					Label Statistics
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"4", "items"=>[#<Jekyll:Page @name="index.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/tutorials/">
+				4.
+				
+					Tutorials
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"5", "items"=>[#<Jekyll:Page @name="about.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/about/">
+				5.
+				
+					About
+				
+				</a>
+			</li>
+		
+	
+
+	</ul>
+</nav>
+
+<article class="page">
+
+  <h1>Feature Channels</h1>
+
+  <div class="entry">
+	<p><img src="/SuRVoS/images/components/features/feature-panel.png" alt="left30" /></p>
+
+<p>Features help to better visualize and describe the data. There are multiple features available in SuRVoS. Standard features include Gaussian denoising, local statistics (e.g. mean, std), local standarization, Gaussian gradient magnitude and orientation and some other filters. More advanced blob detection features such as Difference of Gaussians, Laplacian of Gaussians or Determinant of Hessian help to detect blobs (bright or dark) in the image and textural featues can be extracted from the Eigenvalues of the Hessian or Structure Tensor matrices. These filters can also be computed at multiple scales for scale invariance.</p>
+
+<p>Every feature computed in SuRVoS can be visually inspected in the main panel by choosing an already computed feature in the <em>channel-selection</em> combo box (image on the right). This helps an unexperienced user to understand what features are actually enhancing in the image and whether they are useful or not. Default parameters for each of the features are sensibly chosed for general volumes, however, by using the feature visualization it helps to understand and find appropiate feature parameters for the volume being analyzed.</p>
+
+<p><img src="/SuRVoS/images/components/features/features-demo.png" alt="right40" /></p>
+
+<p>To compute a new feature, it has to first be selected from the available feature list and then click in <strong>Add</strong>. After the feature is added to the list, it will show (by clicking on the name) the list of configurable parameters. Once the feature parameters are selected, the channel can be computed by clicking on the tick symbol next to the name. Alternatively, multiple features can be computed at once by clicking on <strong>Compute Features</strong>.</p>
+
+<p>Additionally, every feature has a parameter that defines the <em>source channel</em> (combo box marked as red on the left image). This source indicates which channel will be used to compute the new feature. The default channel is the raw data, but, it allows to compute <strong>stacked features</strong> (features of features) with limitless level of customization. This allows experienced users to compute complex features that would better enhance elements of the data.</p>
+
+<p>Bellow will be listed a brief description of each of the features and the effect of the parameters on them.</p>
+
+<h2 id="raw-features">Raw features</h2>
+
+<h3 id="threshold">Threshold</h3>
+
+<h3 id="invert-threshold">Invert Threshold</h3>
+
+<h2 id="denoising-filters">Denoising Filters</h2>
+
+<h3 id="gaussian-filter">Gaussian Filter</h3>
+
+<h3 id="total-variation-denoising">Total Variation denoising</h3>
+
+<h2 id="local-features">Local Features</h2>
+
+<h2 id="gaussian-features">Gaussian Features</h2>
+
+<h2 id="blob-detection">Blob Detection</h2>
+
+<h3 id="difference-of-gaussians">Difference of Gaussians</h3>
+
+<h3 id="laplacian-of-gaussians">Laplacian of Gaussians</h3>
+
+<h3 id="determinant-of-hessian">Determinant of Hessian</h3>
+
+<h2 id="texturestructure">Texture/Structure</h2>
+
+<h3 id="eigenvalues-of-the-hessian-matrix">Eigenvalues of the Hessian Matrix</h3>
+
+<h3 id="eigenvalues-of-the-structure-tensor">Eigenvalues of the Structure Tensor</h3>
+
+<h3 id="gabor-like-filters">Gabor-like filters</h3>
+
+<h2 id="robust-features">Robust Features</h2>
+
+<h3 id="scale-invariant">Scale Invariant</h3>
+
+<h3 id="frangi-filter">Frangi Filter</h3>
+
+<h2 id="actiation-layers">Actiation Layers</h2>
+
+<h3 id="maximum-response">Maximum Response</h3>
+
+<h3 id="rectified-linear-unit">Rectified Linear Unit</h3>
+
+  </div>
+</article>
+
+	</div>
+
+	</div>
+	<div class="wrapper-footer">
+	  <div class="container">
+		<footer class="footer">
+		  <div style="position: relative; float: left;">
+			<a href="http://nottingham.ac.uk/">
+				<img src="/SuRVoS/images/nottingham.png" width="200" height="65"/>
+			</a>
+			<a href="http://cvl.cs.nott.ac.uk/">
+				<img src="/SuRVoS/images/aperture2.png" width="65" height="65" />
+			</a>
+		  </div>
+		  
+
+
+
+<a href="https://github.com/DiamondLightSource/SuRVoS"><i class="svg-icon github"></i></a>
+
+
+
+
+
+
+
+
+
+		  <div style="position: relative; float: right;">
+			  <a href="http://www.diamond.ac.uk/Home.html">
+				<img src="/SuRVoS/images/diamond.png" width="200" height="60" />
+			  </a>
+		  </div>
+		</footer>
+	  </div>
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("img").each(function() {
+				if ( $(this).parent().is("a") ) {
+					return;
+				}
+				$(this).fancybox({
+					href    : $(this).attr('src'),
+					type    : 'image',
+					helpers : {
+						overlay: {
+							locked: false
+						}
+					}
+				})
+			});
+		;});
+	</script>
+  </body>
+</html>

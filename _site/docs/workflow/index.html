@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>Workflow – SuRVoS Workbench – Super Region Volume Segmentation</title>
+
+	    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="Super Region Volume Segmentation">
+    <meta property="og:description" content="Super Region Volume Segmentation" />
+    
+    <meta name="author" content="SuRVoS Workbench" />
+
+    
+    <meta property="og:title" content="Workflow" />
+    <meta property="twitter:title" content="Workflow" />
+    
+
+	<!--[if lt IE 9]>
+	  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<!-- Add jQuery library -->
+	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+
+	<!-- Add fancyBox -->
+	<link rel="stylesheet" href="/SuRVoS/fancybox/source/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+	<script type="text/javascript" src="/SuRVoS/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+	<!-- Optionally add helpers - button, thumbnail and/or media -->
+	<link rel="stylesheet" href="/SuRVoS/fancybox/source/helpers/jquery.fancybox-buttons.css?v=1.0.5" type="text/css" media="screen" />
+	<script type="text/javascript" src="/SuRVoS/fancybox/source/helpers/jquery.fancybox-buttons.js?v=1.0.5"></script>
+	<script type="text/javascript" src="/SuRVoS/fancybox/source/helpers/jquery.fancybox-media.js?v=1.0.6"></script>
+
+	<link rel="stylesheet" href="/SuRVoS/fancybox/source/helpers/jquery.fancybox-thumbs.css?v=1.0.7" type="text/css" media="screen" />
+	<script type="text/javascript" src="/SuRVoS/fancybox/source/helpers/jquery.fancybox-thumbs.js?v=1.0.7"></script>
+
+	<link rel="stylesheet" type="text/css" href="/SuRVoS/style.css" />
+	<link rel="alternate" type="application/rss+xml" title="SuRVoS Workbench - Super Region Volume Segmentation" href="/SuRVoS/feed.xml" />
+
+	<!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+  </head>
+
+  <body>
+	<div id="envelope">
+	<div class="wrapper-masthead">
+	  <div class="container">
+		<header class="masthead clearfix">
+		  <!--
+		  <a href="/SuRVoS/" class="site-avatar"><img src="" /></a>
+		  -->
+		  <div class="site-info">
+			<h1 class="site-name"><a href="/SuRVoS/">SuRVoS Workbench</a></h1>
+			<p class="site-description">Super Region Volume Segmentation</p>
+		  </div>
+
+		  <nav class="header">
+			<a href="/SuRVoS/">Home</a>
+			<a href="/SuRVoS/docs/installation">Installation</a>
+			<a href="/SuRVoS/docs">Documentation</a>
+			<a href="/SuRVoS/about">About</a>
+		  </nav>
+		</header>
+	  </div>
+	</div>
+
+	<div id="main" role="main" class="container">
+	  <script type="text/javascript">
+<!--
+	$(document).ready(function() {
+		$("#doc_toc_nav").click(function(ev) {
+			if ( ev.target != this ) {
+				return;
+			}
+			var height = $(this).css('height');
+			$("#doc_toc").toggle();
+			$(this).css('height', height);
+		});
+	});
+//-->
+</script>
+
+<nav id='doc_toc_nav' class="toc">
+	<ul id='doc_toc'>
+
+
+	<!--{"name"=>"", "items"=>[#<Jekyll:Page @name="404.md">, #<Jekyll:Page @name="about.md">, #<Jekyll:Page @name="index.md">, #<Jekyll:Page @name="style.scss">, #<Jekyll:Page @name="feed.xml">, #<Jekyll:Page @name="feed.xslt.xml">], "size"=>6}-->
+	
+
+	<!--{"name"=>"0", "items"=>[#<Jekyll:Page @name="index.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/">
+				0.
+				
+					Introduction
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"1", "items"=>[#<Jekyll:Page @name="installation.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/installation/">
+				1.
+				
+					Installation
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"2", "items"=>[#<Jekyll:Page @name="workflow.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/workflow/">
+				2.
+				
+					Workflow
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"3", "items"=>[#<Jekyll:Page @name="annotations.md">, #<Jekyll:Page @name="export.md">, #<Jekyll:Page @name="features.md">, #<Jekyll:Page @name="index.md">, #<Jekyll:Page @name="label-splitter.md">, #<Jekyll:Page @name="label-statistics.md">, #<Jekyll:Page @name="roi.md">, #<Jekyll:Page @name="super-regions.md">, #<Jekyll:Page @name="training.md">, #<Jekyll:Page @name="visualization.md">], "size"=>10}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/components/">
+				3.
+				
+					Components
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/visualization/">
+				3.1
+				
+					Visualization
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/roi/">
+				3.2
+				
+					Region of Interests
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/features/">
+				3.3
+				
+					Feature Channels
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/super-regions/">
+				3.4
+				
+					Super Regions
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/training/">
+				3.5
+				
+					Model Training
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/annotations/">
+				3.6
+				
+					Annotations
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/export/">
+				3.7
+				
+					Export
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/label-splitter/">
+				3.8
+				
+					Label Splitter
+				
+				</a>
+			</li>
+		
+			
+				<li style='margin-left: 20px'>
+			
+				<a href="/SuRVoS/docs/components/label-statistics/">
+				3.9
+				
+					Label Statistics
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"4", "items"=>[#<Jekyll:Page @name="index.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/tutorials/">
+				4.
+				
+					Tutorials
+				
+				</a>
+			</li>
+		
+	
+
+	<!--{"name"=>"5", "items"=>[#<Jekyll:Page @name="about.md">], "size"=>1}-->
+	
+		
+		
+			
+				<li style='margin-left: 10px;'>
+			
+				<a href="/SuRVoS/docs/about/">
+				5.
+				
+					About
+				
+				</a>
+			</li>
+		
+	
+
+	</ul>
+</nav>
+
+<article class="page">
+
+  <h1>Workflow</h1>
+
+  <div class="entry">
+	<p>SuRVoS Workbench combines the human expert’s knowledge with data representation, machine learning and active learning techniques. This workbench is designed to semi-automatically segment large biological volumes with the input of a user and to guide the user through the process. The basic framework of SuRVoS follows these steps:</p>
+
+<ol>
+  <li>
+    <p>Data Preparation: Data is first loaded into SuRVoS and a region of interest (RoI) is selected.</p>
+  </li>
+  <li>
+    <p>Data Preprocessing: Denoising filters are used to enhance volume information and remove noise that would reduce the segmentation accuracy. Textural filters are used to enhance relevant features of the volume to better discriminate between different cellular components.</p>
+  </li>
+  <li>
+    <p>Data Representation: The volume is partitioned into more meaningful regions using hierarchical layers of super-regions: voxels, supervoxels and megavoxels.</p>
+  </li>
+  <li>
+    <p>Model Training: The user defines an arbitrary number of labels and segments a large amount of data with a few clicks using the super-region hierarchy previously created. With the user annotated data as input, a classifier is trained and applied to the whole volume in real time. The user can then explore the confidence maps of the classifier, accept voxels with high certainty, and iterate through model training to further refine the predictions.</p>
+  </li>
+</ol>
+
+<p>At any point the user can go back to any of the previous steps to improve the pre-processing or data representation steps in order to better highlight new target areas. This allows the user to try various parameter configurations to better segment challenging volume regions.</p>
+
+<p><img src="/SuRVoS/images/overview.png" alt="" /></p>
+
+<p>Applying the user’s knowledge to quickly generate training data (in the form of annotations) is a key feature of SuRVoS. With an intuitive and simple interface, the user can annotate volume slices at any of the super-region levels: voxels, supervoxels or megavoxels. Thus, with a single manual annotation, all the voxels, supervoxels or megavoxels that the pen tool passes through are assigned to the selected label. This means the user can annotate vast regions of voxels with a minimal amount of effort. Labels can be created as required to correspond to experimental content and assigned a custom colour and name.
+To make the annotation task more intuitive, SuRVoS uses a Segmentation Label Hierarchy. Segmentation labels can be created as needed and newer labels can be placed within parent labels to intelligently restrict model training and the segmentation space. For example, it may be useful to first segment large regions from each other (nucleus from cytoplasm) before segmenting the nucleoli within the nucleus and the organelles within the cytoplasm. By exploiting this contextual information, which is known to improve the performance of classifiers, individual areas and organelles can be segmented separately in a more efficient manner. In most cases, a two-level label hierarchy is sufficient, separating in the first level large volume areas and assigning to the second layer smaller objects of interest. In SuRVoS, each segmentation label creates a separate annotation mask. This annotation mask can either be directly output, or can be used within SuRVoS to output only the data within the mask for downstream data visualization purposes.</p>
+
+<p>SuRVoS provides the user with three main workflows with which to segment data: manual segmentation, region-based segmentation, and model-based segmentation. As with other available tools, such as Avizo, IMOD, Fiji or Chimera, the user can manually annotate the voxels of the volume directly. This approach, at the expense of extensive manual labour, can enhance segmentation in difficult areas where the following schemes don’t achieve the desired level of segmentation accuracy. The second segmentation approach, using super-regions (both supervoxels and megavoxels), means different areas of the volume can be rapidly annotated without having to manually delineate a region’s boundaries. As super-regions provide good boundary adherence, annotating cell areas is simplified and more time-efficient. Additionally, region annotations can make use of the Segmentation Label Hierarchy to limit a label to a previously defined area of the volume preventing segmentations from exploding outside of an area of interest. The third approach, using descriptors and annotations from previous steps (both manual and region-based annotations), machine learning algorithms can be used to extend annotations to the rest of the volume. This semi-automatic segmentation is aided by a confidence map and can be used to iteratively add to segmentations to train the descriptor. As before, training and predicting of segmentations can be limited to a certain area of the volume by using the Segmentation Label Hierarchy.</p>
+
+  </div>
+</article>
+
+	</div>
+
+	</div>
+	<div class="wrapper-footer">
+	  <div class="container">
+		<footer class="footer">
+		  <div style="position: relative; float: left;">
+			<a href="http://nottingham.ac.uk/">
+				<img src="/SuRVoS/images/nottingham.png" width="200" height="65"/>
+			</a>
+			<a href="http://cvl.cs.nott.ac.uk/">
+				<img src="/SuRVoS/images/aperture2.png" width="65" height="65" />
+			</a>
+		  </div>
+		  
+
+
+
+<a href="https://github.com/DiamondLightSource/SuRVoS"><i class="svg-icon github"></i></a>
+
+
+
+
+
+
+
+
+
+		  <div style="position: relative; float: right;">
+			  <a href="http://www.diamond.ac.uk/Home.html">
+				<img src="/SuRVoS/images/diamond.png" width="200" height="60" />
+			  </a>
+		  </div>
+		</footer>
+	  </div>
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("img").each(function() {
+				if ( $(this).parent().is("a") ) {
+					return;
+				}
+				$(this).fancybox({
+					href    : $(this).attr('src'),
+					type    : 'image',
+					helpers : {
+						overlay: {
+							locked: false
+						}
+					}
+				})
+			});
+		;});
+	</script>
+  </body>
+</html>

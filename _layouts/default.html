@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>{% if page.title %}{{ page.title }} – {% endif %}{{ site.name }} – {{ site.description }}</title>
+
+	{% include meta.html %}
+
+	<!--[if lt IE 9]>
+	  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+
+	<!-- Add jQuery library -->
+	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+
+	<!-- Add fancyBox -->
+	<link rel="stylesheet" href="{{ site.baseurl }}/fancybox/source/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+	<script type="text/javascript" src="{{ site.baseurl }}/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+	<!-- Optionally add helpers - button, thumbnail and/or media -->
+	<link rel="stylesheet" href="{{ site.baseurl }}/fancybox/source/helpers/jquery.fancybox-buttons.css?v=1.0.5" type="text/css" media="screen" />
+	<script type="text/javascript" src="{{ site.baseurl }}/fancybox/source/helpers/jquery.fancybox-buttons.js?v=1.0.5"></script>
+	<script type="text/javascript" src="{{ site.baseurl }}/fancybox/source/helpers/jquery.fancybox-media.js?v=1.0.6"></script>
+
+	<link rel="stylesheet" href="{{ site.baseurl }}/fancybox/source/helpers/jquery.fancybox-thumbs.css?v=1.0.7" type="text/css" media="screen" />
+	<script type="text/javascript" src="{{ site.baseurl }}/fancybox/source/helpers/jquery.fancybox-thumbs.js?v=1.0.7"></script>
+
+	<link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/style.css" />
+	<link rel="alternate" type="application/rss+xml" title="{{ site.name }} - {{ site.description }}" href="{{ site.baseurl }}/feed.xml" />
+
+	<!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+  </head>
+
+  <body>
+	<div id="envelope">
+	<div class="wrapper-masthead">
+	  <div class="container">
+		<header class="masthead clearfix">
+		  <!--
+		  <a href="{{ site.baseurl }}/" class="site-avatar"><img src="{{ site.logo }}" /></a>
+		  -->
+		  <div class="site-info">
+			<h1 class="site-name"><a href="{{ site.baseurl }}/">{{ site.name }}</a></h1>
+			<p class="site-description">{{ site.description }}</p>
+		  </div>
+
+		  <nav class="header">
+			<a href="{{ site.baseurl }}/">Home</a>
+			<a href="{{ site.baseurl }}/docs/installation">Installation</a>
+			<a href="{{ site.baseurl }}/docs">Documentation</a>
+			<a href="{{ site.baseurl }}/about">About</a>
+		  </nav>
+		</header>
+	  </div>
+	</div>
+
+	<div id="main" role="main" class="container">
+	  {{ content }}
+	</div>
+
+	</div>
+	<div class="wrapper-footer">
+	  <div class="container">
+		<footer class="footer">
+		  <div style="position: relative; float: left;">
+			<a href="http://nottingham.ac.uk/">
+				<img src="{{ site.baseurl }}/images/nottingham.png" width="200" height="65"/>
+			</a>
+			<a href="http://cvl.cs.nott.ac.uk/">
+				<img src="{{ site.baseurl }}/images/aperture2.png" width="65" height="65" />
+			</a>
+		  </div>
+		  {% include svg-icons.html %}
+		  <div style="position: relative; float: right;">
+			  <a href="http://www.diamond.ac.uk/Home.html">
+				<img src="{{ site.baseurl }}/images/diamond.png" width="200" height="60" />
+			  </a>
+		  </div>
+		</footer>
+	  </div>
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("img").each(function() {
+				if ( $(this).parent().is("a") ) {
+					return;
+				}
+				$(this).fancybox({
+					href    : $(this).attr('src'),
+					type    : 'image',
+					helpers : {
+						overlay: {
+							locked: false
+						}
+					}
+				})
+			});
+		;});
+	</script>
+  </body>
+</html>
