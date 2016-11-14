@@ -43,7 +43,7 @@ class QPlainTextEditLogger(log.Handler):
 
 class MainWindow(QtGui.QMainWindow):
 
-	def __init__(self, title='QMainWindow'):
+	def __init__(self, title="SuRVoS: Super-Region Volume Segmentation workbench"):
 		super(MainWindow, self).__init__()
 
 		self.DM = None
