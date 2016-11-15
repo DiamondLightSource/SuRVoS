@@ -542,7 +542,7 @@ class LayeredCanvas(PerspectiveCanvas):
 
 		if plevel is not None and plevel >= 0 and plabel >= 0:
 			plevel = self.LBLM.dataset(plevel)
-			pdata = self.DM.load_slices(plevel, slice_z, slice_y, slice_x)
+			pdata = self.DM.load_slices(plevel, slice_z, slice_y, slice_x, apply_roi=apply_roi)
 			mask = (pdata == plabel)
 			valid = mask[indexes[:, 0], indexes[:, 1], indexes[:, 2]]
 			indexes = indexes[valid]
