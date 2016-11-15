@@ -31,6 +31,7 @@ from skimage.draw import line, bezier_curve
 
 class NavigationToolbar(NavigationToolbar2QT):
 
+	home_pressed = QtCore.pyqtSignal()
 	toggle_grid = QtCore.pyqtSignal()
 
 	toolitems = (
@@ -145,6 +146,9 @@ class NavigationToolbar(NavigationToolbar2QT):
 	def layers(self):
 		self.vizmenu.exec_()
 
+	def home(self):
+		self.home_pressed.emit()
+
 
 class SliceViewer(Plugin):
 	name = 'Slice Viewer'
@@ -171,6 +175,7 @@ class SliceViewer(Plugin):
 			self.layered_canvas.canvas, self, self.locLabel)
 		self.toolbar.setMaximumWidth(50)
 		self.toolbar.toggle_grid.connect(self.layered_canvas.toggle_grid)
+		self.toolbar.home_pressed.connect(self.on_home_pressed)
 
 		self.layered_canvas.toolbar = self.toolbar
 		self.source_combo = SourceCombo(listen_DM=True, listen_self=True)
@@ -183,6 +188,12 @@ class SliceViewer(Plugin):
 		self.layout.addWidget(HWidgets(self.toolbar,
 									   self.layered_canvas,
 									   stretch=[0, 1]))
+
+	def on_home_pressed(self):
+		sy, sx = self.DM.region_shape()[1:]
+		self.layered_canvas.ax.set_ylim([sy, 0])
+		self.layered_canvas.ax.set_xlim([0, sx])
+		self.layered_canvas.redraw()
 
 	def increase_slider(self):
 		self.layered_canvas.increase_slider()
