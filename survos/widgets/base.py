@@ -158,22 +158,29 @@ class CheckableCombo(QtGui.QToolButton):
 						   '}'
 						   'QCheckBox {color: #0056b3;}'
 						   'QAction{ padding: 5px;}')
+		self.setMinimumWidth(100)
 		self._names = []
 		self._data = []
 
 	def sizeHint(self):
-		return self.toolmenu.sizeHint()
+		size = self.toolmenu.sizeHint()
+		size.setWidth(size.width() + 20)
+		return size
 
 	def addItem(self, item):
-		chk = QtGui.QCheckBox(item)
+		chk = QtGui.QCheckBox(item + '    ')
 		widget = QtGui.QWidgetAction(self.toolmenu)
 		widget.setDefaultWidget(chk)
 		self.toolmenu.addAction(widget)
 		self._names.append(item)
 		self._data.append((widget, chk))
+		self.toolmenu.repaint()
+		self.repaint()
 
 	def setItemText(self, item, text):
-		self._data[item][1].setText(text)
+		self._data[item][1].setText(text + '    ')
+		self.toolmenu.repaint()
+		self.repaint()
 
 	def removeItem(self, idx):
 		self.toolmenu.removeAction(self._data[idx][0])
@@ -237,7 +244,6 @@ class CheckableLabels(CheckableCombo):
 
 	def getSelectedLabels(self):
 		return [self._labels[i][1] for i in self.getSelectedIndexes()]
-
 
 
 class MultiSourceCombo(CheckableCombo):

@@ -420,7 +420,7 @@ class LabelExplorer(QtGui.QWidget):
 		self.replot()
 
 	def on_rules_computed(self):
-		self.labels = self.DM.load_ds('objects/objlabels')[:]
+		self.labels = self.DM.load_ds('objects/objlabels')
 		self.color_idx = list(set(np.unique(self.labels)) - set([-1]))
 		self.colors = {i:self.label_rules.labels[i].colorbutton.color
 					   for i in self.color_idx}
@@ -606,10 +606,9 @@ class LabelRules(QtGui.QWidget):
 		del self.labels[idx]
 
 		if self.DM.has_ds('objects/objlabels'):
-			ds = self.DM.load_ds('objects/objlabels')
-			d = ds[:]
-			d[d == idx] = -1
-			ds[:] = d
+			data = self.DM.load_ds('objects/objlabels')
+			data[data == idx] = -1
+			self.DM.write_dataset('objects/objlabels', data)
 		self.computed.emit()
 
 	def on_compute(self, idx, name, color, rules):
@@ -629,12 +628,12 @@ class LabelRules(QtGui.QWidget):
 		self.computed.emit()
 
 	def on_compute_others(self, idx):
-		num_objects = self.DM.attrs('objects/objects', 'num_objects')
-		out_ds = self.DM.require_hdf5('objects', 'objlabels', (num_objects,),
-									  dtype=np.int32, assemble=True)
-		data = out_ds[:]
+		num_objects = self.DM.attr('objects/objects', 'num_objects')
+		data = self.DM.load_ds('objects/objlabels')
+		if data is None:
+			return
 		data[data < 0] = idx
-		out_ds[:] = data
+		self.DM.write_dataset('objects/objlabels', data)
 		self.computed.emit()
 
 	def on_save_labels(self):

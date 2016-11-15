@@ -266,7 +266,7 @@ class TrainPredict(QtGui.QWidget):
 		vbox.addWidget(SubHeaderLabel('Refinement'))
 		self.refinement_combo = TComboBox('Refine:', ['None', 'Potts',
 													  'Appearance', 'Edge'])
-		self.refinement_lamda = PLineEdit(1., parse=float)
+		self.refinement_lamda = PLineEdit(50., parse=float)
 		self.refinement_lamda.setMaximumWidth(80)
 		self.refinement_desc = MultiSourceCombo()
 		self.ref_features = HWidgets(None, 'Features:', self.refinement_desc,
