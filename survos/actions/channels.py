@@ -153,7 +153,8 @@ def compute_difference_gaussians(data=None, params=None):
 	g1 = compute_gaussian(data=data, params=dict(Sigma=sigma1))
 	g2 = compute_gaussian(data=data, params=dict(Sigma=sigma2))
 	response = g1 - g2
-	response[response < 0] = 0
+	if 'Threshold' in params and params['Threshold']:
+		response[response < 0] = 0
 	return response
 
 
@@ -179,7 +180,8 @@ def compute_laplacian_gaussian(data=None, params=None):
 		gauss = gconvssh(tmp, kz, ky, kx)
 		out += gauss
 
-	out[out < 0] = 0
+	if 'Threshold' in params and params['Threshold']:
+		out[out < 0] = 0
 
 	return out
 
@@ -299,7 +301,8 @@ def compute_sidog(data=None, params=None):
 		np.maximum(result, tmp, out=result)
 		gauss = gauss1
 
-	result[result < 0] = 0
+	if 'Threshold' in params and params['Threshold']:
+		result[result < 0] = 0
 
 	return result
 
@@ -318,7 +321,8 @@ def compute_silaplacian(data=None, params=None):
 		np.maximum(result, tmp, out=result)
 		sigma += sincr
 
-	result[result < 0] = 0
+	if 'Threshold' in params and params['Threshold']:
+		result[result < 0] = 0
 
 	return result
 

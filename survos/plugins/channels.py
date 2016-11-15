@@ -76,10 +76,12 @@ available_features = [
 	('Difference of Gaussian', 'dog', [
 		('Sigma', Float3d, 2.),
 		('Sigma Ratio', float, 1.6),
+		('Threshold', bool, False),
 		('Response', Choice(['Bright', 'Dark']), 'Bright'),
 	]),
 	('Laplacian of Gaussian', 'log', [
 		('Sigma', Float3d, 2.),
+		('Threshold', bool, False),
 		('Response', Choice(['Bright', 'Dark']), 'Bright')
 	]),
 	('Determinant of Hessian', 'hessian_det', [
@@ -122,12 +124,14 @@ available_features = [
 		('Init Sigma', Float3d, 1),
 		('Sigma Ratio', float, 1.6),
 		('Max Sigma', float, 15.),
+		('Threshold', bool, False),
 		('Response', Choice(['Bright', 'Dark']), 'Bright')
 	]),
 	('(SI) Laplacian of Gaussian', 'si_laplacian', [
 		('Init Sigma', Float3d, 1),
 		('Sigma Incr', float, 2.),
 		('Max Sigma', float, 10.),
+		('Threshold', bool, False),
 		('Response', Choice(['Bright', 'Dark']), 'Bright')
 	]),
 	('(SI) Determinant of Hessian', 'si_hessian_det', [
