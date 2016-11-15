@@ -169,10 +169,10 @@ def predict_proba(y_data=None, p_data=None,
 		log.info('+ Extracting supervoxel labels')
 		nsp = DM.attr(desc_params['supervoxels'], 'num_supervoxels')
 		nlbl = DM.attr(y_data, 'label').max()+1
-		labels = _sp_labels(supervoxels.ravel(), labels.ravel(), nsp, nlbl, 0.1)
+		labels = _sp_labels(supervoxels.ravel(), labels.ravel(), nsp, nlbl, 0.)
 		if mask is not None:
 			mask = _sp_labels(supervoxels.ravel(), mask.astype(np.int16).ravel(),
-							  nsp, 2, 0.1).astype(np.bool)
+							  nsp, 2, 0.).astype(np.bool)
 		if X.shape[0] < labels.shape[0]: # less supervoxels
 			labels = labels[svmask]
 			if mask is not None:
@@ -247,7 +247,7 @@ def predict_proba(y_data=None, p_data=None,
 
 		log.info('+ Mapping predictions back to pixels')
 		pred_map = np.empty(nsp, dtype=pred.dtype)
-		conf_map = np.empty(nsp, dtype=pred.dtype)
+		conf_map = np.empty(nsp, dtype=conf.dtype)
 		pred_map[full_svmask] = pred
 		conf_map[full_svmask] = conf
 		pred = pred_map[supervoxels]
@@ -302,6 +302,7 @@ def _predict_proba(clf, X, y, mask=None, projection=None, mode=None):
 	uncertain = entropy(probas.T)
 	uncertain -= uncertain.min()
 	uncertain /= uncertain.max()
+
 	y_uncertain[idx_train] = 1
 	y_uncertain[idx_test] = 1 - uncertain
 
