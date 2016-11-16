@@ -224,7 +224,7 @@ def hessian_eigvals(data=None, params=None, correct=False, doabs=False): # TODO:
 
 def compute_hessian_eigvals(data=None, params=None, correct=False):
 	R = hessian_eigvals(data=data, params=params, correct=correct)
-	return R[:, :, :, params['Eigen Value']].copy()
+	return R[..., params['Eigen Value']].copy()
 
 ### STRUCTURE TENSOR
 
@@ -238,6 +238,7 @@ def compute_structure_tensor(data=None, params=None):
 			   for ax0, ax1 in combinations_with_replacement(range(3), 2)]
 	return H_elems
 
+
 def compute_structure_tensor_determinant(data=None, params=None):
 	Sxx, Sxy, Sxz, Syy, Syz, Szz = compute_structure_tensor(data=data, params=params)
 
@@ -246,11 +247,12 @@ def compute_structure_tensor_determinant(data=None, params=None):
 		  - Sxy * (Sxy*Szz - Syz*Sxz) \
 		  + Sxz * (Sxy*Syz - Syy*Sxz)
 
+
 def compute_structure_tensor_eigvals(data=None, params=None):
 	Sxx, Sxy, Sxz, Syy, Syz, Szz = compute_structure_tensor(data=data, params=params)
 	log.info('+ Computing Structure Tensor Eigenvalues')
-	R = symmetric_eigvals3S_gpu(Szz, Szy, Szx, Syy, Syx, Sxx)
-	return R[:, :, :, params['Eigen Value']].copy()
+	R = symmetric_eigvals3S_gpu(Sxx, Sxy, Sxz, Syy, Syz, Szz)
+	return R[..., params['Eigen Value']].copy()
 
 
 def compute_gaussian_scale_invariant(data=None, params=None):
@@ -396,6 +398,21 @@ def compute_frangi(data=None, params=None):
 
 	return result
 
+
+def compute_relu(data=None, params=None):
+	rtype = params['Type']
+	alpha = params['Alpha']
+
+	if rtype == 'Standard':
+		np.maximum(0, data, out=data)
+	elif rtype == 'Noisy':
+		gnoise = np.random.randn(*data.shape).astype(np.float32)
+		np.maximum(0, data + alpha * gnoise, out=data)
+	else:
+		data[data < 0] *= alpha
+
+	return data
+
 ###############################################################################
 # MAIN FUNC
 ###############################################################################
@@ -431,6 +448,8 @@ fnmap = {
 	'si_laplacian'      : compute_silaplacian,
 	'si_hessian_det'    : compute_sihessian_det,
 	'frangi'            : compute_frangi,
+
+	'relu'              : compute_relu
 }
 
 def compute_channel(source=None, clamp=None, feature=None,
@@ -448,7 +467,7 @@ def compute_channel(source=None, clamp=None, feature=None,
 		data[data > t2] = t2
 		data -= t1
 		data /= (t2 - t1)
-	else:
+	elif feature != 'relu':
 		log.info('+ Rescaling data')
 		data -= data.min()
 		data /= data.max()

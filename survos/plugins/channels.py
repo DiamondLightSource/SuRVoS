@@ -99,12 +99,7 @@ available_features = [
 	]),
 	('Struct. Tensor Eigenvalues', 'structure_eig', [
 		('Sigma Deriv', Float3d, 1.),
-		('Sigma Area', Float3d, 3.),
-		('Eigen Value', Choice([0,1,2]), 0),
-	]),
-	('Gabor Filter', 'gabor', [
-		('Sigma Deriv', Float3d, 2.),
-		('Sigma Area', Float3d, 3.),
+		('Sigma Area', Float3d, 1.),
 		('Eigen Value', Choice([0,1,2]), 0),
 	]),
 	##################################################
@@ -115,11 +110,11 @@ available_features = [
 		('Max Sigma', float, 10.),
 		('Response', Choice(['Min', 'Max', 'Avg']), 'Max')
 	]),
-	('Derivative Rotation Invariant', 'gauss_ori3d', [
-		('Sigma', Float3d, 3.),
-		('Num Orientations', Choice([2,4,8,16]), 8),
-		('Response', Choice(['Min', 'Max', 'Avg']), 'Max')
-	]),
+	#('Derivative Rotation Invariant', 'gauss_ori3d', [
+	#	('Sigma', Float3d, 3.),
+	#	('Num Orientations', Choice([2,4,8,16]), 8),
+	#	('Response', Choice(['Min', 'Max', 'Avg']), 'Max')
+	#]),
 	('(SI) Difference of Gaussians', 'si_dog', [
 		('Init Sigma', Float3d, 1),
 		('Sigma Ratio', float, 1.6),
@@ -152,7 +147,7 @@ available_features = [
 	('Maximum Response', 'max_response', []),
 	('Rectified Linear Unit', 'relu', [
 		('Type', Choice(['Standard', 'Noisy', 'Leaky']), 'Standard'),
-		('alpha', float, 0.01)
+		('Alpha', float, 0.01)
 	]),
 ]
 
