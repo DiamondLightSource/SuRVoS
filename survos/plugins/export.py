@@ -80,7 +80,7 @@ class Export(Plugin):
 		self.output = FileWidget(folder=True)
 		vbox.addWidget(HWidgets('Output Folder:', self.output, stretch=[0,1]))
 
-		options = ['Raw Annotations', 'Segmentation Masks', 'Masked Data']
+		options = ['Raw Data', 'Raw Annotations', 'Segmentation Masks', 'Masked Data']
 		self.combo = TComboBox('Output:', options, selected=0)
 		self.combo.currentIndexChanged.connect(self.on_combo)
 		vbox.addWidget(HWidgets(self.combo, None, stretch=[0,1]))
@@ -93,7 +93,7 @@ class Export(Plugin):
 		self.scont.setVisible(False)
 		vbox.addWidget(self.scont)
 
-		formats = ['HDF5 (.h5)', 'IMOD (.mrc)', 'Tiff Stack (.tiff)']
+		formats = ['HDF5 (.h5)', 'MRC (.mrc)', 'Tiff Stack (.tiff)']
 		self.format = TComboBox('Format:', formats, selected=0)
 		self.overwrite = QtGui.QCheckBox('Overwrite')
 		self.overwrite.setChecked(True)
@@ -107,7 +107,7 @@ class Export(Plugin):
 		self.export.clicked.connect(self.on_export)
 
 	def on_combo(self, idx):
-		self.scont.setVisible(idx == 2)
+		self.scont.setVisible(idx == 3)
 
 	def on_level_added(self, level, dataset):
 		if level not in self.levels:
@@ -126,9 +126,12 @@ class Export(Plugin):
 			if level.isChecked():
 				levels.append(level.value())
 		ftype = ['hdf5', 'mrc', 'tiff'][self.format.currentIndex()]
-		otype = ['raw', 'mask', 'data'][self.combo.currentIndex()]
+		otype = ['rdata', 'raw', 'mask', 'data'][self.combo.currentIndex()]
 		owrite = self.overwrite.isChecked()
 		dest = self.output.value()
+
+		if otype == 'rdata':
+			return self.save_raw_data('data', dest, ftype, owrite)
 
 		self.launcher.setup('Exporting Levels')
 		for level in levels:
@@ -181,14 +184,17 @@ class Export(Plugin):
 		fname = os.path.basename(dataset)
 
 		source = self.DM.load_ds(source_ds)
+		source[np.isinf(source)] = np.nan
 		if invert:
 			source = -source
 
 		log.info('+ Extracting data stats')
-		amin = source.min(); amax = source.max();
+		mask = ~np.isnan(source)
+		amin = np.min(source[mask]); amax = np.max(source[mask]);
 		if scale:
-			source -= amin
-			source /= (amax - amin)
+			source[mask] -= amin
+			source[mask] /= (amax - amin)
+			source[~mask] = 0
 			amin = 0; amax = 1;
 		amean = source.mean()
 
@@ -205,10 +211,27 @@ class Export(Plugin):
 				attrs = self.DM.attrs(source_ds)
 				self.save_hdf5(outpath + '.h5', final, owrite=owrite, attrs=attrs)
 			elif ftype == 'mrc':
-				stats = (amin, amax, amean)
-				self.save_mrc(outpath + '.mrc', final, owrite=owrite, stats=stats)
+				self.save_mrc(outpath + '.mrc', final, owrite=owrite)
 			else:
 				self.save_tiff(outpath + '.tif', final, owrite=owrite)
+
+	def save_raw_data(self, dataset, dest, ftype, owrite):
+		log.info('+ Loading data into memory')
+		data = self.DM.load_ds(dataset)
+		data -= data.min()
+		data /= data.max()
+
+		fname = os.path.basename(dataset)
+		outpath = os.path.join(dest, 'data')
+		if ftype == 'hdf5':
+			attrs = self.DM.attrs(dataset)
+			self.save_hdf5(outpath + '.h5', data, owrite=owrite, attrs=attrs)
+		elif ftype == 'mrc':
+			stats = (data.min(), data.max(), data.mean())
+			self.save_mrc(outpath + '.mrc', data, owrite=owrite, stats=stats)
+		else:
+			self.save_tiff(outpath + '.tif', data, owrite=owrite)
+
 
 	def check_owrite(self, path, flag=False):
 		if flag:
