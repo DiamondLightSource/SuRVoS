@@ -80,6 +80,7 @@ class LabelCanvas(PerspectiveCanvas):
 
 		self.data = None
 		self.objects = None
+		self.num_objects = None
 		self.selected_object = None
 		self.labels = None
 		self.color_idx = None
@@ -147,8 +148,9 @@ class LabelCanvas(PerspectiveCanvas):
 		self.ax.axis('image')
 		self.redraw()
 
-	def set_objects(self, objects):
+	def set_objects(self, objects, num_objects):
 		self.objects = objects
+		self.num_objects = num_objects
 		self.selected_object = None
 		self.replot()
 
@@ -168,15 +170,16 @@ class LabelCanvas(PerspectiveCanvas):
 		self.selected_object = obj
 		self.replot()
 
-	def colour(self, labels, idx, colour):
+	def colour(self, labels, idx, colors):
 		self.labels = np.r_[-1, labels]
 		self.color_idx = idx
-		self.colors = colour
+		self.colors = colors
 		self.replot()
 
 	def reset(self):
 		self.labels = None
 		self.objects = None
+		self.num_objects = None
 		self.selected_object = None
 		self.replot()
 
@@ -291,6 +294,7 @@ class LabelExplorer(QtGui.QWidget):
 		self.label_rules.initialize()
 
 		self.DM.remove_dataset('objects/objects')
+		self.DM.remove_dataset('objects/objlabels')
 
 		Launcher.instance().run(ac.label_objects, dataset=in_dset, source=source,
 								out=out_dset, out_features=out_features,
@@ -303,7 +307,7 @@ class LabelExplorer(QtGui.QWidget):
 			return
 		self.objects = objects
 		self.num_objects = num_objects
-		self.label_canvas.set_objects(objects)
+		self.label_canvas.set_objects(objects, num_objects)
 		self.on_feature_changed()
 
 	def on_feature_changed(self):
