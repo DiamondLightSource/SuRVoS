@@ -33,7 +33,7 @@ root.addHandler(ch)
 app = QtGui.QApplication(sys.argv)
 
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'survos.qcs')) as f:
-	css = f.read()
+    css = f.read()
 
 window = MainWindow("SuRVoS: Super-Region Volume Segmentation workbench")
 window.setMinimumSize(1024, 768)
@@ -42,6 +42,6 @@ window.showMaximized()
 
 # Debug
 if len(sys.argv) > 1 and os.path.isdir(sys.argv[1]):
-	window.load_workspace(sys.argv[1])
+    window.load_workspace(sys.argv[1])
 
 sys.exit(app.exec_())

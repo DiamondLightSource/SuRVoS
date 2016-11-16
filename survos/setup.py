@@ -11,12 +11,12 @@ base_path = os.path.abspath(os.path.dirname(__file__))
 
 
 def configuration(parent_package='', top_path=None):
-	config = Configuration('survos', parent_package, top_path,
-						   cmdclass={'build_ext': custom_build_ext})
-	config.add_subpackage('lib')
-	return config
+    config = Configuration('survos', parent_package, top_path,
+                           cmdclass={'build_ext': custom_build_ext})
+    config.add_subpackage('lib')
+    return config
 
 
 if __name__ == '__main__':
-	config = configuration(top_path='').todict()
-	setup(**config)
+    config = configuration(top_path='').todict()
+    setup(**config)

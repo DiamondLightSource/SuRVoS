@@ -9,11 +9,11 @@ base_path = os.path.abspath(os.path.dirname(__file__))
 
 
 def configuration(parent_package='', top_path=None):
-	config = Configuration('', parent_package, top_path)
-	config.add_subpackage('survos')
-	return config
+    config = Configuration('', parent_package, top_path)
+    config.add_subpackage('survos')
+    return config
 
 
 if __name__ == '__main__':
-	config = configuration(top_path='').todict()
-	setup(**config)
+    config = configuration(top_path='').todict()
+    setup(**config)
