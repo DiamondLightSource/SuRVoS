@@ -50,7 +50,7 @@ With Anaconda:
 
 ```bash
 $> conda update conda pip
-$> conda install numpy scipy matplotlib scikit-learn scikit-image cython seaborn networkx pyside
+$> conda install numpy scipy matplotlib scikit-learn scikit-image cython seaborn networkx pyqt=4.11.4
 $> pip install scikit-tensor
 ```
 
@@ -58,7 +58,7 @@ With another python distribution:
 
 ```bash
 $> pip install --upgrade pip
-$> pip install --upgrade numpy scipy matplotlib scikit-learn scikit-image cython seaborn networkx scikit-tensor pyside
+$> pip install --upgrade numpy scipy matplotlib scikit-learn scikit-image cython seaborn networkx scikit-tensor
 ```
 
 ## 3. Install SuRVoS
