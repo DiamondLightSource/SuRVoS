@@ -246,6 +246,8 @@ class LayeredCanvas(PerspectiveCanvas):
 
 		self.layout().setContentsMargins(0, 0, 0, 0)
 
+		self.current = None
+
 		# Draw!
 		self.grid = False
 		self.replot()
@@ -332,6 +334,7 @@ class LayeredCanvas(PerspectiveCanvas):
 		y = int(ev.ydata)
 		x = int(ev.xdata)
 		self.current = [[y], [x]]
+		self.canvas.updateMouseLines(ev.y, ev.x)
 
 	def canvas_onmousemove(self, ev):
 		if not self.pressed or ev.inaxes != self.ax:
@@ -340,6 +343,8 @@ class LayeredCanvas(PerspectiveCanvas):
 		x = int(ev.xdata)
 		self.current[0] += [y]
 		self.current[1] += [x]
+		self.canvas.setMouseWidth(self.DM.gtradius * 2 + 1)
+		self.canvas.updateMouseLines(ev.y, ev.x)
 
 	def canvas_onmouserelease(self, ev):
 		if self.DM.gtselected is None:
@@ -350,6 +355,9 @@ class LayeredCanvas(PerspectiveCanvas):
 			self.update_gt(ev)
 		elif self.toolbar._active == 'REGION' and ev.inaxes == self.ax:
 			self.calculate_region(ev)
+
+		self.current = None
+		self.canvas.setMouseLines(None)
 
 	def calculate_region(self, ev):
 		y = int(ev.ydata)

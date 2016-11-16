@@ -57,7 +57,6 @@ class MplCanvas(QtGui.QWidget):
 		self.layout().addWidget(self.canvas, 1)
 		self.canvas.mpl_connect('button_press_event',self.on_press)
 
-
 	def replot(self):
 		self.ax.clear()
 		self.ax.cla()
@@ -169,12 +168,52 @@ class ConfidenceCanvas(MplCanvas):
 class FigureCanvas(FigureCanvasQTAgg):
 	def __init__(self, figure, **kwargs):
 		self.fig = figure
-		FigureCanvasQTAgg.__init__(self, self.fig)
-		FigureCanvasQTAgg.setSizePolicy(self,
-										QtGui.QSizePolicy.Expanding,
-										QtGui.QSizePolicy.Expanding)
-		FigureCanvasQTAgg.updateGeometry(self)
+		super(FigureCanvas, self).__init__(self.fig)
+		self.setSizePolicy(QtGui.QSizePolicy.Expanding,
+							QtGui.QSizePolicy.Expanding)
+		self.updateGeometry()
+		self.mouse_lines = None
+		self.mouse_color = QtCore.Qt.black
+		self.mouse_width = 1
 
 	def resizeEvent(self, event):
-		FigureCanvasQTAgg.resizeEvent(self, event)
+		super(FigureCanvas, self).resizeEvent(event)
 		self.resize_event()
+
+	def setColor(self, color):
+		self.mouse_color = color
+
+	def setMouseWidth(self, width):
+		self.mouse_width = width
+
+	def updateMouseLines(self, y, x):
+		y = self.height() - int(y)
+		x = int(x)
+		if self.mouse_lines is None:
+			self.mouse_lines = [[y], [x]]
+		else:
+			self.mouse_lines[0].append(y)
+			self.mouse_lines[1].append(x)
+		self.update()
+
+	def setMouseLines(self, lines):
+		self.mouse_lines = lines
+		self.update()
+
+	def paintEvent(self, event):
+		super(FigureCanvas, self).paintEvent(event)
+
+		if self.mouse_lines is None:
+			return
+
+		qp = QtGui.QPainter()
+		qp.begin(self)
+
+		qp.setPen(QtGui.QPen(self.mouse_color, self.mouse_width))
+
+		for i in range(len(self.mouse_lines[0]) - 1):
+			y0, x0 = self.mouse_lines[0][i], self.mouse_lines[1][i]
+			y1, x1 = self.mouse_lines[0][i+1], self.mouse_lines[1][i+1]
+			qp.drawLine(x0, y0, x1, y1)
+
+		qp.end()
