@@ -189,6 +189,9 @@ class SliceViewer(Plugin):
                                        self.layered_canvas,
                                        stretch=[0, 1]))
 
+        self.gt_tool = GtTool()
+        self.grow_tool = GrowTool()
+
     def on_home_pressed(self):
         sy, sx = self.DM.region_shape()[1:]
         self.layered_canvas.ax.set_ylim([sy, 0])
@@ -210,9 +213,9 @@ class SliceViewer(Plugin):
             layout.itemAt(i).widget().setParent(None)
 
         if tool == 'GT':
-            layout.addWidget(GtTool())
+            layout.addWidget(self.gt_tool)
         elif tool == 'REGION':
-            layout.addWidget(GrowTool())
+            layout.addWidget(self.grow_tool)
 
 
 class LayeredCanvas(PerspectiveCanvas):
@@ -334,6 +337,16 @@ class LayeredCanvas(PerspectiveCanvas):
         y = int(ev.ydata)
         x = int(ev.xdata)
         self.current = [[y], [x]]
+
+        # Extract correct radius for current scale
+        brush_width = self.DM.gtradius * 2 + 1
+        bbox = self.ax.get_window_extent().transformed(self.fig.dpi_scale_trans.inverted())
+        canvas_width = bbox.width * self.fig.dpi
+        xlim = self.ax.get_xlim()
+        zoom_width = xlim[1] - xlim[0] - 2
+        brush_width *=  canvas_width / zoom_width
+
+        self.canvas.setMouseWidth(brush_width)
         self.canvas.updateMouseLines(ev.y, ev.x)
 
     def canvas_onmousemove(self, ev):
@@ -343,7 +356,6 @@ class LayeredCanvas(PerspectiveCanvas):
         x = int(ev.xdata)
         self.current[0] += [y]
         self.current[1] += [x]
-        self.canvas.setMouseWidth(self.DM.gtradius * 2 + 1)
         self.canvas.updateMouseLines(ev.y, ev.x)
 
     def canvas_onmouserelease(self, ev):
