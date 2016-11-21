@@ -439,14 +439,19 @@ class LayeredCanvas(PerspectiveCanvas):
         print "Time Smooth:", time.time() - t0
         t0 = time.time()
 
-        pos[:, 0] = np.clip(pos[:, 0], 0, data_shape[1]-1)
-        pos[:, 1] = np.clip(pos[:, 1], 0, data_shape[2]-1)
+        _, region_maxy, region_maxx = self.DM.region_shape()
+        pos[:, 0] = np.clip(pos[:, 0], 0, region_maxy - 1)
+        pos[:, 1] = np.clip(pos[:, 1], 0, region_maxx - 1)
 
         radius = self.DM.gtradius
-        ymin, xmin = np.maximum(0, pos.min(0) - radius)
+
+        ymin, xmin = pos.min(0) - radius
         ymax, xmax = pos.max(0) + radius
-        ymax = min(ymax, data_shape[1]-1)
-        xmax = min(xmax, data_shape[2]-1)
+
+        ymin = max(ymin, 0)
+        xmin = max(xmin, 0)
+        ymax = min(ymax, region_maxy - 1)
+        xmax = min(xmax, region_maxx - 1)
 
         mask2d = np.zeros((ymax-ymin+1, xmax-xmin+1), np.bool)
         mask2d[pos[:, 0] - ymin, pos[:, 1] - xmin] = True
