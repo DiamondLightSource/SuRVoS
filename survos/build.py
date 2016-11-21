@@ -2,36 +2,49 @@
 import os
 import numpy as np
 from Cython.Distutils import build_ext
-from os.path import join as pjoin
+import os
 
 #adapted fom http://code.activestate.com/recipes/52224-find-a-file-given-a-search-path/
 
 def find_in_path(name, path):
     "Find a file in a search path"
-    for dir in path.split(os.pathsep):
-        binpath = pjoin(dir, name)
+    for cdir in path.split(os.pathsep):
+        binpath = os.path.join(cdir, name)
         if os.path.exists(binpath):
             return os.path.abspath(binpath)
+
     return None
 
 def locate_cuda():
+    nvcc = None
     if 'CUDAHOME' in os.environ:
         home = os.environ['CUDAHOME']
-        nvcc = pjoin(home, 'bin', 'nvcc')
-    else:
-        # otherwise, search the PATH for NVCC
-        nvcc = find_in_path('nvcc', os.environ['PATH'])
-        if nvcc is None:
-            raise EnvironmentError('The nvcc binary could not be '
-                'located in your $PATH. Either add it to your path, or set $CUDAHOME')
-        home = os.path.dirname(os.path.dirname(nvcc))
+        nvcc_path = os.path.join(home, 'bin', 'nvcc')
+        if os.path.isfile(nvcc_path):
+            nvcc = nvcc_path
 
-    cudaconfig = {'home':home, 'nvcc':nvcc,
-                  'include': pjoin(home, 'include'),
-                  'lib64': pjoin(home, 'lib64')}
+    if nvcc is None:
+        nvcc_path = find_in_path('nvcc', os.environ['PATH'])
+        if nvcc_path is None or not os.path.isfile(nvcc_path):
+            raise EnvironmentError('The nvcc binary could not be located in your'
+                                   ' $PATH. Either add it to your path, or set'
+                                   ' appropiate $CUDAHOME.')
+        nvcc = nvcc_path
+        home = os.path.dirname(os.path.dirname(nvcc_path))
+
+    cudaconfig = {
+        'home': home,
+        'nvcc': nvcc,
+        'include': os.path.join(home, 'include'),
+        'lib64': os.path.join(home, 'lib64')
+    }
+
+    errmsg = 'The CUDA {} path could not be located in {}'
+
     for k, v in cudaconfig.items():
         if not os.path.exists(v):
-            raise EnvironmentError('The CUDA %s path could not be located in %s' % (k, v))
+            raise EnvironmentError(errmsg.format(k, v))
+
     return cudaconfig
 
 CUDA = locate_cuda()
