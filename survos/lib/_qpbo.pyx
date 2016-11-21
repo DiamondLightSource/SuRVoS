@@ -1,3 +1,5 @@
+# distutils: language = c++
+
 ###############################################################
 # QPBO algorithm by Vladimir Kolmogorov.
 #
