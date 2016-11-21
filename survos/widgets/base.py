@@ -30,7 +30,7 @@ class SectionCombo(QtGui.QToolButton):
         self.toolmenu.setMinimumWidth(val)
 
     def addItem(self, item, section=False):
-        curr_idx = self.item_count
+        curr_item = item
         widget = QtGui.QWidgetAction(self.toolmenu)
         if section:
             lbl = QtGui.QLabel(item)
@@ -43,7 +43,7 @@ class SectionCombo(QtGui.QToolButton):
             lbl = QtGui.QPushButton(item)
             lbl.setStyleSheet('border-radius: 0px; border: 0px;'
                               'text-align: left; padding-left: 15px;')
-            lbl.clicked.connect(lambda: self.on_clicked(curr_idx))
+            lbl.clicked.connect(lambda: self.on_clicked(curr_item))
         widget.setDefaultWidget(lbl)
         self._names.append(item)
         self._actions.append(widget)
@@ -55,7 +55,8 @@ class SectionCombo(QtGui.QToolButton):
         size.setWidth(size.width() + 20)
         return size
 
-    def on_clicked(self, idx):
+    def on_clicked(self, item):
+        idx = self._names.index(item)
         self.selected_idx = idx
         self.setText(self._names[idx])
         self.toolmenu.close()
@@ -347,7 +348,13 @@ class SourceCombo(SectionCombo):
         self.removeItem(idx)
 
     def value(self):
-        return self.sources[self.currentIndex()]
+        if self.currentIndex() < len(self.sources):
+            return self.sources[self.currentIndex()]
+        elif len(self.sources) > 0:
+            return self.sources[0]
+        else:
+            return None
+
 
     def setSource(self, source):
         self.on_update_channel(source)
