@@ -374,6 +374,7 @@ class Annotations(Plugin):
         path = QtGui.QFileDialog.getOpenFileName(self, "Select input source",
                                                  filter='*.h5 *.hdf5 *.h5.bak')
         if path is None or len(path) == 0:
+            self.launcher.cleanup()
             return
 
         dataset = None
@@ -412,11 +413,9 @@ class Annotations(Plugin):
             else:
                 log.info('    * Not possible to re-activate')
 
-        print 1
 
         if path.endswith('.h5') or path.endswith('.h5.bak'):
             av = self.DM.available_hdf5_datasets(path, dtype=np.int16)
-            print 2
             if len(av) == 0:
                 self.launcher.show_error('No annotation level found')
                 return self.launcher.cleanup()
@@ -425,7 +424,6 @@ class Annotations(Plugin):
                 return
             dataset = selected
 
-            print 3
             background = self.level_background.value()
 
             with h5.File(path, 'r') as f:
