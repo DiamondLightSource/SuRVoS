@@ -176,11 +176,6 @@ class FigureCanvas(FigureCanvasQTAgg):
         self.mouse_color = QtCore.Qt.black
         self.mouse_width = 1
 
-    def get_size(self):
-        bbox = self.ax.get_window_extent().transformed(self.fig.dpi_scale_trans.inverted())
-        canvas_width, canvas_height = bbox.width, bbox.height
-        width *= self.fig.dpi; height *= self.fig.dpi
-
     def resizeEvent(self, event):
         super(FigureCanvas, self).resizeEvent(event)
         self.resize_event()

@@ -20,7 +20,8 @@ def create_supervoxels(dataset=None, compactness=1., sp_shape=(5,10,10),
 
     log.info('+ Computing supervoxels')
     svlabels = slic_supervoxels(data, compactness=compactness,
-                                sp_shape=sp_shape, spacing=spacing)
+                                sp_shape=sp_shape, spacing=spacing,
+                                gpu=DM.selected_gpu)
     total_sv = svlabels.max()+1
     log.info('+ {} supervoxels created'.format(total_sv))
 

@@ -124,10 +124,8 @@ class MainWindow(QtGui.QMainWindow):
         self.LM = LayerManager.instance()
         self.LBLM = LabelManager.instance()
 
-    def __del__(self):
-        if self.DM is not None and self.DM.hdf5data is not None:
-            log.info('+ Closing hdf5 file')
-            self.DM.hdf5data.close()
+    def setGPU(self, gpu):
+        self.DM.selected_gpu = gpu
 
     def open_docs(self):
         docURL = 'https://github.com/DiamondLightSource/SuRVoS/wiki'

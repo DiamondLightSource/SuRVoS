@@ -69,14 +69,14 @@ void anisodiff3d(const float* data, float* result, int type,
 // Main function
 void anidiffusion(const float* src, float* dst, const float lambda,
                   const int3 shape, const float gamma, const int mode,
-                  const int maxIter, const float eps)
+                  const int maxIter, const float eps, int gpu)
 {
     // Init params
         size_t total = shape.x * shape.y * shape.z;
     size_t mem_size = sizeof(float) * total;
 
     // Init cuda memory
-    initCuda();
+    initCuda(gpu);
 
     float *d_1, *d_2;
 

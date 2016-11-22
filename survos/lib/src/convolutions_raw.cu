@@ -46,10 +46,10 @@ void convolution_raw(float* out, const int3 im_shape, const int3 k_shape, const 
 // MAIN
 //*****************************************************************
 void convolution(const float *h_src, const float *h_kernel, float *h_dest,
-                 const int3 im_shape, const int3 kernel_shape)
+                 const int3 im_shape, const int3 kernel_shape, int gpu)
 {
     // Init cuda memory
-    initCuda();
+    initCuda(gpu);
 
     int3 total;
     total.x = im_shape.x - kernel_shape.x + 1;

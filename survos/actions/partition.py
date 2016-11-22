@@ -13,8 +13,6 @@ from scipy.ndimage import measurements as measure
 from scipy.stats import binned_statistic
 from sklearn.decomposition import PCA
 
-from ..lib._zernike import zernike_descriptors
-
 
 def label_objects(dataset=None, labels=None, out=None, out_features=None,
                   source=None, return_labels=False):

@@ -7,7 +7,6 @@
 #include <math.h>
 #include <cfloat>
 
-#include "types.h"
 #include "cuda.cuh"
 
 #define DLIMIT FLT_MAX
@@ -17,14 +16,15 @@
 
 struct SLICClusterCenter
 {
-    dtype f, x, y, z;
+    float f, x, y, z;
 };
 
 // Function defines
-void slicSupervoxels(const dtype *h_src, itype *h_dest, const dtype compactness, \
-                     const itype3 im_shape, const itype3 sp_shape, \
-                     const itype3 window, const dtype3 spacing, \
-                     const dtype min_size_ratio=0.5, const dtype max_size_ratio=3, \
-                     const uint16 max_iter=5, const bool enforce_connectivity=true);
+void slicSupervoxels(const float *h_src, int *h_dest, const float compactness, \
+                     const int3 im_shape, const int3 sp_shape, \
+                     const int3 window, const float3 spacing, \
+                     float min_size_ratio=0.5, float max_size_ratio=3, \
+                     unsigned short max_iter=5, bool enforce_connectivity=true,
+                     int gpu=-1);
 
 #endif __SLIC_CUDA__

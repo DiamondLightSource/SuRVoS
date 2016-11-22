@@ -46,6 +46,7 @@ class DataModel(QtCore.QObject):
         # Storage
         self.wspath = None
         self.current_idx = 0
+        self.selected_gpu = -1
 
         # DataFiles
         self.data = None

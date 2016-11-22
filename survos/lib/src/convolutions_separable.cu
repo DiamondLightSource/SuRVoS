@@ -102,10 +102,11 @@ void clamp_result(const float* in, float* out,
 //*****************************************************************
 void convolution_separable(const float *h_src, const float *h_kernelz,
                            const float *h_kernely, const float *h_kernelx,
-                           float *h_dest, const int3 ishape, const int3 kshape)
+                           float *h_dest, const int3 ishape, const int3 kshape,
+                           int gpu)
 {
     // Init cuda memory
-    initCuda();
+    initCuda(gpu);
 
     int3 total;
     total.x = ishape.x - kshape.x + 1;

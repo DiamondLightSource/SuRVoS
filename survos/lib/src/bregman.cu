@@ -209,14 +209,15 @@ update_v_poisson(const float* f, const float* u, float* v, float* b2,
 
 // Main function
 void tvbregman(const float* src, float* dst, float lambda, float mu,
-               int3 shape, int maxIter, float eps, bool isotropic, int method)
+               int3 shape, int maxIter, float eps, bool isotropic, int method,
+               int gpu)
 {
     // Init params
     size_t total = shape.x * shape.y * shape.z;
     size_t mem_size = sizeof(float) * total;
 
     // Init cuda memory
-    initCuda();
+    initCuda(gpu);
 
     float *d_src, *d_u, *d_v, *d_errtv, *d_errl2, *d_dx, *d_dy, *d_dz, *d_bx, *d_by, *d_bz, *d_b2;
 
@@ -302,8 +303,8 @@ void tvbregman(const float* src, float* dst, float lambda, float mu,
                                   d_dz, d_dy, d_dx,
                                   d_bz, d_by, d_bx, d_b2, shape);
 
-        error_tv = reduce<float>(d_errtv, total) / total;
-        error_l2 = reduce<float>(d_errl2, total) / total;
+        error_tv = reduce<float>(d_errtv, total, gpu) / total;
+        error_l2 = reduce<float>(d_errl2, total, gpu) / total;
 
         printf("[%d] TVerr: %.10f # L2err: %.10f\n", i+1, error_tv, error_l2);
 

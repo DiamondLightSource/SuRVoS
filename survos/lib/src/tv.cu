@@ -108,14 +108,15 @@ void update_p(const float* u, float* pz, float* py, float* px,
 
 // Main function
 void tvdenoising(const float* src, float* dst, float lambda,
-                 float3 spacing, int3 shape, int maxIter, float eps)
+                 float3 spacing, int3 shape, int maxIter, float eps,
+                 int gpu)
 {
     // Init params
     size_t total = shape.x * shape.y * shape.z;
     size_t mem_size = sizeof(float) * total;
 
     // Init cuda memory
-    initCuda();
+    initCuda(gpu);
 
     float *d_src, *d_u, *d_px, *d_py, *d_pz;
 
@@ -161,7 +162,7 @@ void tvdenoising(const float* src, float* dst, float lambda,
                                   spacing.z, spacing.y, spacing.x);
     }
 
-    cudaCheckErrors("TV minimization"); 
+    cudaCheckErrors("TV minimization");
 
     cudaMemcpy(dst, d_u, mem_size, cudaMemcpyDeviceToHost);
     cudaCheckErrors("Copy result back");

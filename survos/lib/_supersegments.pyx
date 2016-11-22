@@ -7,12 +7,11 @@ import numpy as np
 cimport numpy as cnp
 
 
-def _neighbors(int[:, ::1] edges,
-               int n_nodes, int max_neighbors):
+def _neighbors(int[:, ::1] edges, int n_nodes, int max_neighbors):
     cdef int n_edges = edges.shape[0]
     cdef int[:, ::1] neighbors = np.full((n_nodes, max_neighbors), -1, np.int32)
     cdef int[::1] currents = np.zeros(n_nodes, np.int32)
-    cdef n, p, q, pc, qc
+    cdef int n, p, q, pc, qc
 
     for n in range(n_edges):
         p = edges[n, 0]

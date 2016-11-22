@@ -162,13 +162,6 @@ def configuration(parent_package='', top_path=None):
                          extra_compile_args=[],
                          extra_link_args=[])
 
-    sources = ['src/zernike/main.cpp']
-    config.add_extension('_zernike', sources=['_zernike.pyx'] + sources,
-                         include_dirs=['src/zernike', get_numpy_include_dirs()],
-                         language='c++', libraries=["stdc++"],
-                         extra_compile_args=["-fpermissive"],
-                         extra_link_args=["-fpermissive"])
-
     return config
 
 

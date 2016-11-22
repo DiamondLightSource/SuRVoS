@@ -9,36 +9,56 @@ using namespace cub;
 bool CUDA_STARTED = false;
 
 
-__host__ void initCuda()
+__host__ void initCuda(int devID)
 {
     if ( CUDA_STARTED == true ) { return; }
 
-    int devID = 0;
+    int num_devices, max_multiprocessors = 0;
     cudaError_t error;
-    cudaDeviceProp deviceProp;
+    cudaDeviceProp properties;
 
-    error = cudaGetDevice(&devID);
-
-    if (error != cudaSuccess)
-    {
-        printf("cudaGetDevice returned error code %d, line(%d)\n", error, __LINE__);
+    if ( devID < 0 ) {
+        cudaGetDeviceCount(&num_devices);
+        if ( num_devices > 1 ) {
+            for ( int device = 0; device < num_devices; device++ ) {
+                cudaGetDeviceProperties(&properties, device);
+                if ( max_multiprocessors < properties.multiProcessorCount ) {
+                    max_multiprocessors = properties.multiProcessorCount;
+                    devID = device;
+                }
+            }
+        } else if ( num_devices == 1 ) {
+            devID = 0;
+        }
     }
 
-    error = cudaGetDeviceProperties(&deviceProp, devID);
+    error = cudaSetDevice(devID);
 
-    if (deviceProp.computeMode == cudaComputeModeProhibited)
-    {
-        fprintf(stderr, "Error: device is running in <Compute Mode Prohibited>, no threads can use ::cudaSetDevice().\n");
-        exit(EXIT_SUCCESS);
+    if ( error != cudaSuccess ) {
+        printf("[GPU] cudaSetDevice returned error code %d, line(%d)\n", error, __LINE__);
+        exit(EXIT_FAILURE);
+    } else {
+        printf("[GPU] Selected CUDA device: %d\n", devID);
     }
 
-    if (error != cudaSuccess)
+    error = cudaGetDeviceProperties(&properties, devID);
+
+    if ( properties.computeMode == cudaComputeModeProhibited )
     {
-        printf("cudaGetDeviceProperties returned error code %d, line(%d)\n", error, __LINE__);
+        printf("[GPU] Error: device is running in <Compute Mode Prohibited>, no threads can use ::cudaSetDevice().\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if ( error != cudaSuccess )
+    {
+        printf("[GPU] cudaGetDeviceProperties returned error code %d, line(%d)\n",
+               error, __LINE__);
+        exit(EXIT_FAILURE);
     }
     else
     {
-        printf("GPU Device %d: \"%s\" with compute capability %d.%d\n\n", devID, deviceProp.name, deviceProp.major, deviceProp.minor);
+        printf("[GPU] Device %d: \"%s\" with compute capability %d.%d\n\n",
+               devID, properties.name, properties.major, properties.minor);
     }
 
     CUDA_STARTED = true;
@@ -46,9 +66,9 @@ __host__ void initCuda()
 
 
 template<typename T> __host__
-T reduce(const T* h_in, size_t num_items)
+T reduce(const T* h_in, size_t num_items, int gpu)
 {
-    initCuda();
+    initCuda(gpu);
 
     CachingDeviceAllocator  g_allocator(true);
 
@@ -81,16 +101,16 @@ T reduce(const T* h_in, size_t num_items)
     return sum;
 }
 
-template long reduce(const long *h_in, size_t num_items);
-template int reduce(const int *h_in, size_t num_items);
-template float reduce(const float *h_in, size_t num_items);
-template double reduce(const double *h_in, size_t num_items);
+template long reduce(const long *h_in, size_t num_items, int gpu);
+template int reduce(const int *h_in, size_t num_items, int gpu);
+template float reduce(const float *h_in, size_t num_items, int gpu);
+template double reduce(const double *h_in, size_t num_items, int gpu);
 
 
 template<typename T> __host__
-T reduceMax(const T* h_in, size_t num_items)
+T reduceMax(const T* h_in, size_t num_items, int gpu)
 {
-    initCuda();
+    initCuda(gpu);
 
     CachingDeviceAllocator  g_allocator(true);
 
@@ -123,7 +143,7 @@ T reduceMax(const T* h_in, size_t num_items)
     return tmax;
 }
 
-template long reduceMax(const long *h_in, size_t num_items);
-template int reduceMax(const int *h_in, size_t num_items);
-template float reduceMax(const float *h_in, size_t num_items);
-template double reduceMax(const double *h_in, size_t num_items);
+template long reduceMax(const long *h_in, size_t num_items, int gpu);
+template int reduceMax(const int *h_in, size_t num_items, int gpu);
+template float reduceMax(const float *h_in, size_t num_items, int gpu);
+template double reduceMax(const double *h_in, size_t num_items, int gpu);

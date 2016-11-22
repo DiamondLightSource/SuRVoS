@@ -11,6 +11,9 @@ from ..lib.convolutions import gconvssh, make_gaussian_1d
 from ..lib._preprocess import tvdenoising
 from ..lib._channels import symmetric_eigvals3S_gpu
 
+
+DM = DataModel.instance()
+
 ### RAW CLAMPED DATA
 
 def compute_threshold(data=None, params=None):
@@ -32,13 +35,13 @@ def compute_gaussian(data=None, params=None):
     data = np.pad(data, ((d,d),(h,h),(w,w)), mode='reflect')
 
     log.info('   - Computing gaussian (radius={})'.format((d, h, w)))
-    gauss = gconvssh(data, kz, ky, kx)
+    gauss = gconvssh(data, kz, ky, kx, gpu=DM.selected_gpu)
 
     return gauss
 
 def compute_tvdenoise(data=None, params=None):
     return tvdenoising(data, params['Lambda'], spacing=params['Spacing'],
-                       max_iter=params['Max Iter'])
+                       max_iter=params['Max Iter'], gpu=DM.selected_gpu)
 
 ### LOCAL STATISTICS
 
@@ -55,7 +58,7 @@ def compute_local_mean(data=None, params=None):
     kernelx = np.ones(w * 2 + 1, np.float32)
     kernelx /= kernelx.sum()
 
-    features = gconvssh(data, kernelz, kernely, kernelx)
+    features = gconvssh(data, kernelz, kernely, kernelx, gpu=DM.selected_gpu)
 
     return features
 
@@ -73,12 +76,12 @@ def compute_local_std(data=None, params=None):
     kernelx /= kernelx.sum()
 
     log.info('   - Computing local mean squared')
-    meansq = gconvssh(data, kernelz, kernely, kernelx)
+    meansq = gconvssh(data, kernelz, kernely, kernelx, gpu=DM.selected_gpu)
     meansq **= 2
 
     log.info('   - Computing local squared mean')
     data **= 2
-    sqmean = gconvssh(data, kernelz, kernely, kernelx)
+    sqmean = gconvssh(data, kernelz, kernely, kernelx, gpu=DM.selected_gpu)
     sqmean -= meansq
     np.maximum(sqmean, 0, out=sqmean)
     np.sqrt(sqmean, sqmean) # inplace
@@ -136,7 +139,7 @@ def compute_gaussian_magnitude(data=None, params=None):
         tmp = np.pad(data, ((d,d),(h,h),(w,w)), mode='reflect')
 
         log.info('   - Computing convolutions (radius={})'.format((d, h, w)))
-        gauss = gconvssh(tmp, kz, ky, kx)
+        gauss = gconvssh(tmp, kz, ky, kx, gpu=DM.selected_gpu)
         out.append(gauss)
 
     out = np.sqrt(out[0]**2 + out[1]**2 + out[2]**2)
@@ -177,7 +180,7 @@ def compute_laplacian_gaussian(data=None, params=None):
         tmp = np.pad(data, ((d,d),(h,h),(w,w)), mode='reflect')
 
         log.info('   - Computing convolutions (radius={})'.format((d, h, w)))
-        gauss = gconvssh(tmp, kz, ky, kx)
+        gauss = gconvssh(tmp, kz, ky, kx, gpu=DM.selected_gpu)
         out += gauss
 
     if 'Threshold' in params and params['Threshold']:
@@ -219,7 +222,7 @@ def hessian_eigvals(data=None, params=None, correct=False, doabs=False): # TODO:
     else:
         Hxx, Hxy, Hxz, Hyy, Hyz, Hzz = H
     log.info('+ Computing Hessian Eigenvalues')
-    R = symmetric_eigvals3S_gpu(Hxx, Hxy, Hxz, Hyy, Hyz, Hzz, doabs=doabs)
+    R = symmetric_eigvals3S_gpu(Hxx, Hxy, Hxz, Hyy, Hyz, Hzz, doabs=doabs, gpu=DM.selected_gpu)
     return R
 
 def compute_hessian_eigvals(data=None, params=None, correct=False):
@@ -251,7 +254,7 @@ def compute_structure_tensor_determinant(data=None, params=None):
 def compute_structure_tensor_eigvals(data=None, params=None):
     Sxx, Sxy, Sxz, Syy, Syz, Szz = compute_structure_tensor(data=data, params=params)
     log.info('+ Computing Structure Tensor Eigenvalues')
-    R = symmetric_eigvals3S_gpu(Sxx, Sxy, Sxz, Syy, Syz, Szz)
+    R = symmetric_eigvals3S_gpu(Sxx, Sxy, Sxz, Syy, Syz, Szz, gpu=DM.selected_gpu)
     return R[..., params['Eigen Value']].copy()
 
 
@@ -457,7 +460,6 @@ def compute_channel(source=None, clamp=None, feature=None,
     result = None
 
     log.info('+ Loading data into memory')
-    DM = DataModel.instance()
     data = DM.load_slices(source)
 
     if clamp is not None:

@@ -15,36 +15,32 @@ from libc.math cimport sqrt, acos, cos, M_PI
 cdef extern from "src/symmetric_eigvals3S.cuh":
     void symmetric3_eigenvalues(const float *Hzz, const float *Hzy, const float *Hzx,
                                 const float *Hyy, const float *Hyx, const float *Hxx,
-                                float* out, size_t total_size, bool doabs) nogil except +
+                                float* out, size_t total_size, bool doabs,
+                                int gpu) nogil except +
 
 
-def symmetric_eigvals3S_gpu(np.ndarray[np.float32_t, ndim=3, mode='c'] Hzz,
-                            np.ndarray[np.float32_t, ndim=3, mode='c'] Hzy,
-                            np.ndarray[np.float32_t, ndim=3, mode='c'] Hzx,
-                            np.ndarray[np.float32_t, ndim=3, mode='c'] Hyy,
-                            np.ndarray[np.float32_t, ndim=3, mode='c'] Hyx,
-                            np.ndarray[np.float32_t, ndim=3, mode='c'] Hxx,
-                            bool doabs=False):
+def symmetric_eigvals3S_gpu(float[:, :, ::1] Hzz, float[:, :, ::1] Hzy, float[:, :, ::1] Hzx,
+                            float[:, :, ::1] Hyy, float[:, :, ::1] Hyx, float[:, :, ::1] Hxx,
+                            bool doabs=False, int gpu=-1):
     cdef int depth = Hzz.shape[0]
     cdef int height = Hzz.shape[1]
     cdef int width = Hzz.shape[2]
     cdef size_t total = depth * height * width
 
-    cdef np.ndarray[np.float32_t, ndim=4, mode='c'] result
-    result = np.zeros((depth, height, width, 3), np.float32)
+    cdef float[:, :, :, ::1] result = np.zeros((depth, height, width, 3), np.float32)
 
-    cdef float *hzz = <float*>np.PyArray_DATA(Hzz)
-    cdef float *hzy = <float*>np.PyArray_DATA(Hzy)
-    cdef float *hzx = <float*>np.PyArray_DATA(Hzx)
-    cdef float *hyy = <float*>np.PyArray_DATA(Hyy)
-    cdef float *hyx = <float*>np.PyArray_DATA(Hyx)
-    cdef float *hxx = <float*>np.PyArray_DATA(Hxx)
-    cdef float *out = <float*>np.PyArray_DATA(result)
+    cdef float *hzz = <float*>&(Hzz[0,0,0])
+    cdef float *hzy = <float*>&(Hzy[0,0,0])
+    cdef float *hzx = <float*>&(Hzx[0,0,0])
+    cdef float *hyy = <float*>&(Hyy[0,0,0])
+    cdef float *hyx = <float*>&(Hyx[0,0,0])
+    cdef float *hxx = <float*>&(Hxx[0,0,0])
+    cdef float *out = <float*>&(result[0,0,0,0])
 
     with nogil:
-        symmetric3_eigenvalues(hzz, hzy, hzx, hyy, hyx, hxx, out, total, doabs)
+        symmetric3_eigenvalues(hzz, hzy, hzx, hyy, hyx, hxx, out, total, doabs, gpu)
 
-    return result
+    return np.asarray(result)
 
 
 def symmetric_eig(float[:, :, ::1] Hzz, float[:, :, ::1] Hzy, float[:, :, ::1] Hzx,

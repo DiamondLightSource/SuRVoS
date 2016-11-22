@@ -138,10 +138,11 @@ void add_result_sh(const float* in, float* out,
 // Main function
 void convolution_separable_shared(const float *h_src, const float *h_kernelz,
                                   const float *h_kernely, const float *h_kernelx,
-                                  float *h_dest, const int3 ishape, const int3 kshape)
+                                  float *h_dest, const int3 ishape, const int3 kshape,
+                                  int gpu)
 {
     // Init cuda memory
-    initCuda();
+    initCuda(gpu);
 
     int3 total;
     total.x = ishape.x - kshape.x + 1;
@@ -216,10 +217,11 @@ void convolution_separable_shared(const float *h_src, const float *h_kernelz,
 
 
 void n_convolution_separable_shared(const float *h_src, const float *h_kernels, float *h_dest,
-                                    const int3 ishape, const int3 kshape, const int n_kernels)
+                                    const int3 ishape, const int3 kshape, const int n_kernels,
+                                    int gpu)
 {
     // Init cuda memory
-    initCuda();
+    initCuda(gpu);
 
     int3 total;
     total.x = ishape.x - kshape.x + 1;

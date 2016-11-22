@@ -133,14 +133,14 @@ void update_pv(const float* up, float* pz, float* py, float* px, float* err,
 // Main function
 void tvchambolle1st(const float* src, float* dst,
                     float lambda, float rho, float theta, float sigma, float gamma,
-                    int3 shape, int maxIter, float eps, bool l2)
+                    int3 shape, int maxIter, float eps, bool l2, int gpu)
 {
     // Init params
     size_t total = shape.x * shape.y * shape.z;
     size_t mem_size = sizeof(float) * total;
 
     // Init cuda memory
-    initCuda();
+    initCuda(gpu);
 
     float *d_src, *d_px, *d_py, *d_pz, *d_u, *d_up, *d_errtv, *d_errl2;
 
