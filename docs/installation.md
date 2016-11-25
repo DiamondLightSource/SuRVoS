@@ -49,8 +49,13 @@ $> source ~/.bashrc
 With Anaconda:
 
 ```bash
+<<<<<<< HEAD
 $> conda update conda
 $> conda install numpy scipy matplotlib scikit-learn scikit-image cython seaborn networkx
+=======
+$> conda update conda pip
+$> conda install numpy scipy matplotlib scikit-learn scikit-image cython seaborn networkx pyqt=4.11.4
+>>>>>>> 7d2fd965acd0d407d167ab5c6ed50fada9a2e41a
 $> pip install scikit-tensor
 ```
 
@@ -77,7 +82,11 @@ $> cd SuRVoS
 This step requires CUDA already installed and NVCC compiler in the path (type `which nvcc` to verify it).
 
 ```bash
+<<<<<<< HEAD
 $> env PYTHONPATH=.. python setup.py build_ext -i
+=======
+$> python setup.py build_ext -i
+>>>>>>> 7d2fd965acd0d407d167ab5c6ed50fada9a2e41a
 ```
 
 ## 4. Run SuRVoS
@@ -85,5 +94,9 @@ $> env PYTHONPATH=.. python setup.py build_ext -i
 From the SuRVoS folder:
 
 ```bash
+<<<<<<< HEAD
 $> env PYTHONPATH=.. ./SuRVoS
+=======
+$> ./SuRVoS
+>>>>>>> 7d2fd965acd0d407d167ab5c6ed50fada9a2e41a
 ```
