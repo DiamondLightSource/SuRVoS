@@ -20,20 +20,20 @@ html {
 }
 
 body {
-	background: $white;
-	font: 18px/1.4 $helvetica;
-	color: $darkGray;
-	height: 100%;
+    background: $white;
+    font: 18px/1.4 $helvetica;
+    color: $darkGray;
+    height: 100%;
 }
 
 #envelope {
-	width: 100%;
-	min-height: 100%;
+    width: 100%;
+    min-height: 100%;
 }
 
 #main {
-	overflow: auto;
-	padding-bottom: 110px;
+    overflow: auto;
+    padding-bottom: 110px;
 }
 
 .container {
@@ -44,19 +44,19 @@ body {
 }
 
 .main-block {
-	width: 30%;
-	margin-left: 130px;
-	padding-bottom: 10px;
-	display: inline-block;
-	text-align: center;
+    width: 30%;
+    margin-left: 130px;
+    padding-bottom: 10px;
+    display: inline-block;
+    text-align: center;
 
-	border-radius: 10px;
-	border: 2px solid $turq2;
-	background-color: $turq1;
+    border-radius: 10px;
+    border: 2px solid $turq2;
+    background-color: $turq1;
 
-	h1 {
-		color: $turq2;
-	}
+    h1 {
+        color: $turq2;
+    }
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -69,39 +69,39 @@ h1, h2, h3, h4, h5, h6 {
   padding: 0;
 
   @include mobile {
-	line-height: 1.4;
+    line-height: 1.4;
   }
 }
 
 h1 {
   font-size: 24px;
   a {
-	color: inherit;
+    color: inherit;
   }
 }
 
 h2 {
-	font-size: 20px;
-	width: 100%;
-	background-color: $blue3;
-	padding: 5px;
-	padding-left: 20px;
-	color: $white;
+    font-size: 20px;
+    width: 100%;
+    background-color: $blue3;
+    padding: 5px;
+    padding-left: 20px;
+    color: $white;
 
-	a {
-		color: $white;
-	}
-	a:hover {
-		color: $blue1;
-	}
+    a {
+        color: $white;
+    }
+    a:hover {
+        color: $blue1;
+    }
 }
 
 h3 {
-	font-size: 18px;
-	width: 80%;
-	background-color: $turq2;
-	color: $white;
-	padding-left: 10px;
+    font-size: 18px;
+    width: 80%;
+    background-color: $turq2;
+    color: $white;
+    padding-left: 10px;
 }
 
 h4 {
@@ -116,9 +116,9 @@ p {
 a {
   color: $blue;
   text-decoration: none;
-	cursor: pointer;
+    cursor: pointer;
   &:hover, &:active {
-	color: $blue;
+    color: $blue;
   }
 }
 
@@ -152,8 +152,8 @@ strong, b {
 }
 
 img {
-	cursor: pointer;
-	max-width: 100%;
+    cursor: pointer;
+    max-width: 100%;
 }
 
 // Fixes images in popup boxes from Google Translate
@@ -180,12 +180,12 @@ img {
 // http://nicolasgallagher.com/micro-clearfix-hack/
 .clearfix:before,
 .clearfix:after {
-	content: " ";
-	display: table;
+    content: " ";
+    display: table;
 }
 
 .clearfix:after {
-	clear: both;
+    clear: both;
 }
 
 /*********************/
@@ -207,11 +207,11 @@ img {
 }
 
 .masthead {
-	padding-bottom: 10px;
+    padding-bottom: 10px;
   color: $white;
 
   @include mobile {
-	text-align: center;
+    text-align: center;
   }
 }
 
@@ -222,13 +222,13 @@ img {
   margin-right: 15px;
 
   @include mobile {
-	float: none;
-	display: block;
-	margin: 0 auto;
+    float: none;
+    display: block;
+    margin: 0 auto;
   }
 
   img {
-	border-radius: 5px;
+    border-radius: 5px;
   }
 }
 
@@ -236,9 +236,9 @@ img {
   float: left;
 
   @include mobile {
-	float: none;
-	display: block;
-	margin: 0 auto;
+    float: none;
+    display: block;
+    margin: 0 auto;
   }
 }
 
@@ -252,7 +252,7 @@ img {
   letter-spacing: 1px;
 
   a:hover {
-	  color: $blue1;
+      color: $blue1;
   }
 }
 
@@ -262,7 +262,7 @@ img {
   font-size: 16px;
 
   @include mobile {
-	margin: 3px 0;
+    margin: 3px 0;
   }
 }
 
@@ -274,54 +274,57 @@ nav.header {
   font-size: 18px;
 
   @include mobile {
-	float: none;
-	margin-top: 9px;
-	display: block;
-	font-size: 16px;
+    float: none;
+    margin-top: 9px;
+    display: block;
+    font-size: 16px;
   }
 
   a {
-	margin-left: 20px;
-	color: $white;
-	text-align: right;
-	font-weight: 300;
-	letter-spacing: 1px;
+    margin-left: 20px;
+    color: $white;
+    text-align: right;
+    font-weight: 300;
+    letter-spacing: 1px;
 
-	@include mobile {
-	  margin: 0 10px;
-	  color: $lightGray;
-	}
+    @include mobile {
+      margin: 0 10px;
+      color: $lightGray;
+    }
   }
 
   a:hover {
-	  color: $blue1;
+      color: $blue1;
   }
 }
 
 nav.toc
 {
-	position:absolute;
-	left: 0px;
-	float: left;
-	background: $white;
-	border: 1px solid $blue3;
-	border-right-width: 10px;
-	border-left: 0px;
-	border-top-right-radius: 5px;
-	border-bottom-right-radius: 5px;
-	min-width: 10px;
-	max-width: 250px;
-	ul {
-		list-style-type: none;
-		padding: 0px;
-		padding-right: 20px;
-		min-width: 200px;
-		li {
-			a {
-				color: $blue3;
-			}
-		}
-	}
+    position: absolute;
+    background: $white;
+    border: 1px solid $blue3;
+    border-right-width: 10px;
+    border-left: 0px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    min-width: 10px;
+    max-width: 200px;
+    font-size: 12pt;
+    ul {
+        list-style-type: none;
+        padding: 0px;
+        padding-right: 20px;
+        min-width: 200px;
+        li {
+            a {
+                color: $blue3;
+            }
+        }
+    }
+}
+
+article.page {
+    margin-left: 220px;
 }
 
 //
@@ -330,27 +333,27 @@ nav.toc
 
 div.overflow
 {
-	width: 100%;
-	overflow: auto;
+    width: 100%;
+    overflow: auto;
 }
 
 div.component
 {
-	width: 49%;
+    width: 49%;
 }
 
 div.component.left
 {
-	float: left;
+    float: left;
 }
 
 div.component.right
 {
-	float: right;
+    float: right;
 }
 
 img {
-	padding: 5px;
+    padding: 5px;
 }
 
 img[alt=left],
@@ -358,9 +361,9 @@ img[alt=left20],img[alt=left30],img[alt=left40],
 img[alt=left50],img[alt=left60],img[alt=left70],
 img[alt=left80]
 {
-	float: left;
-	margin-right: 20px;
-	margin-bottom: 10px;
+    float: left;
+    margin-right: 20px;
+    margin-bottom: 10px;
 }
 
 img[alt=right],
@@ -368,9 +371,9 @@ img[alt=right20],img[alt=right30],img[alt=right40],
 img[alt=right50],img[alt=right60],img[alt=right70],
 img[alt=right80]
 {
-	float: right;
-	margin-left: 20px;
-	margin-bottom: 10px;
+    float: right;
+    margin-left: 20px;
+    margin-bottom: 10px;
 }
 
 img[alt=left], img[alt=right]       {width: 20%;}
@@ -394,21 +397,21 @@ img[alt=left80], img[alt=right80]   {width: 80%;}
 
 .post {
   blockquote {
-	margin: 1.8em .8em;
-	border-left: 2px solid $gray;
-	padding: 0.1em 1em;
-	color: $gray;
-	font-size: 22px;
-	font-style: italic;
+    margin: 1.8em .8em;
+    border-left: 2px solid $gray;
+    padding: 0.1em 1em;
+    color: $gray;
+    font-size: 22px;
+    font-style: italic;
   }
 
   .comments {
-	margin-top: 10px;
+    margin-top: 10px;
   }
 
   .read-more {
-	text-transform: uppercase;
-	font-size: 15px;
+    text-transform: uppercase;
+    font-size: 15px;
   }
 }
 
@@ -420,10 +423,10 @@ img[alt=left80], img[alt=right80]   {width: 80%;}
 }
 
 footer {
-	min-height: 80px;
-	padding-top: 10px;
-	text-align: center;
-	clear:both;
+    min-height: 80px;
+    padding-top: 10px;
+    text-align: center;
+    clear:both;
 }
 
 // Settled on moving the import of syntax highlighting to the bottom of the CSS

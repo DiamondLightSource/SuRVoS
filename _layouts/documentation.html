@@ -4,45 +4,45 @@ layout: default
 
 <script type="text/javascript">
 <!--
-	$(document).ready(function() {
-		$("#doc_toc_nav").click(function(ev) {
-			if ( ev.target != this ) {
-				return;
-			}
-			var height = $(this).css('height');
-			$("#doc_toc").toggle();
-			$(this).css('height', height);
-		});
-	});
+    $(document).ready(function() {
+        $("#doc_toc_nav").click(function(ev) {
+            if ( ev.target != this ) {
+                return;
+            }
+            var height = $(this).css('height');
+            $("#doc_toc").toggle();
+            $(this).css('height', height);
+        });
+    });
 //-->
 </script>
 
 <nav id='doc_toc_nav' class="toc">
-	<ul id='doc_toc'>
+    <ul id='doc_toc'>
 {% assign sections = site.pages | group_by: "toc-section" | sort: "name" %}
 {% for section in sections %}
-	<!--{{ section }}-->
-	{% if section.name != nil and section.name != blank and section.name != "" %}
-		{% assign pages = section.items | sort: "toc-subsection" %}
-		{% for page in pages %}
-			{% if page.toc-subsection != nil %}
-				<li style='margin-left: 20px'>
-			{% else %}
-				<li style='margin-left: 10px;'>
-			{% endif %}
-				<a href="{{ site.baseurl }}{{ page.url }}">
-				{{ page.toc-section }}.{{ page.toc-subsection }}
-				{% if page.toc-title == nil or page.toc-title == blank %}
-					{{ page.title }}
-				{% else %}
-					{{ page.toc-title }}
-				{% endif %}
-				</a>
-			</li>
-		{% endfor %}
-	{% endif %}
+    <!--{{ section }}-->
+    {% if section.name != nil and section.name != blank and section.name != "" %}
+        {% assign pages = section.items | sort: "toc-subsection" %}
+        {% for page in pages %}
+            {% if page.toc-subsection != nil %}
+                <li style='margin-left: 20px'>
+            {% else %}
+                <li style='margin-left: 10px;'>
+            {% endif %}
+                <a href="{{ site.baseurl }}{{ page.url }}">
+                {{ page.toc-section }}.{{ page.toc-subsection }}
+                {% if page.toc-title == nil or page.toc-title == blank %}
+                    {{ page.title }}
+                {% else %}
+                    {{ page.toc-title }}
+                {% endif %}
+                </a>
+            </li>
+        {% endfor %}
+    {% endif %}
 {% endfor %}
-	</ul>
+    </ul>
 </nav>
 
 <article class="page">
@@ -50,6 +50,6 @@ layout: default
   <h1>{{ page.title }}</h1>
 
   <div class="entry">
-	{{ content }}
+    {{ content }}
   </div>
 </article>
