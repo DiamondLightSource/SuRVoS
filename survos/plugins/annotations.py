@@ -307,6 +307,9 @@ class Annotations(Plugin):
         if params is None:
             return
         indexes, values = params
+        if len(indexes) == 0 or len(values) == 0:
+            return
+
         zmin, ymin, xmin = indexes.min(0)
         zmax, ymax, xmax = indexes.max(0)
 

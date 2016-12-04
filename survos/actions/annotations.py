@@ -21,20 +21,30 @@ DM = DataModel.instance()
 def refine_label(data=None, label=None, method=None, radius=1, slide=None):
     ds = data
     data = DM.load_slices(ds)
+    rshape = DM.region_shape()
 
     zmin = DM.active_roi[0].start
     ymin = DM.active_roi[1].start
     xmin = DM.active_roi[2].start
 
+    if method == 'fill_holes':
+        radius = 1
+
     if type(slide) == str:
         mask = (data == label)
         if slide == '3D':
+            msize = max(rshape)
             selem = octahedron(radius)
         else:
+            msize = max(rshape[1:])
             selem = diamond(radius)
     else:
+        msize = max(rshape[1:])
         mask = (data[slide] == label)
         selem = diamond(radius)
+
+    if radius > np.sqrt(msize):
+        raise Exception('Radius too large')
 
     funcs = {
         'dilation' : binary_dilation,
@@ -49,13 +59,14 @@ def refine_label(data=None, label=None, method=None, radius=1, slide=None):
         return None
 
     log.info('+ Performing {} refinement ({})'.format(method, slide))
-    if slide != '2D':
+    if slide != '2D' and mask.any():
         result = funcs[method](mask, structure=selem)
     else:
         result = np.zeros(data.shape, dtype=np.bool)
         f = funcs[method]
         for i in range(data.shape[0]):
-            result[i] = f(mask[i], structure=selem)
+            if mask[i].any():
+                result[i] = f(mask[i], structure=selem)
 
     log.info('+ Calculating changes..')
     changes = (result != mask)
