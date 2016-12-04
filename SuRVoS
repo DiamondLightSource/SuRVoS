@@ -11,7 +11,7 @@ import argparse
 survos_title = "SuRVoS: Super-Region Volume Segmentation workbench"
 
 parser = argparse.ArgumentParser(description=survos_title)
-parser.add_argument('workspace_path', type=str, default=None)
+parser.add_argument('--workspace', type=str, default=None, help='Load workspace')
 parser.add_argument('--gpu', type=int, default=-1, help='Select GPU')
 args = parser.parse_args()
 
@@ -51,7 +51,7 @@ window.showMaximized()
 if args.gpu >= 0:
     window.setGPU(args.gpu)
 
-if len(args.workspace_path) > 1 and os.path.isdir(args.workspace_path):
-    window.load_workspace(args.workspace_path)
+if args.workspace is not None and os.path.isdir(args.workspace):
+    window.load_workspace(args.workspace)
 
 sys.exit(app.exec_())
