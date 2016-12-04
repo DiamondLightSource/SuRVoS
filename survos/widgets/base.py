@@ -477,15 +477,14 @@ class HeaderLabel(QtGui.QLabel):
 
     def __init__(self, text, parent=None, height=30,
                  bgcolor='#6194BC', color='#fefefe', bradius=0,
-                 bsides=0, fontsize=15):
+                 bsides=0, fontsize=15, margin=0, padding=0):
         super(HeaderLabel, self).__init__(text, parent=parent)
         self.setMinimumHeight(height)
         self.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         self.setStyleSheet('background-color: {}; color: {};'
                            'font-weight: bold; font-size: {}px;'
-                           'border-radius: {}px;'
-                           .format(bgcolor, color, fontsize,
-                                   bsides, bsides, bradius))
+                           'border-radius: {}px; margin: {}px; padding: {}px'
+                           .format(bgcolor, color, fontsize,bsides,margin,padding))
 
 class SubHeaderLabel(HeaderLabel):
 

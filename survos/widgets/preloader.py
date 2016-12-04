@@ -2,7 +2,7 @@
 
 from ..qt_compat import QtGui, QtCore
 
-from .base import HWidgets
+from .base import HWidgets, HeaderLabel
 
 class RefContainer(QtGui.QWidget):
 
@@ -68,9 +68,9 @@ class PreWidget(QtGui.QWidget):
                                 '}')
         main_layout.addWidget(container)
 
-        title = QtGui.QLabel('<b>SuRVoS</b>: <u>Su</u>per-<u>R</u>egion '
-                             '<u>Vo</u>lume <u>S</u>egmentation workbench')
-        title.setStyleSheet('font-size: 24pt; color: #6194BC; margin: 30px;')
+        title = HeaderLabel('<b>SuRVoS</b>: <u>Su</u>per-<u>R</u>egion '
+                            '<u>Vo</u>lume <u>S</u>egmentation workbench',
+                            fontsize=28, padding=30, margin=5)
         vbox.addWidget(title)
 
         ref1 = RefContainer('Source Repository',
@@ -89,7 +89,7 @@ class PreWidget(QtGui.QWidget):
 
         self.open = PreButton('Open Dataset',
                               'Load an existing dataset of supported file formats:'
-                              '\n\nIMOD (.mrc, .rec), HDF5 (.h5, .hdf5)'
+                              '\n\nMRC (.mrc, .rec), HDF5 (.h5, .hdf5)'
                               ', Tiff Stacks (.tif, .tiff)', parent=self)
         self.open.setFixedWidth(300)
         self.open.setFixedHeight(250)
