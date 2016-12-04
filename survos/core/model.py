@@ -43,6 +43,10 @@ class DataModel(QtCore.QObject):
 
         self.main_window = None
 
+        # tmp_data
+        self.tmp_data = None
+        self.tmp_stats = None
+
         # Storage
         self.wspath = None
         self.current_idx = 0

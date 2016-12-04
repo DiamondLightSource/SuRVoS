@@ -13,6 +13,7 @@ from .slice_viewer import SliceViewer
 from .label_partitioning import LabelSplitter
 from .level_statistics import LevelStats
 from .preloader import PreWidget
+from .data_loader import LoadWidget
 
 from ..core import Launcher
 from ..core import DataModel, LayerManager, LabelManager
@@ -49,9 +50,11 @@ class MainWindow(QtGui.QMainWindow):
         self.DM = None
 
         self.pre_widget = PreWidget()
+        self.load_widget = LoadWidget()
         self.main_widget = MainWidget()
         self.main_container = QtGui.QStackedWidget()
         self.main_container.addWidget(self.pre_widget)
+        self.main_container.addWidget(self.load_widget)
         self.main_container.addWidget(self.main_widget)
         self.setCentralWidget(self.main_container)
 
@@ -82,8 +85,8 @@ class MainWindow(QtGui.QMainWindow):
         self.openAction = QtGui.QAction('&Open Dataset..', self)
         self.openAction.setShortcut('Ctrl+O')
         self.openAction.setStatusTip('Open Dataset (.rec, .hdf5, .tiff)')
-        self.openAction.triggered.connect(self.load_data)
-        self.pre_widget.open.clicked.connect(self.load_data)
+        self.openAction.triggered.connect(self.load_data_view)
+        self.pre_widget.open.clicked.connect(self.load_data_view)
 
         self.loadAction = QtGui.QAction('&Load Workspace..', self)
         self.loadAction.setShortcut('Ctrl+L')
@@ -119,10 +122,17 @@ class MainWindow(QtGui.QMainWindow):
         helpMenu.addAction(self.bugAction)
         helpMenu.addAction(self.aboutAction)
 
+        # LOADER
+        self.load_widget.data_loaded.connect(self.load_data)
+        self.load_widget.cancel.clicked.connect(self.show_main)
+
         self.DM = DataModel.instance()
         self.DM.main_window = self
         self.LM = LayerManager.instance()
         self.LBLM = LabelManager.instance()
+
+    def show_main(self):
+        self.main_container.setCurrentIndex(0)
 
     def setGPU(self, gpu):
         self.DM.selected_gpu = gpu
@@ -135,9 +145,12 @@ class MainWindow(QtGui.QMainWindow):
         bugURL = 'https://github.com/DiamondLightSource/SuRVoS/issues'
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(bugURL))
 
-    def load_data(self):
-        if self.main_widget.load_data_action():
-            self.main_container.setCurrentIndex(1)
+    def load_data_view(self):
+        self.main_container.setCurrentIndex(1)
+
+    def load_data(self, wdir):
+        self.main_widget.prepare_data(wdir)
+        self.main_container.setCurrentIndex(2)
 
     def load_workspace(self, path=None):
         if type(path) not in [str, unicode]:
@@ -148,7 +161,7 @@ class MainWindow(QtGui.QMainWindow):
                 return
 
         if self.main_widget.load_workspace(path):
-            self.main_container.setCurrentIndex(1)
+            self.main_container.setCurrentIndex(2)
 
     def on_error(self, msg):
         QtGui.QMessageBox.critical(self, "Error", msg)
@@ -232,52 +245,14 @@ class MainWidget(QtGui.QWidget):
     def __add__(self, plugin):
         return self.add_widget(plugin)
 
-    def load_data_action(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, "Select input source",
-                                                 filter='*.rec *.npy *.h5')
-        if path is not None and len(path) > 0:
-            dataset = None
-            if path.endswith('.h5'):
-                available_hdf5 = self.DM.available_hdf5_datasets(path)
-                selected, accepted = ComboDialog.getOption(available_hdf5, parent=self)
-                if accepted == QtGui.QDialog.Rejected:
-                    return
-                dataset = selected
-
-            self.load_data(str(path), dataset=dataset)
-            return True
-        return False
-
-    def get_valid_workspace_folder(self):
-        msg = "Select a folder to save the workspace"
-        err_msg = "Workspace folder is not empty. Previously saved workspace" \
-                  " files will be overwritten. Do you wish to continue?"
-        flags = QtGui.QFileDialog.ShowDirsOnly
-        wdir = QtGui.QFileDialog.getExistingDirectory(self, msg, '.', flags)
-
-        do_continue = False
-        while wdir != '' and len(os.listdir(wdir)) > 0 and not do_continue:
-            ans = QtGui.QMessageBox.question(self, "Folder not empty", err_msg,
-                                             QtGui.QMessageBox.Yes,
-                                             QtGui.QMessageBox.No)
-            if ans == QtGui.QMessageBox.No:
-                wdir = QtGui.QFileDialog.getExistingDirectory(self, msg,
-                                                              '.', flags)
-            else:
-                do_continue = True
-        return wdir
-
-    def load_data(self, path, dataset='data'):
-        wdir = self.get_valid_workspace_folder()
-        if wdir is None or len(wdir) == 0:
-            return
+    def prepare_data(self, wdir):
         log.info("Workspace directory: {}".format(wdir))
-
         self.on_workspace(wdir)
-        self.launcher.run(ac.load_data, path=path, dataset=dataset,
+        self.launcher.run(ac.load_data, data=self.DM.tmp_data, stats=self.DM.tmp_stats,
                           cb=self.on_data_loaded, caption='Loading data..')
 
     def on_data_loaded(self, result):
+        del self.DM.tmp_data; self.DM.tmp_data = None
         self.DM.data = '/data'
         self.DM.data_shape = self.DM.ds_shape('/data')
         self.DM.active_roi = (slice(0, self.DM.data_shape[0]),

@@ -59,10 +59,12 @@ class Launcher(QtCore.QObject):
             title = '[Error]'
         else:
             title = '[{}]'.format(type(err).__name__)
+
         try:
             traceback.print_last()
         except Exception as e:
             pass
+
         self.error.emit(title + '\n' + str(err))
         log.error(title + '\n' + str(err))
 

@@ -105,7 +105,7 @@ class MRC(object):
         self.header = self.header_dict = self.data = None
         self.yz_swapped = False
 
-        if type(X) == str:
+        if type(X) in [str, unicode]:
             self.read(X)
         else:
             # assuming X to be a numpy array
@@ -301,9 +301,6 @@ class MRC(object):
         else:
             data = np.ndarray(shape=(nx, ny, nz), dtype=dtype, buffer=img_str, order='F')
 
-        if data.shape[1] < data.shape[2]:
-            data = np.swapaxes(data, 1, 2)
-            self.yz_swapped = True
         data = np.swapaxes(data, 0, 2)
 
         header_dict = {}

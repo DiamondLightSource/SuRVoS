@@ -1,6 +1,6 @@
 
 
-from .data import load_data
+from .data import load_data, volread
 from .annotations import refine_label
 from .supervoxels import create_supervoxels
 from .megavoxels import create_megavoxels

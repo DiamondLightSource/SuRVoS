@@ -86,7 +86,9 @@ class SectionCombo(QtGui.QToolButton):
 
 class FileWidget(QtGui.QWidget):
 
-    def __init__(self, extensions='*.h5', folder=False, save=True, parent=None):
+    path_updated = QtCore.pyqtSignal(str)
+
+    def __init__(self, extensions='*.h5', home=None, folder=False, save=True, parent=None):
         super(FileWidget, self).__init__(parent)
         hbox = QtGui.QHBoxLayout()
         hbox.setContentsMargins(0,0,0,0)
@@ -96,35 +98,47 @@ class FileWidget(QtGui.QWidget):
         self.folder = folder
         self.save = save
 
-        home = os.path.expanduser('~')
+        if save and home == '~':
+            home = os.path.expanduser('~')
+        elif home is None:
+            home = 'Click to select Folder' if folder else 'Click to select File'
+
         self.path = QtGui.QLineEdit(home)
         self.path.setReadOnly(True)
         self.path.mousePressEvent = self.find_path
+        self.selected = False
 
         hbox.addWidget(self.path)
 
     def find_path(self, ev):
         if ev.button() != 1:
             return
+        selected = False
+        path = None
         if self.folder:
             flags = QtGui.QFileDialog.ShowDirsOnly
             message = 'Select Output Folder'
             path = QtGui.QFileDialog.getExistingDirectory(self, message,
                                                           self.path.text(), flags)
             if path is not None and len(path) > 0 and os.path.isdir(path):
-                self.path.setText(path)
+                selected = True
         else:
             if self.save:
                 path = QtGui.QFileDialog.getSaveFileName(self, "Select input source",
-                                                         filter='*.rec *.npy *.h5')
+                                                         filter=self.extensions)
             else:
                 path = QtGui.QFileDialog.getOpenFileName(self, "Select input source",
-                                                         filter='*.rec *.npy *.h5')
+                                                         filter=self.extensions)
             if path is not None and len(path) > 0:
-                self.path.setText(path)
+                selected = True
+
+        if selected:
+            self.path.setText(path)
+            self.path_updated.emit(path)
+            self.selected = True
 
     def value(self):
-        return self.path.text()
+        return self.path.text() if self.selected else None
 
 
 class ActionButton(QtGui.QPushButton):
@@ -140,6 +154,8 @@ class ActionButton(QtGui.QPushButton):
 
 
 class CheckableCombo(QtGui.QToolButton):
+
+    selectionChanged = QtCore.pyqtSignal()
 
     def __init__(self, text='Select', parent=None):
         super(CheckableCombo, self).__init__(parent)
@@ -170,6 +186,7 @@ class CheckableCombo(QtGui.QToolButton):
 
     def addItem(self, item):
         chk = QtGui.QCheckBox(item + '    ')
+        chk.stateChanged.connect(self.on_selection_changed)
         widget = QtGui.QWidgetAction(self.toolmenu)
         widget.setDefaultWidget(chk)
         self.toolmenu.addAction(widget)
@@ -177,6 +194,9 @@ class CheckableCombo(QtGui.QToolButton):
         self._data.append((widget, chk))
         self.toolmenu.repaint()
         self.repaint()
+
+    def on_selection_changed(self, *args):
+        self.selectionChanged.emit()
 
     def setItemText(self, item, text):
         self._data[item][1].setText(text + '    ')

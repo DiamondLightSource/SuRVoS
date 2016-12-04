@@ -41,13 +41,7 @@ class MplCanvas(QtGui.QWidget):
     def __init__(self, orient=Axial, axisoff=True, autoscale=False, **kwargs):
         super(MplCanvas, self).__init__()
 
-        self.DM = DataModel.instance()
-        self.LM = LayerManager.instance()
-        self.LBLM = LabelManager.instance()
-        self.launcher = Launcher.instance()
-
         self.orient = orient
-        self.idx = self.DM.data_shape[orient]//2
         self.setLayout(QtGui.QVBoxLayout())
 
         # Figure
@@ -64,10 +58,6 @@ class MplCanvas(QtGui.QWidget):
         self.ax.spines['bottom'].set_position(('outward', 3))
         self.ax.spines['right'].set_position(('outward', 3))
         self.ax.spines['top'].set_position(('outward', 3))
-
-    def update_slides(self):
-        self.slider.setMaximum(self.DM.data_shape[self.orient]-1)
-        self.slider.setValue(self.DM.data_shape[self.orient]//2)
 
     def redraw(self):
         self.canvas.draw_idle()
@@ -89,6 +79,12 @@ class PerspectiveCanvas(MplCanvas):
     def __init__(self, orient=Axial, axisoff=True, autoscale=False, **kwargs):
         super(PerspectiveCanvas, self).__init__(axisoff=axisoff,
                                                 autoscale=autoscale)
+        self.DM = DataModel.instance()
+        self.LM = LayerManager.instance()
+        self.LBLM = LabelManager.instance()
+        self.launcher = Launcher.instance()
+
+        self.idx = self.DM.data_shape[orient]//2
 
         topbox = QtGui.QHBoxLayout()
         self.layout().insertLayout(0, topbox)
@@ -104,6 +100,10 @@ class PerspectiveCanvas(MplCanvas):
 
         # Slots
         self.DM.cropped.connect(self.update_slides)
+
+    def update_slides(self):
+        self.slider.setMaximum(self.DM.data_shape[self.orient]-1)
+        self.slider.setValue(self.DM.data_shape[self.orient]//2)
 
     def on_perspective_changed(self, orient):
         self.orient = orient
