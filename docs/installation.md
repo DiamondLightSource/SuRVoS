@@ -6,7 +6,7 @@ toc-section: 1
 
 ## Requirements
 
-- Python Distribution
+- Python Distribution (Python 2.7)
 
 - NVIDIA GPU with at least 1024 threads
 
@@ -24,7 +24,7 @@ If there is no Python distribution installed on your system, we recommend instal
 
 [https://www.continuum.io/downloads](https://www.continuum.io/downloads)
 
-### 1.2 Install Anaconda:
+### 1.2 Install Anaconda (Python 2.7):
 
 **(Windows)** Just double click on the installer and follow instructions.
 
