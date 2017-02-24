@@ -236,7 +236,7 @@ class Export(Plugin):
     def check_owrite(self, path, flag=False):
         if flag:
             return True
-        if os.path.isfile(outpath):
+        if os.path.isfile(path):
             err_msg = 'Destination dataset [{}] already exists, '\
                       'do you want to overwrite it?'.format(path)
             ans = QtGui.QMessageBox.question(self, "Error", err_msg,
