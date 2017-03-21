@@ -259,15 +259,15 @@ def compute_structure_tensor_eigvals(data=None, params=None):
 
 
 def compute_gaussian_scale_invariant(data=None, params=None):
-    sigma = np.asarray(params['Init Sigma'])
-    ratio = params['Sigma Ratio']
-    num_scales = params['Num Scales']
+    sigma = np.asarray(params['Init Sigma'], dtype=np.float32)
+    sigincr = params['Sigma Incr']
+    max_sigma = params['Max Sigma']
     response = params['Response']
 
-    result = compute_gaussian(data=data, params=dict(Sigma=sigma))
+    result = np.full(data.shape, -np.inf, data.dtype)
+    num_scales = 0
 
-    for i in range(num_scales):
-        sigma *= ratio
+    while max(sigma) < max_sigma:
         tmp = compute_gaussian(data=data, params=dict(Sigma=sigma))
         if response == 'Min':
             result = np.minimum(result, tmp)
@@ -275,8 +275,10 @@ def compute_gaussian_scale_invariant(data=None, params=None):
             result = np.maximum(result, tmp)
         else:
             result += tmp
+            num_scales += 1
+        sigma += sigincr
 
-    if response == 'Avg':
+    if response == 'Avg' and num_scales > 0:
         result /= num_scales
 
     return result

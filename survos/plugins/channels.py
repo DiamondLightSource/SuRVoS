@@ -105,7 +105,7 @@ available_features = [
     ##################################################
     ('Robust Features', None, None),
     ('(SI) Gaussian', 'gauss_scale3d', [
-        ('Init Sigma', float, 1),
+        ('Init Sigma', Float3d, 1),
         ('Sigma Incr', float, 2.),
         ('Max Sigma', float, 10.),
         ('Response', Choice(['Min', 'Max', 'Avg']), 'Max')
