@@ -2,13 +2,13 @@
 #include "slic.cuh"
 
 
+
 __global__
 void initSupervoxels(const float *data,
                      SLICClusterCenter* centers,
                      const int tClusters,
                      const int3 nClusters,
                      const int3 sp_shape,
-                     const int3 padding,
                      const int3 window,
                      const int3 shape)
 {
@@ -18,14 +18,15 @@ void initSupervoxels(const float *data,
         return;
 
     int3 idx;
-    idx.x       = lidx % nClusters.x;
-    int r     = lidx / nClusters.x;
-    idx.y       = r % nClusters.y;
-    idx.z       = r / nClusters.y;
+    int plane = nClusters.y * nClusters.x;
+    idx.z = lidx / plane;
+    int aux = lidx % plane;
+    idx.y = aux / nClusters.x;
+    idx.x = aux % nClusters.x;
 
-    int x = idx.x * sp_shape.x + sp_shape.x / 2 + padding.x;
-    int y = idx.y * sp_shape.y + sp_shape.y / 2 + padding.y;
-    int z = idx.z * sp_shape.z + sp_shape.z / 2 + padding.z;
+    int x = idx.x * sp_shape.x + sp_shape.x / 2;
+    int y = idx.y * sp_shape.y + sp_shape.y / 2;
+    int z = idx.z * sp_shape.z + sp_shape.z / 2;
 
     int u, v, w, cx = x, cy = y, cz = z, cux, cuy, cuz;
     float minGradient = DLIMIT, gradient, dx, dy, dz;
@@ -74,64 +75,70 @@ void assignSupervoxels(const float *data,
                        const float compactness,
                        const int tClusters,
                        const float3 spacing,
-                       const int3 imshape)
+                       const int3 nClusters,
+                       const int3 sp_shape,
+                       const int3 im_shape)
 {
     int3 idx;
-    idx.x = blockIdx.x * blockDim.x + threadIdx.x;
-    idx.y = blockIdx.y * blockDim.y + threadIdx.y;
-    idx.z = blockIdx.z * blockDim.z + threadIdx.z;
-    size_t gidx = idx.z * (imshape.y * imshape.x) + idx.y * imshape.x + idx.x;
 
-    extern __shared__ float shared[];
-    SLICClusterCenter* _centers = (SLICClusterCenter*)shared;
-    int* _label = (int*)&_centers[27];
+    size_t gidx  = threadIdx.x + (blockIdx.x * blockDim.x);
 
-    if ( threadIdx.z < 3 && threadIdx.y < 3 && threadIdx.x < 3 )
-    {
-        int3 csp;
-        csp.z = blockIdx.z + threadIdx.z - 1;
-        csp.y = blockIdx.y + threadIdx.y - 1;
-        csp.x = blockIdx.x + threadIdx.x - 1;
-        int lidx = threadIdx.z * 9 + threadIdx.y * 3 + threadIdx.x;
-
-        if ( csp.z < 0 || csp.y < 0 || csp.x < 0 || csp.z >= gridDim.z || csp.y >= gridDim.y || csp.x >= gridDim.x )
-        {
-            _label[lidx] = -1;
-        }
-        else
-        {
-            int spi = csp.z * (gridDim.y * gridDim.x) + csp.y * gridDim.x + csp.x;
-            _centers[lidx] = centers[spi];
-            _label[lidx] = spi;
-        }
-    }
-
-    __syncthreads();
-
-    if ( idx.x >= imshape.x || idx.y >= imshape.y || idx.z >= imshape.z )
+    if ( gidx >= im_shape.x * im_shape.y * im_shape.z )
         return;
 
+    int plane = (im_shape.y * im_shape.x);
+
+    idx.z = gidx / plane;
+    int aux = gidx % plane;
+    idx.y = aux / im_shape.x;
+    idx.x = aux % im_shape.x;
+
+    int cz = idx.z / sp_shape.z;
+    if ( cz >= nClusters.z ) { cz = nClusters.z - 1; }
+    int cy = idx.y / sp_shape.y;
+    if ( cy >= nClusters.y ) { cy = nClusters.y - 1; }
+    int cx = idx.x / sp_shape.x;
+    if ( cx >= nClusters.x ) { cx = nClusters.x - 1; }
+
     float minDist = DLIMIT;
-    int minIdx = 13;
+    int minIdx = cz * cy * cx;
 
-    for ( int i = 0; i < 27; i++ )
-    {
-        if ( _label[i] == -1 ) {continue;}
+    int R = 2;
 
-        float dist_g = data[gidx] - _centers[i].f;
-        float dx = (idx.x - _centers[i].x) * spacing.x;
-        float dy = (idx.y - _centers[i].y) * spacing.y;
-        float dz = (idx.z - _centers[i].z) * spacing.z;
-        float dist_s = dx*dx + dy*dy + dz*dz;
-        float dist = dist_g * dist_g + compactness * dist_s;
+    for ( int k = -R; k < 1+R; k++ ) {
+        int ccz = cz + k;
+        if ( ccz < 0 || ccz >= nClusters.z ) {
+            continue;
+        }
+        for ( int i = -R; i < 1+R; i++ ) {
+            int ccy = cy + i;
+            if ( ccy < 0 || ccy >= nClusters.y ) {
+                continue;
+            }
+            for ( int j = -R; j < 1+R; j++ ) {
+                int ccx = cx + j;
+                if ( ccx < 0 || ccx >= nClusters.x ) {
+                    continue;
+                }
+                int cidx = ccz * nClusters.y * nClusters.x + ccy * nClusters.x + ccx;
+                if ( cidx >= tClusters || centers[cidx].z < 0 ) {
+                    continue;
+                }
+                float dist_g = data[gidx] - centers[cidx].f;
+                float dx = (idx.x - centers[cidx].x) * spacing.x;
+                float dy = (idx.y - centers[cidx].y) * spacing.y;
+                float dz = (idx.z - centers[cidx].z) * spacing.z;
+                float dist_s = dx*dx + dy*dy + dz*dz;
+                float dist = dist_g * dist_g + compactness * dist_s;
 
-        if ( dist < minDist ) {
-            minDist = dist;
-            minIdx = i;
+                if ( dist < minDist ) {
+                    minDist = dist;
+                    minIdx = cidx;
+                }
+            }
         }
     }
-
-    labels[gidx] = _label[minIdx];
+    labels[gidx] = minIdx;
 }
 
 __global__
@@ -155,7 +162,7 @@ void updateSupervoxels(const float *data,
 
     int kinit, kend, jinit, jend, iinit, iend;
 
-    float ratio = 1.5f;
+    float ratio = 2.0f;
     kinit = cz - spshape.z * ratio;
     if ( kinit < 0 ) kinit = 0;
     kend = cz + spshape.z * ratio;
@@ -192,14 +199,17 @@ void updateSupervoxels(const float *data,
         }
     }
 
-    centers[lidx].f = gray / count;
-    centers[lidx].x = x / count;
-    centers[lidx].y = y / count;
-    centers[lidx].z = z / count;
-
-    if ( count == 0 )
+    if ( count == 0 ) {
         centers[lidx].z = -1;
+        centers[lidx].y = -1;
+        centers[lidx].x = -1;
         return;
+    } else {
+        centers[lidx].f = gray / count;
+        centers[lidx].x = x / count;
+        centers[lidx].y = y / count;
+        centers[lidx].z = z / count;
+    }
 }
 
 
@@ -335,19 +345,12 @@ void slicSupervoxels(const float *h_src, int *h_dest, const float compactness, \
                      const unsigned short max_iter, const bool enforce_connectivity,
                      int gpu)
 {
-    if ( sp_shape.x * sp_shape.y * sp_shape.z > 1024 ) {
-        printf("SP_SHAPE must be <1024");
-        exit(1);
-    }
-
     // Init params
-    size_t mem_size = sizeof(float) * im_shape.x * im_shape.y * im_shape.z;
+    size_t npixels = im_shape.x * im_shape.y * im_shape.z;
+    size_t mem_size = sizeof(float) * npixels;
     int3 nsp = {(im_shape.x + sp_shape.x - 1) / sp_shape.x, \
                  (im_shape.y + sp_shape.y - 1) / sp_shape.y, \
                  (im_shape.z + sp_shape.z - 1) / sp_shape.z};
-    int3 shift = {(im_shape.x - nsp.x * sp_shape.x) / 2, \
-                   (im_shape.y - nsp.y * sp_shape.y) / 2, \
-                   (im_shape.z - nsp.z * sp_shape.z) / 2,};
     size_t total = nsp.x * nsp.y * nsp.z;
 
     float m = compactness / (float)(max(max(im_shape.x, im_shape.y), im_shape.z));
@@ -362,29 +365,30 @@ void slicSupervoxels(const float *h_src, int *h_dest, const float compactness, \
 
     cudaMalloc((float **) &d_src, mem_size);
     cudaMemcpy(d_src, h_src, mem_size, cudaMemcpyHostToDevice);
-    cudaMalloc((int **) &d_dest, mem_size);
+    cudaMalloc((int **) &d_dest, npixels * sizeof(int));
+    cudaMemset(d_dest, 0, npixels * sizeof(int));
     cudaMalloc((float **) &d_centers, sizeof(SLICClusterCenter) * total);
+    cudaMemset(d_centers, 0, sizeof(SLICClusterCenter) * total);
     cudaCheckErrors("SRC, DST & Centers malloc");
 
     // bdim and gdim
     dim3 threads(1024, 1, 1);
     dim3 grid((total + 1024 - 1) / 1024, 1, 1);
 
-    dim3 threads2(sp_shape.x, sp_shape.y, sp_shape.z);
-    dim3 grid2(nsp.x, nsp.y, nsp.z);
+    dim3 threads2(1024, 1, 1);
+    dim3 grid2((npixels + 1024 - 1) / 1024, 1, 1);
 
     initSupervoxels<<<grid, threads>>>(d_src, d_centers, total, nsp, sp_shape, \
-                                       shift, window, im_shape);
+                                       window, im_shape);
 
     for ( int i = 0; i < max_iter; i++ )
     {
-        assignSupervoxels<<<grid2, threads2, sizeof(float)*5*27>>>(d_src, d_centers, d_dest, m, total, spacing, im_shape);
+        assignSupervoxels<<<grid2, threads2>>>(d_src, d_centers, d_dest, m, total, spacing, nsp, sp_shape, im_shape);
         updateSupervoxels<<<grid, threads>>>(d_src, d_dest, d_centers, total, nsp, sp_shape, im_shape);
     }
+    assignSupervoxels<<<grid2, threads2>>>(d_src, d_centers, d_dest, m, total, spacing, nsp, sp_shape, im_shape);
 
-    assignSupervoxels<<<grid2, threads2, sizeof(float)*5*27>>>(d_src, d_centers, d_dest, m, total, spacing, im_shape);
-
-    cudaMemcpy(h_dest, d_dest, mem_size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_dest, d_dest, npixels * sizeof(int), cudaMemcpyDeviceToHost);
     cudaCheckErrors("Memcpy back");
 
     cudaFree(d_src);
