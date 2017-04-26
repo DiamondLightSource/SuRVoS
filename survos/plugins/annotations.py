@@ -255,7 +255,7 @@ class Annotations(Plugin):
         vbox.addWidget(scroll, 1)
 
         ###############################################
-        vbox.addWidget(SubHeaderLabel('Refine label'))
+        vbox.addWidget(SubHeaderLabel('Refine Annotation Label'))
         self.combo_refine = TComboBox('', ['dilation', 'erosion', 'opening',
                                            'closing', 'fill_holes'])
         self.refine_radius = PLineEdit(1, parse=int)

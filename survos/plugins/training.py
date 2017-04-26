@@ -263,7 +263,7 @@ class TrainPredict(QtGui.QWidget):
         self.clf_container.layout().addWidget(self.ensembles)
         vbox.addWidget(self.clf_container)
 
-        vbox.addWidget(SubHeaderLabel('Refinement'))
+        vbox.addWidget(SubHeaderLabel('Prediction Refinement'))
         self.refinement_combo = TComboBox('Refine:', ['None', 'Potts',
                                                       'Appearance', 'Edge'])
         self.refinement_lamda = PLineEdit(50., parse=float)
