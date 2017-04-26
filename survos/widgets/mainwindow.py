@@ -276,9 +276,9 @@ class MainWidget(QtGui.QWidget):
                        enabled=True, after=self)
         self.addWidget(self.SuperRegions, pvisible=False, \
                        enabled=True, after=self)
-        self.addWidget(self.training, pvisible=False, \
-                       enabled=True, after=self)
         self.addWidget(self.annotations, pvisible=False, \
+                       enabled=True, after=self)
+        self.addWidget(self.training, pvisible=False, \
                        enabled=True, after=self)
         self.addWidget(self.export, pvisible=False, \
                        enabled=True, after=self)
