@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <cuda_runtime.h>
 
-void initCuda(int devID=-1);
+int initCuda(int devID=-1);
 
 template<typename T> T reduce(const T *h_in, size_t num_items, int gpu=-1);
 template<typename T> T reduceMax(const T *h_in, size_t num_items, int gpu=-1);

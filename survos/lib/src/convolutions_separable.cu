@@ -106,7 +106,8 @@ void convolution_separable(const float *h_src, const float *h_kernelz,
                            int gpu)
 {
     // Init cuda memory
-    initCuda(gpu);
+    int max_threads = initCuda(gpu);
+    int max_threads_dim = (int)(floor(pow(max_threads, 1./3.)));
 
     int3 total;
     total.x = ishape.x - kshape.x + 1;
@@ -140,9 +141,9 @@ void convolution_separable(const float *h_src, const float *h_kernelz,
 
     // bdim and gdim
     dim3 threads;
-    threads.x = total.x < 13? total.x : 13;
-    threads.y = total.y < 13? total.y : 13;
-    threads.z = total.z < 6? total.z : 6;
+    threads.x = total.x < max_threads_dim? total.x : max_threads_dim;
+    threads.y = total.y < max_threads_dim? total.y : max_threads_dim;
+    threads.z = total.z < max_threads_dim? total.z : max_threads_dim;
 
     dim3 gridz((ishape.x + threads.x - 1) / threads.x, \
                (ishape.y + threads.y - 1) / threads.y, \

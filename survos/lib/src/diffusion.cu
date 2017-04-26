@@ -7,14 +7,16 @@ void anisodiff3d(const float* data, float* result, int type,
                  float gamma, float lambda,
                  long cols, long rows, long depth)
 {
-    long size2d = cols * rows;
-    long x = threadIdx.x + blockIdx.x * blockDim.x;
-    long y = threadIdx.y + blockIdx.y * blockDim.y;
-    long z = threadIdx.z + blockIdx.z * blockDim.z;
-    long idx = z * size2d + y * cols + x;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+    size_t size2d = rows * cols;
 
-    if ( z >= depth || y >= rows || x >= cols )
+    if ( idx >= size2d * depth )
         return;
+
+    size_t t = idx % size2d;
+    size_t z = idx / size2d;
+    size_t y = t / cols;
+    size_t x = t % cols;
 
     long zs[] = {-1, 1, 0, 0, 0, 0};
     long ys[] = { 0, 0,-1, 1, 0, 0};
@@ -72,11 +74,11 @@ void anidiffusion(const float* src, float* dst, const float lambda,
                   const int maxIter, const float eps, int gpu)
 {
     // Init params
-        size_t total = shape.x * shape.y * shape.z;
+    size_t total = shape.x * shape.y * shape.z;
     size_t mem_size = sizeof(float) * total;
 
     // Init cuda memory
-    initCuda(gpu);
+    int max_threads = initCuda(gpu);
 
     float *d_1, *d_2;
 
@@ -88,8 +90,8 @@ void anidiffusion(const float* src, float* dst, const float lambda,
     cudaMemcpy(d_2, src, mem_size, cudaMemcpyHostToDevice);
 
     // bdim and gdim
-    dim3 block(10, 10, 10);
-    dim3 grid((shape.x+block.x-1)/block.x, (shape.y+block.y-1)/block.y, (shape.z+block.z-1)/block.z);
+    dim3 block(max_threads, 1, 1);
+    dim3 grid((total+max_threads-1)/max_threads, 1, 1);
 
     int i;
     for ( i = 0; i < maxIter; i++ )

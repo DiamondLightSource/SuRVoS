@@ -165,7 +165,7 @@ void symmetric3_eigenvalues(const float *Hzz, const float *Hzy, const float *Hzx
                             float* out, size_t total_size, bool doabs, int gpu)
 {
     // Init cuda memory
-    initCuda(gpu);
+    int max_threads = initCuda(gpu);
 
     float *d_hzz, *d_hzy, *d_hzx, *d_hyy, *d_hyx, *d_hxx, *d_out;
     size_t d_mem_size = total_size * sizeof(float);
@@ -187,17 +187,17 @@ void symmetric3_eigenvalues(const float *Hzz, const float *Hzy, const float *Hzx
     cudaCheckErrors("SRC & KERNEL & DST");
 
     // bdim and gdim
-    dim3 threads(1024, 1, 1);
-    dim3 grids((total_size + threads.x - 1) / threads.x, 1, 1);
+    dim3 block(max_threads, 1, 1);
+    dim3 grid((total_size+max_threads-1)/max_threads, 1, 1);
 
     if ( doabs ) {
-        k_abs_symmetric_eigvalues<<<grids, threads>>>(d_hzz, d_hzy, d_hzx,
-                                                      d_hyy, d_hyx, d_hxx,
-                                                      d_out, total_size);
+        k_abs_symmetric_eigvalues<<<grid, block>>>(d_hzz, d_hzy, d_hzx,
+                                                    d_hyy, d_hyx, d_hxx,
+                                                    d_out, total_size);
     } else {
-        k_symmetric_eigvalues<<<grids, threads>>>(d_hzz, d_hzy, d_hzx,
-                                                  d_hyy, d_hyx, d_hxx,
-                                                  d_out, total_size);
+        k_symmetric_eigvalues<<<grid, block>>>(d_hzz, d_hzy, d_hzx,
+                                                d_hyy, d_hyx, d_hxx,
+                                                d_out, total_size);
     }
 
     cudaCheckErrors("Eigenvalues");

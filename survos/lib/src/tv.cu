@@ -5,27 +5,26 @@
 
 __device__ __inline__
 float divergence(const float* pz, const float* py, const float* px,
-                 long z, long y, long x, long depth, long rows, long cols,
-                 float dz, float dy, float dx)
+                 size_t idx, size_t z, size_t y, size_t x,
+                 int3 shape, float3 spacing)
 {
-    long size2d = rows*cols;
-    long idx = z * size2d + y * cols + x;
+    size_t size2d = shape.y * shape.x;
     float _div = 0.0f;
 
     if ( z - 1 >= 0 ) {
-        _div += (pz[idx] - pz[(z-1)*size2d + y*cols + x]) / dz;
+        _div += (pz[idx] - pz[(z-1)*size2d + y*shape.x + x]) / spacing.z;
     } else {
         _div += pz[idx];
     }
 
     if ( y - 1 >= 0 ) {
-        _div += (py[idx] - py[z*size2d + (y-1)*cols + x]) / dy;
+        _div += (py[idx] - py[z*size2d + (y-1)*shape.x + x]) / spacing.y;
     } else {
         _div += py[idx];
     }
 
     if ( x - 1 >= 0 ) {
-        _div += (px[idx] - px[z*size2d + y*cols + (x-1)]) / dx;
+        _div += (px[idx] - px[z*size2d + y*shape.x + (x-1)]) / spacing.x;
     } else {
         _div += px[idx];
     }
@@ -35,44 +34,43 @@ float divergence(const float* pz, const float* py, const float* px,
 
 __device__ __inline__
 void gradient(const float* u, float* grad,
-              long z, long y, long x,
-              long depth, long rows, long cols,
-              float dz, float dy, float dx)
+              size_t idx, size_t z, size_t y, size_t x,
+              int3 shape, float3 spacing)
 {
-    long size2d = rows*cols;
-    long idx = z * size2d + y * cols + x;
+    size_t size2d = shape.y * shape.x;
 
     float uidx = u[idx];
 
-    if ( z + 1 < depth ) {
-        grad[0] = (u[(z+1)*size2d + y*cols + x] - uidx) / dz;
+    if ( z + 1 < shape.z ) {
+        grad[0] = (u[(z+1)*size2d + y*shape.x + x] - uidx) / spacing.z;
     }
 
-    if ( y + 1 < rows ) {
-        grad[1] = (u[z*size2d + (y+1)*cols + x] - uidx) / dy;
+    if ( y + 1 < shape.y ) {
+        grad[1] = (u[z*size2d + (y+1)*shape.x + x] - uidx) / spacing.y;
     }
 
-    if ( x + 1 < cols ) {
-        grad[2] = (u[z*size2d + y*cols + (x+1)] - uidx) / dx;
+    if ( x + 1 < shape.x ) {
+        grad[2] = (u[z*size2d + y*shape.x + (x+1)] - uidx) / spacing.x;
     }
 }
 
 
 __global__
 void update_u(const float* f, const float* pz, const float* py, const float* px, float* u,
-              float tau, float lambda,
-              long depth, long rows, long cols,
-              float dz, float dy, float dx)
+              float tau, float lambda, int3 shape, float3 spacing)
 {
-    long x = threadIdx.x + blockIdx.x * blockDim.x;
-    long y = threadIdx.y + blockIdx.y * blockDim.y;
-    long z = threadIdx.z + blockIdx.z * blockDim.z;
-    long idx = z * rows * cols + y * cols + x;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+    size_t plane = shape.y * shape.x;
 
-    if ( x >= cols || y >= rows || z >= depth )
+    if ( idx >= plane * shape.z )
         return;
 
-    float _div = divergence(pz, py, px, z, y, x, depth, rows, cols, dz, dy, dx);
+    size_t t = idx % plane;
+    size_t z = idx / plane;
+    size_t y = t / shape.x;
+    size_t x = t % shape.x;
+
+    float _div = divergence(pz, py, px, idx, z, y, x, shape, spacing);
 
     u[idx] = u[idx] * (1.0f - tau) + tau * (f[idx] + (1.0f/lambda) * _div);
 }
@@ -80,19 +78,21 @@ void update_u(const float* f, const float* pz, const float* py, const float* px,
 
 __global__
 void update_p(const float* u, float* pz, float* py, float* px,
-              float tau, long depth, long rows, long cols,
-              float dz, float dy, float dx)
+              float tau, int3 shape, float3 spacing)
 {
-    long x = threadIdx.x + blockIdx.x * blockDim.x;
-    long y = threadIdx.y + blockIdx.y * blockDim.y;
-    long z = threadIdx.z + blockIdx.z * blockDim.z;
-    long idx = z * rows * cols + y * cols + x;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+    size_t plane = shape.y * shape.x;
 
-    if ( x >= cols || y >= rows || z >= depth )
+    if ( idx >= plane * shape.z )
         return;
 
+    size_t t = idx % plane;
+    size_t z = idx / plane;
+    size_t y = t / shape.x;
+    size_t x = t % shape.x;
+
     float grad[3] = {0,0,0}, q[3];
-    gradient(u, grad, z, y, x, depth, rows, cols, dz, dy, dx);
+    gradient(u, grad, idx, z, y, x, shape, spacing);
 
     q[0] = pz[idx] + tau * grad[0];
     q[1] = py[idx] + tau * grad[1];
@@ -116,7 +116,7 @@ void tvdenoising(const float* src, float* dst, float lambda,
     size_t mem_size = sizeof(float) * total;
 
     // Init cuda memory
-    initCuda(gpu);
+    int max_threads = initCuda(gpu);
 
     float *d_src, *d_u, *d_px, *d_py, *d_pz;
 
@@ -142,24 +142,20 @@ void tvdenoising(const float* src, float* dst, float lambda,
     cudaCheckErrors("Memory Malloc and Memset: PZ");
 
     // bdim and gdim
-    dim3 block(10, 10, 10);
-    dim3 grid((shape.x+block.x-1)/block.x, (shape.y+block.y-1)/block.y, (shape.z+block.z-1)/block.z);
-
-    int i = 0;
+    dim3 block(max_threads, 1, 1);
+    dim3 grid((total+max_threads-1)/max_threads, 1, 1);
 
     float tau2, tau1;
-    for ( i = 0; i < maxIter; i++ )
+    for ( int i = 0; i < maxIter; i++ )
     {
         tau2 = 0.3f + 0.02f * i;
         tau1 = (1.f/tau2) * ((1.f/6.f) - (5.f/(15.f+i)));
 
         update_u<<<grid, block>>>(d_src, d_pz, d_py, d_px, d_u, tau1, lambda,
-                                  shape.z, shape.y, shape.x,
-                                  spacing.z, spacing.y, spacing.x);
+                                  shape, spacing);
 
         update_p<<<grid, block>>>(d_u, d_pz, d_py, d_px, tau2,
-                                  shape.z, shape.y, shape.x,
-                                  spacing.z, spacing.y, spacing.x);
+                                  shape, spacing);
     }
 
     cudaCheckErrors("TV minimization");

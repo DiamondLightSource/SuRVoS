@@ -13,14 +13,16 @@ update_u(const float *f, float *u, float *err,
          const float *b2, int3 shape)
 {
 
-    int x = threadIdx.x + blockIdx.x * blockDim.x;
-    int y = threadIdx.y + blockIdx.y * blockDim.y;
-    int z = threadIdx.z + blockIdx.z * blockDim.z;
-    int s2d = shape.y * shape.x;
-    long idx = z * s2d + y * shape.x + x;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+    size_t plane = shape.y * shape.x;
 
-    if ( x >= shape.x || y >= shape.y || z >= shape.z )
+    if ( idx >= plane * shape.z )
         return;
+
+    size_t t = idx % plane;
+    size_t z = idx / plane;
+    size_t y = t / shape.x;
+    size_t x = t % shape.x;
 
     float uterm = 0.0f, vterm = 0.0f;
     int num = 0;
@@ -93,14 +95,16 @@ update_d_ani(const float *u, float lambda,
              float *bz, float *by, float *bx, float *err,
              int3 shape)
 {
-    int x = threadIdx.x + blockIdx.x * blockDim.x;
-    int y = threadIdx.y + blockIdx.y * blockDim.y;
-    int z = threadIdx.z + blockIdx.z * blockDim.z;
-    int s2d = shape.y * shape.x;
-    long idx = z * s2d + y * shape.x + x;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+    size_t plane = shape.y * shape.x;
 
-    if ( x >= shape.x || y >= shape.y || z >= shape.z )
+    if ( idx >= plane * shape.z )
         return;
+
+    size_t t = idx % plane;
+    size_t z = idx / plane;
+    size_t y = t / shape.x;
+    size_t x = t % shape.x;
 
     float gz = 0.0f, gy = 0.0f, gx = 0.0f;
 
@@ -148,13 +152,16 @@ __global__ void
 update_v_l1(const float* f, const float* u, float* v, float* b2,
             float lambda, float mu, int3 shape)
 {
-    int x = threadIdx.x + blockIdx.x * blockDim.x;
-    int y = threadIdx.y + blockIdx.y * blockDim.y;
-    int z = threadIdx.z + blockIdx.z * blockDim.z;
-    int idx = z * shape.y * shape.x + y * shape.x + x;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+    size_t plane = shape.y * shape.x;
 
-    if ( x >= shape.x || y >= shape.y || z >= shape.z )
+    if ( idx >= plane * shape.z )
         return;
+
+    size_t t = idx % plane;
+    size_t z = idx / plane;
+    size_t y = t / shape.x;
+    size_t x = t % shape.x;
 
     float fidx = f[idx];
     float uidx = u[idx];
@@ -171,13 +178,16 @@ __global__ void
 update_v_l2(const float* f, const float* u, float* v, float* b2,
             float lambda, float mu, int3 shape)
 {
-    int x = threadIdx.x + blockIdx.x * blockDim.x;
-    int y = threadIdx.y + blockIdx.y * blockDim.y;
-    int z = threadIdx.z + blockIdx.z * blockDim.z;
-    int idx = z * shape.y * shape.x + y * shape.x + x;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+    size_t plane = shape.y * shape.x;
 
-    if ( x >= shape.x || y >= shape.y || z >= shape.z )
+    if ( idx >= plane * shape.z )
         return;
+
+    size_t t = idx % plane;
+    size_t z = idx / plane;
+    size_t y = t / shape.x;
+    size_t x = t % shape.x;
 
     v[idx] = f[idx];
     b2[idx] = 0;
@@ -187,13 +197,16 @@ __global__ void
 update_v_poisson(const float* f, const float* u, float* v, float* b2,
                  float lambda, float mu, int3 shape)
 {
-    int x = threadIdx.x + blockIdx.x * blockDim.x;
-    int y = threadIdx.y + blockIdx.y * blockDim.y;
-    int z = threadIdx.z + blockIdx.z * blockDim.z;
-    int idx = z * shape.y * shape.x + y * shape.x + x;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+    size_t plane = shape.y * shape.x;
 
-    if ( x >= shape.x || y >= shape.y || z >= shape.z )
+    if ( idx >= plane * shape.z )
         return;
+
+    size_t t = idx % plane;
+    size_t z = idx / plane;
+    size_t y = t / shape.x;
+    size_t x = t % shape.x;
 
     float fidx = f[idx];
     float uidx = u[idx];
@@ -217,7 +230,7 @@ void tvbregman(const float* src, float* dst, float lambda, float mu,
     size_t mem_size = sizeof(float) * total;
 
     // Init cuda memory
-    initCuda(gpu);
+    int max_threads = initCuda(gpu);
 
     float *d_src, *d_u, *d_v, *d_errtv, *d_errl2, *d_dx, *d_dy, *d_dz, *d_bx, *d_by, *d_bz, *d_b2;
 
@@ -271,10 +284,8 @@ void tvbregman(const float* src, float* dst, float lambda, float mu,
     cudaCheckErrors("Memory Malloc and Memset: V");
 
     // bdim and gdim
-    dim3 block(10, 10, 10);
-    dim3 grid((shape.x+block.x-1)/block.x,
-              (shape.y+block.y-1)/block.y,
-              (shape.z+block.z-1)/block.z);
+    dim3 block(max_threads, 1, 1);
+    dim3 grid((total+max_threads-1)/max_threads, 1, 1);
 
     printf("=======================\n");
     printf("Bregman TV denoising\n");

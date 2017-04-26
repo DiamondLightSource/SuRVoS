@@ -7,13 +7,16 @@ __global__
 void update_u(const float* f, const float* pz, const float* py, const float* px,
               float* u, float* err, float lambda, int3 shape)
 {
-    int x = threadIdx.x + blockIdx.x * blockDim.x;
-    int y = threadIdx.y + blockIdx.y * blockDim.y;
-    int z = threadIdx.z + blockIdx.z * blockDim.z;
-    int idx = z * shape.y * shape.x + y * shape.x + x;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+    size_t plane = shape.y * shape.x;
 
-    if ( x >= shape.x || y >= shape.y || z >= shape.z )
+    if ( idx >= plane * shape.z )
         return;
+
+    size_t t = idx % plane;
+    size_t z = idx / plane;
+    size_t y = t / shape.x;
+    size_t x = t % shape.x;
 
 #define UIDX(zz, yy, xx) ((zz) * shape.y * shape.x + (yy) * shape.x + (xx))
 
@@ -42,13 +45,16 @@ __global__
 void update_v(const float* f, const float* pz, const float* py, const float* px,
               float* v, float lambda, int3 shape)
 {
-    int x = threadIdx.x + blockIdx.x * blockDim.x;
-    int y = threadIdx.y + blockIdx.y * blockDim.y;
-    int z = threadIdx.z + blockIdx.z * blockDim.z;
-    int idx = z * shape.y * shape.x + y * shape.x + x;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+    size_t plane = shape.y * shape.x;
 
-    if ( x >= shape.x || y >= shape.y || z >= shape.z )
+    if ( idx >= plane * shape.z )
         return;
+
+    size_t t = idx % plane;
+    size_t z = idx / plane;
+    size_t y = t / shape.x;
+    size_t x = t % shape.x;
 
 #define UIDX(zz, yy, xx) ((zz) * shape.y * shape.x + (yy) * shape.x + (xx))
 
@@ -72,13 +78,16 @@ __global__
 void update_p(const float* v, float* pz, float* py, float* px,
               float* err, float rho, int3 shape)
 {
-    int x = threadIdx.x + blockIdx.x * blockDim.x;
-    int y = threadIdx.y + blockIdx.y * blockDim.y;
-    int z = threadIdx.z + blockIdx.z * blockDim.z;
-    int idx = z * shape.y * shape.x + y * shape.x + x;
+    size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+    size_t plane = shape.y * shape.x;
 
-    if ( x >= shape.x || y >= shape.y || z >= shape.z )
+    if ( idx >= plane * shape.z )
         return;
+
+    size_t t = idx % plane;
+    size_t z = idx / plane;
+    size_t y = t / shape.x;
+    size_t x = t % shape.x;
 
     float gz = 0.0f, gy = 0.0f, gx = 0.0f;
     float vidx = v[idx];
@@ -111,7 +120,7 @@ void tvchambolle(const float* src, float* dst, float lambda, float rho,
     size_t mem_size = sizeof(float) * total;
 
     // Init cuda memory
-    initCuda(gpu);
+    int max_threads = initCuda(gpu);
 
     float *d_src, *d_errtv, *d_errl2, *d_px, *d_py, *d_pz, *d_u, *d_v;
 
@@ -149,10 +158,8 @@ void tvchambolle(const float* src, float* dst, float lambda, float rho,
     cudaCheckErrors("Memory Malloc and Memset: ERR L2");
 
     // bdim and gdim
-    dim3 block(10, 10, 10);
-    dim3 grid((shape.x+block.x-1)/block.x,
-              (shape.y+block.y-1)/block.y,
-              (shape.z+block.z-1)/block.z);
+    dim3 block(max_threads, 1, 1);
+    dim3 grid((total+max_threads-1)/max_threads, 1, 1);
 
     float error_tv, error_l2, eprev;
 

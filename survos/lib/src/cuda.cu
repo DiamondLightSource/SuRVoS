@@ -7,14 +7,26 @@ using namespace cub;
 
 
 bool CUDA_STARTED = false;
+int CUDA_DEVICE = -1;
+int CUDA_THREADS = -1;
 
 
-__host__ void initCuda(int devID)
+__host__
+int initCuda(int devID)
 {
-    if ( CUDA_STARTED == true ) { return; }
+    cudaError_t error;
+    if ( CUDA_STARTED == true ) {
+        printf("[GPU] Reusing device (%d) with %d threads\n.", CUDA_DEVICE, CUDA_THREADS);
+        error = cudaSetDevice(CUDA_DEVICE);
+        if ( error != cudaSuccess ) {
+            printf("[GPU] cudaSetDevice returned error code %d, line(%d)\n", error, __LINE__);
+            exit(EXIT_FAILURE);
+        } else {
+            return CUDA_THREADS;
+        }
+    }
 
     int num_devices, max_multiprocessors = 0;
-    cudaError_t error;
     cudaDeviceProp properties;
 
     if ( devID < 0 ) {
@@ -57,11 +69,15 @@ __host__ void initCuda(int devID)
     }
     else
     {
-        printf("[GPU] Device %d: \"%s\" with compute capability %d.%d\n\n",
-               devID, properties.name, properties.major, properties.minor);
+        printf("[GPU] Device %d: \"%s\" with compute capability %d.%d, %d threads pb.\n",
+               devID, properties.name, properties.major, properties.minor,
+               properties.maxThreadsPerBlock);
     }
 
     CUDA_STARTED = true;
+    CUDA_DEVICE = devID;
+    CUDA_THREADS = properties.maxThreadsPerBlock;
+    return CUDA_THREADS;
 }
 
 

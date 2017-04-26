@@ -49,7 +49,8 @@ void convolution(const float *h_src, const float *h_kernel, float *h_dest,
                  const int3 im_shape, const int3 kernel_shape, int gpu)
 {
     // Init cuda memory
-    initCuda(gpu);
+    int max_threads = initCuda(gpu);
+    int max_threads_dim = (int)(floor(pow(max_threads, 1./3.)));
 
     int3 total;
     total.x = im_shape.x - kernel_shape.x + 1;
@@ -111,9 +112,9 @@ void convolution(const float *h_src, const float *h_kernel, float *h_dest,
 
     // bdim and gdim
     dim3 threads;
-    threads.x = total.x < 13? total.x : 13;
-    threads.y = total.y < 13? total.y : 13;
-    threads.z = total.z < 6? total.z : 6;
+    threads.x = total.x < max_threads_dim? total.x : max_threads_dim;
+    threads.y = total.y < max_threads_dim? total.y : max_threads_dim;
+    threads.z = total.z < max_threads_dim? total.z : max_threads_dim;
     dim3 grid((total.x + threads.x - 1) / threads.x, \
               (total.y + threads.y - 1) / threads.y, \
               (total.z + threads.z - 1) / threads.z);

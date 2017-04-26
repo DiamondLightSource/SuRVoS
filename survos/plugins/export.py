@@ -86,7 +86,7 @@ class Export(Plugin):
         vbox.addWidget(HWidgets(self.combo, None, stretch=[0,1]))
 
         self.source = SourceCombo()
-        self.scale = QtGui.QCheckBox('Scale')
+        self.scale = QtGui.QCheckBox('Normalize')
         self.scale.setChecked(True)
         self.invert = QtGui.QCheckBox('Invert')
         self.scont = HWidgets(self.source, self.scale, self.invert, stretch=[1,0,0])
