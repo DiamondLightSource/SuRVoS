@@ -6,6 +6,9 @@ __pycache__/
 *.h5
 *.py~
 qpbo_src/
+.spyproject
+.*
+!/.gitignore
 
 # C extensions
 *.so
