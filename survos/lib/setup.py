@@ -43,6 +43,28 @@ def get_qpbo():
     os.rmdir(os.path.join(source_path, qpbo_version))
     os.remove(qpbo_file)
 
+def cuda_extension(config, name, sources, CUDA, gcc_args=[], gpp_args=[]):
+    config.add_extension(name, sources=sources,
+                         library_dirs=[CUDA['lib64']],
+                         libraries=['cudart', 'stdc++'], language='c++',
+                         runtime_library_dirs=[CUDA['lib64']],
+                         extra_compile_args={
+                            'gcc': gcc_args,
+                            'g++': gpp_args,
+                            'nvcc': ['-arch=sm_30',
+                                     '-gencode=arch=compute_20,code=sm_20',
+                                     '-gencode arch=compute_30,code=sm_30',
+                                     '-gencode arch=compute_35,code=sm_35',
+                                     '-gencode arch=compute_37,code=sm_37',
+                                     '-gencode arch=compute_50,code=sm_50',
+                                     '-gencode arch=compute_52,code=sm_52',
+                                     '-gencode arch=compute_52,code=compute_52',
+                                     '--ptxas-options=-v', '-c',
+                                     '--compiler-options', "'-fPIC'"]
+                         },
+                         include_dirs = [get_numpy_include_dirs()[0],
+                                         CUDA['include'], 'src'])
+
 
 def configuration(parent_package='', top_path=None):
     config = Configuration('lib', parent_package, top_path,
@@ -50,82 +72,27 @@ def configuration(parent_package='', top_path=None):
 
     CUDA = locate_cuda()
 
-    numpy_include = get_numpy_include_dirs()[0]
-
     files = ['_supersegments.pyx']
     config.add_extension('_supersegments', sources=files,
                          language='c++', libraries=["stdc++"],
                          include_dirs=[get_numpy_include_dirs()])
 
-    config.add_extension('_preprocess',
-                         sources=['src/cuda.cu', 'src/tv.cu', 'src/diffusion.cu',
-                                  'src/chambolle2005.cu', 'src/chambolle2011.cu',
-                                  'src/bregman.cu',  '_preprocess.pyx'],
-                         library_dirs=[CUDA['lib64']],
-                         libraries=['cudart', 'stdc++'], language='c++',
-                         runtime_library_dirs=[CUDA['lib64']],
-                         extra_compile_args={
-                            'gcc': [],
-                            'g++': [],
-                            'nvcc': ['-gencode arch=compute_30,code=sm_30',
-                                     '-gencode arch=compute_35,code=sm_35',
-                                     '-gencode arch=compute_50,code=sm_50',
-                                     '--ptxas-options=-v', '-c',
-                                     '--compiler-options', "'-fPIC'"]
-                         },
-                         include_dirs = [numpy_include, CUDA['include'], 'src'])
+    sources = ['src/cuda.cu', 'src/tv.cu', 'src/diffusion.cu',
+               'src/chambolle2005.cu', 'src/chambolle2011.cu',
+               'src/bregman.cu',  '_preprocess.pyx']
+    cuda_extension(config, '_preprocess', sources, CUDA)
 
-    config.add_extension('_superpixels',
-                         sources=['src/slic.cu', 'src/cuda.cu', '_superpixels.pyx'],
-                         library_dirs=[CUDA['lib64']],
-                         libraries=['cudart', 'stdc++'], language='c++',
-                         runtime_library_dirs=[CUDA['lib64']],
-                         extra_compile_args={
-                            'gcc': [],
-                            'g++': [],
-                            'nvcc': ['-gencode arch=compute_30,code=sm_30',
-                                     '-gencode arch=compute_35,code=sm_35',
-                                     '-gencode arch=compute_50,code=sm_50',
-                                     '--ptxas-options=-v', '-c',
-                                     '--compiler-options', "'-fPIC'"]
-                         },
-                         include_dirs = [numpy_include, CUDA['include'], 'src'])
+    sources = ['src/slic.cu', 'src/cuda.cu', '_superpixels.pyx']
+    cuda_extension(config, '_superpixels', sources, CUDA)
 
-    config.add_extension('_convolutions',
-                         sources=['src/convolutions_raw.cu',
-                                  'src/convolutions_separable.cu',
-                                  'src/convolutions_separable_shared.cu',
-                                  'src/cuda.cu', '_convolutions.pyx'],
-                         library_dirs=[CUDA['lib64']],
-                         libraries=['cudart', 'stdc++'], language='c++',
-                         runtime_library_dirs=[CUDA['lib64']],
-                         extra_compile_args={
-                            'gcc': [],
-                            'g++': [],
-                            'nvcc': ['-gencode arch=compute_30,code=sm_30',
-                                     '-gencode arch=compute_35,code=sm_35',
-                                     '-gencode arch=compute_50,code=sm_50',
-                                     '--ptxas-options=-v', '-c',
-                                     '--compiler-options', "'-fPIC'"]
-                         },
-                         include_dirs = [get_numpy_include_dirs(), CUDA['include'], 'src'])
+    sources = ['src/convolutions_raw.cu',
+               'src/convolutions_separable.cu',
+               'src/convolutions_separable_shared.cu',
+               'src/cuda.cu', '_convolutions.pyx']
+    cuda_extension(config, '_convolutions', sources, CUDA)
 
-    config.add_extension('_channels',
-                         sources=['src/symmetric_eigvals3S.cu',
-                                  'src/cuda.cu', '_channels.pyx'],
-                         library_dirs=[CUDA['lib64']],
-                         libraries=['cudart', 'stdc++'], language='c++',
-                         runtime_library_dirs=[CUDA['lib64']],
-                         extra_compile_args={
-                            'gcc': [],
-                            'g++': [],
-                            'nvcc': ['-gencode arch=compute_30,code=sm_30',
-                                     '-gencode arch=compute_35,code=sm_35',
-                                     '-gencode arch=compute_50,code=sm_50',
-                                     '--ptxas-options=-v', '-c',
-                                     '--compiler-options', "'-fPIC'"]
-                         },
-                         include_dirs = [get_numpy_include_dirs(), CUDA['include'], 'src'])
+    sources = ['src/symmetric_eigvals3S.cu', 'src/cuda.cu', '_channels.pyx']
+    cuda_extension(config, '_channels', sources, CUDA)
 
     config.add_extension('_spencoding', sources=['_spencoding.pyx'],
                          include_dirs=get_numpy_include_dirs())
