@@ -59,6 +59,8 @@ def cuda_extension(config, name, sources, CUDA, gcc_args=[], gpp_args=[]):
                                      '-gencode arch=compute_50,code=sm_50',
                                      '-gencode arch=compute_52,code=sm_52',
                                      '-gencode arch=compute_52,code=compute_52',
+                                     '-gencode=arch=compute_60,code=sm_60',
+                                     '-gencode=arch=compute_61,code=sm_61',
                                      '--ptxas-options=-v', '-c',
                                      '--compiler-options', "'-fPIC'"]
                          },
