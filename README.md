@@ -12,7 +12,7 @@ As part of the semi-automatic segmentation pipeline, SuRVoS uses the publicy ava
 
 which is available at (http://pub.ist.ac.at/~vnk/software.html) and automatically downloaded and installed through the installation process.
 
-# Acknowledgements
+# Referencing SuRVoS
 
 If you use SuRVoS for your academic publication, please consider citing the following article:
 
@@ -26,3 +26,5 @@ If you use SuRVoS for your academic publication, please consider citing the foll
       year={2017},
       publisher={Elsevier}
     }
+
+[Read the article online (Open Access)](http://www.sciencedirect.com/science/article/pii/S1047847717300308).
