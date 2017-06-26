@@ -158,9 +158,8 @@ def predict_proba(y_data=None, p_data=None,
 
     log.info("+ Loading labels")
     labels = DM.load_slices(y_data)
-
     if level_params['plevel'] is not None:
-        parent_labels = DM.load_ds(level_params['plevel'])
+        parent_labels = DM.load_slices(p_data)
         mask = parent_labels == level_params['plabel']
     else:
         mask = None
@@ -169,10 +168,10 @@ def predict_proba(y_data=None, p_data=None,
         log.info('+ Extracting supervoxel labels')
         nsp = DM.attr(desc_params['supervoxels'], 'num_supervoxels')
         nlbl = DM.attr(y_data, 'label').max()+1
-        labels = _sp_labels(supervoxels.ravel(), labels.ravel(), nsp, nlbl, 0.)
+        labels = _sp_labels(supervoxels.ravel(), labels.ravel(), nsp, nlbl, 0)
         if mask is not None:
-            mask = _sp_labels(supervoxels.ravel(), mask.astype(np.int16).ravel(),
-                              nsp, 2, 0.).astype(np.bool)
+            mask = mask.astype(np.int16)
+            mask = np.bincount(supervoxels.ravel(), weights=mask.ravel()*2-1) > 0
         if X.shape[0] < labels.shape[0]: # less supervoxels
             labels = labels[svmask]
             if mask is not None:

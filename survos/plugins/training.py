@@ -628,8 +628,8 @@ class Training(Plugin):
 
     def on_parent_selected(self, idx):
         if idx > 0:
-            self.train_widget.parent_level = self.levels[idx]
-            self.train_widget.parent_label = self.parent_labels[idx].idx
+            self.train_widget.parent_level = self.parent_labels[idx][0]
+            self.train_widget.parent_label = self.parent_labels[idx][1].idx
         else:
             self.train_widget.parent_level = None
             self.train_widget.parent_label = -1
