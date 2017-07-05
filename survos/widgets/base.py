@@ -569,8 +569,9 @@ class ULabel(QtGui.QLabel):
 
 class TComboBox(QtGui.QWidget):
 
-    def __init__(self, label, options, selected=None, parse=str, *args, **kwargs):
+    def __init__(self, label, options, selected=None, parse=str, default=0, *args, **kwargs):
         super(TComboBox, self).__init__(*args, **kwargs)
+        self.default = default
         hbox = MHBoxLayout()
         if label is not None:
             hbox.addWidget(QtGui.QLabel(label))
@@ -621,7 +622,7 @@ class TComboBox(QtGui.QWidget):
         try:
             return self.parse(self.combo.currentText())
         except:
-            return self.parse(0)
+            return self.parse(self.default)
 
 class PLineEdit(QtGui.QLineEdit):
 
@@ -657,6 +658,7 @@ class RCheckBox(QtGui.QWidget):
 
         self.label = RClickableLabel(text)
         self.check = QtGui.QCheckBox()
+        self.label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.check.setChecked(True)
         hbox.addWidget(self.label, 1)
         hbox.addWidget(self.check)

@@ -13,3 +13,5 @@ from .mainwindow import MainWindow
 from .slice_viewer import SliceViewer
 from .conficence_viewer import ConfidenceViewer
 from .mpl_widgets import OrthogonalViewer
+from .compare_levels import QuantitativeAnalysis
+

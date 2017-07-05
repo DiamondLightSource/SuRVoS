@@ -14,6 +14,7 @@ from .label_partitioning import LabelSplitter
 from .level_statistics import LevelStats
 from .preloader import PreWidget
 from .data_loader import LoadWidget
+from .compare_levels import QuantitativeAnalysis
 
 from ..core import Launcher
 from ..core import DataModel, LayerManager, LabelManager
@@ -283,7 +284,6 @@ class MainWidget(QtGui.QWidget):
         self.addWidget(self.export, pvisible=False, \
                        enabled=True, after=self)
 
-
         # Midle
         self.slice_viewer = SliceViewer()
         self.addWidget(self.slice_viewer)
@@ -291,6 +291,8 @@ class MainWidget(QtGui.QWidget):
         self.addWidget(self.label_splitter)
         self.level_statistics = LevelStats()
         self.addWidget(self.level_statistics)
+        self.compare_segmentations = QuantitativeAnalysis()
+        self.addWidget(self.compare_segmentations)
 
         self.LM.clear()
         self.LM.addLayer(self.DM.data, 'Data', level='Data', cmap=attrs['cmap'],

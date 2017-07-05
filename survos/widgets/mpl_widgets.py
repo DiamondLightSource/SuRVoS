@@ -84,7 +84,7 @@ class PerspectiveCanvas(MplCanvas):
         self.LBLM = LabelManager.instance()
         self.launcher = Launcher.instance()
 
-        self.idx = self.DM.data_shape[orient]//2
+        self.idx = self.DM.data_shape[orient] // 2
 
         topbox = QtGui.QHBoxLayout()
         self.layout().insertLayout(0, topbox)
