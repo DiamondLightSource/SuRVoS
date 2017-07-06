@@ -184,12 +184,10 @@ class ComparisonResult(QtGui.QWidget):
 
     def setResults(self, results):
         scores = []
-        if 'acc' in results:
-            scores.append(('Accuracy', results['acc']))
         if 'dice' in results:
-            scores.append(('Dice Coefficient', results['acc']))
-        if 'jaccard' in results:
-            scores.append(('Jaccard Index', results['jaccard']))
+            scores.append(('Dice Coefficient', results['dice']))
+        if 'jacc' in results:
+            scores.append(('Jaccard Index', results['jacc']))
         if 'cohen' in results:
             scores.append(('Cohen\'s Kappa', results['cohen']))
 
@@ -228,6 +226,7 @@ class ComparisonResult(QtGui.QWidget):
             ax.set_xticks([j + 0.35 for j in x])
             ax.set_xticklabels(['Level A', 'Level B', 'Overlap'])
             ax.set_title('Target {}'.format(idx))
+            ax.set_ylabel('Volume area ([0,1] ratio)')
 
         sns.despine(self.mplcanvas.fig)
         self.mplcanvas.redraw()
@@ -261,14 +260,13 @@ class QuantitativeAnalysis(Plugin):
         self.results = ComparisonResult()
 
         vbox.addWidget(splitter, 1)
-        self.acc = RCheckBox('Accuracy')
         self.dice = RCheckBox('Dice Coefficient')
         self.jacc = RCheckBox('Jaccard Score')
         self.jacc.setChecked(False)
         self.cohen = RCheckBox('Cohen\'s Kappa')
         self.cohen.setChecked(False)
         button = QtGui.QPushButton('Calculate Segmentation Coefficients')
-        vbox.addWidget(HWidgets(None, self.acc, self.dice, self.jacc,
+        vbox.addWidget(HWidgets(None, self.dice, self.jacc,
                                 self.cohen, button, None,
                                 stretch=[True, False, False, False, False, False, True]))
         vbox.addWidget(self.results)
@@ -292,8 +290,8 @@ class QuantitativeAnalysis(Plugin):
 
         launcher.run(ac.compare_segmentations, levelA=levelA, levelB=levelB,
                      labelsA=labelsA, labelsB=labelsB, cb=self.on_analysis,
-                     acc=self.acc.isChecked(), dice=self.dice.isChecked(),
-                     jacc=self.jacc.isChecked(), cohen=self.cohen.isChecked(),
+                     dice=self.dice.isChecked(), jacc=self.jacc.isChecked(),
+                     cohen=self.cohen.isChecked(),
                      caption='Comparing segmentations')
 
     def on_analysis(self, result):

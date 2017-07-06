@@ -13,7 +13,7 @@ DM = DataModel.instance()
 
 
 def compare_segmentations(levelA=None, levelB=None, labelsA=None, labelsB=None,
-                          acc=False, dice=False, jacc=False, cohen=False):
+                          dice=False, jacc=False, cohen=False):
     log.info('+ Loading level A into memory')
     levelA = DM.load_slices(levelA)
 
@@ -24,7 +24,7 @@ def compare_segmentations(levelA=None, levelB=None, labelsA=None, labelsB=None,
     mappingA = np.full(levelA.shape, -1, np.int8)
     for s, t in labelsA.items():
         mappingA[levelA[...] == s] = t
-        indexes |= set([t])
+        indexes |= {t}
 
     log.info('+ Loading level B into memory')
     levelB = DM.load_slices(levelB)
@@ -33,7 +33,7 @@ def compare_segmentations(levelA=None, levelB=None, labelsA=None, labelsB=None,
     mappingB = np.full(levelB.shape, -1, np.int8)
     for s, t in labelsB.items():
         mappingB[levelB[...] == s] = t
-        indexes |= set([t])
+        indexes |= {t}
 
     mappingA += 1
     mappingB += 1
@@ -59,10 +59,8 @@ def compare_segmentations(levelA=None, levelB=None, labelsA=None, labelsB=None,
     dA = mappingA[union]
     dB = mappingB[union]
 
-    if acc:
-        result['acc'] = ninter / float(nnzB)
     if dice:
-        result['dice'] = 2 * ninter / float(nnzA + nnzB)
+        result['dice'] = (2 * ninter) / float(nnzA + nnzB)
     if jacc:
         result['jacc'] = jaccard_similarity_score(dB.ravel(), dA.ravel())
     if cohen:
