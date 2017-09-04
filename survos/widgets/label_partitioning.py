@@ -136,7 +136,7 @@ class LabelCanvas(PerspectiveCanvas):
             for cidx in self.color_idx:
                 color = self.colors[cidx]
                 curr_obj = (labels == cidx)
-                if np.unique(curr_obj).size > 0:
+                if np.unique(curr_obj).size > 1:
                     self.ax.contour(curr_obj, colors=color, linewidths=2)
 
         if self.selected_object is not None:
