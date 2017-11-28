@@ -16,7 +16,8 @@ Coronal = DataModel.instance().Coronal
 class Layer(object):
 
     def __init__(self, data, level=None, cmap=None, vmin=None, vmax=None, alpha=1., \
-                 orient=Axial, background=None, threshold=None, pre=None, visible=True):
+                 orient=Axial, background=None, threshold=None, pre=None,
+                 binarize=False, visible=True):
         self.DM = DataModel.instance()
         self.data = data
         self.level = level
@@ -30,11 +31,13 @@ class Layer(object):
         self.visible = visible
         self.index = -1
         self.threshold = threshold
+        self.binarize = binarize
 
     def draw(self, ax, idx, i):
         self.index = i
         if self.visible:
             sslice = self.get_slice(self.data, idx)
+            vmin, vmax = self.vmin, self.vmax
             if self.pre is not None:
                 sslice = self.pre(sslice)
             if self.background is not None and self.cmap is not None:
@@ -42,7 +45,12 @@ class Layer(object):
             elif self.threshold is not None and self.cmap is not None:
                 target, thresh = self.threshold
                 sslice = np.ma.masked_where(self.get_slice(target, idx) < thresh, sslice)
-            ax.imshow(sslice, self.cmap, vmin=self.vmin, vmax=self.vmax,
+            elif self.binarize:
+                mask = (sslice < vmin) | (sslice > vmax)
+                sslice[mask] = 0
+                sslice[~mask] = 1
+                vmin, vmax = 0, 1
+            ax.imshow(sslice, self.cmap, vmin=vmin, vmax=vmax,
                       alpha=self.alpha, interpolation='none')
 
     def update(self, image, idx):
@@ -55,6 +63,10 @@ class Layer(object):
             elif self.threshold is not None and self.cmap is not None:
                 target, thresh = self.threshold
                 sslice = np.ma.masked_where(self.get_slice(target, idx) < thresh, sslice)
+            elif self.binarize:
+                mask = (sslice < self.vmin) | (sslice > self.vmax)
+                sslice[mask] = 0
+                sslice[~mask] = 1
         else:
             mask = np.ones(self.shape(), np.bool)
             sslice = np.ma.masked_where(mask, mask)

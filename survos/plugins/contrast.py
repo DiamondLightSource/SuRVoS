@@ -2,10 +2,11 @@
 import numpy as np
 from ..qt_compat import QtGui, QtCore
 
-from ..widgets import HSlider, HWidgets, ActionButton
+from ..widgets import HSlider, HWidgets, ActionButton, TComboBox
 from ..widgets.mpl_widgets import MplCanvas
 from .base import Plugin
-from ..core import DataModel, LayerManager, Launcher
+from ..core import DataModel, LayerManager, Launcher, LabelManager
+from .. import actions as ac
 
 import logging as log
 import seaborn as sns
@@ -23,6 +24,7 @@ class Contrast(QtGui.QWidget):
 
         self.DM = DataModel.instance()
         self.LM = LayerManager.instance()
+        self.LBLM = LabelManager.instance()
         self.launcher = Launcher.instance()
 
         self.sld_vmin = HSlider('VMin', 0, 1, 0)
@@ -59,6 +61,54 @@ class Contrast(QtGui.QWidget):
         self.current_channel = '/data'
         self.vmin = self.vmax = self.evmin = self.evmax = 0
         self.update_contrast(self.current_channel)
+
+        self.threshold = QtGui.QCheckBox('Threshold')
+        self.cmb_save_to = TComboBox('Save to:', [])
+        self.btn_save_to = QtGui.QPushButton('Save')
+        vbox.addWidget(HWidgets(self.threshold, self.cmb_save_to, self.btn_save_to,
+                                stretch=[1]))
+
+        self.threshold.toggled.connect(self.on_threshold)
+        self.btn_save_to.clicked.connect(self.save_threshold)
+
+        self.LBLM.levelAdded.connect(self.on_levels_changed)
+        self.LBLM.levelLoaded.connect(self.on_levels_changed)
+        self.LBLM.levelRemoved.connect(self.on_levels_changed)
+
+        self.LBLM.labelAdded.connect(self.on_levels_changed)
+        self.LBLM.labelLoaded.connect(self.on_levels_changed)
+        self.LBLM.labelNameChanged.connect(self.on_levels_changed)
+        self.LBLM.labelRemoved.connect(self.on_levels_changed)
+
+        self.all_labels = []
+
+    def on_threshold(self, flag):
+        data = self.LM.get('Data', 'Data')
+        data.binarize = flag
+        self.LM.update()
+
+    def save_threshold(self):
+        if len(self.all_labels) == 0 or not self.threshold.isChecked():
+            return
+        data = self.LM.get('Data', 'Data')
+        dataset = data.data
+        vmin = data.vmin
+        vmax = data.vmax
+        idx = self.cmb_save_to.currentIndex()
+        level = self.LBLM.dataset(self.all_labels[idx][0])
+        label = self.all_labels[idx][1].idx
+        Launcher.instance().run(ac.save_threshold, caption='Saving threshold',
+                                source=dataset, vmin=vmin, vmax=vmax, level=level, label=label)
+
+    def on_levels_changed(self):
+        levels = self.LBLM.levels()
+        self.all_labels = []
+        self.cmb_save_to.clear()
+        for level in levels:
+            labels = self.LBLM.labels(level)
+            for label in labels:
+                self.all_labels.append((level, label))
+                self.cmb_save_to.addItem('Level {}/{}'.format(level, label.name))
 
     def view_channel(self, channel='/data'):
         layer = self.LM.get('Data', 'Data')

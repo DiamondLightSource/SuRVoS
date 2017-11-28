@@ -298,12 +298,22 @@ class LayeredCanvas(PerspectiveCanvas):
         self.redraw()
 
     def update_vmin(self, val):
-        self.ax.images[0].set_clim(vmin=val)
-        self.redraw()
+        data = self.LM.get('Data', 'Data')
+        data.vmin = val
+        if not data.binarize:
+            self.ax.images[0].set_clim(vmin=val)
+            self.redraw()
+        else:
+            self.LM.update()
 
     def update_vmax(self, val):
-        self.ax.images[0].set_clim(vmax=val)
-        self.redraw()
+        data = self.LM.get('Data', 'Data')
+        data.vmax = val
+        if not data.binarize:
+            self.ax.images[0].set_clim(vmax=val)
+            self.redraw()
+        else:
+            self.LM.update()
 
     def increase_slider(self):
         if self.slider.value() < self.slider.maximum():

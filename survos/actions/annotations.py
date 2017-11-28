@@ -85,3 +85,12 @@ def refine_label(data=None, label=None, method=None, radius=1, slide=None):
 
     log.info('+ done.')
     return changes, values
+
+
+
+def save_threshold(source=None, vmin=None, vmax=None, level=None, label=None):
+    data = DM.load_slices(source)
+    target = DM.load_slices(level)
+    mask = (data > vmin) & (data < vmax)
+    target[mask] = label
+    DM.write_slices(level, target)
