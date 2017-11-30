@@ -1,6 +1,6 @@
 
 import numpy as np
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 import logging as log
 
@@ -21,7 +21,7 @@ class ROIWidget(RoundedWidget):
     def __init__(self, idx, dfrom, dto, checked=False, removable=True, parent=None):
         super(ROIWidget, self).__init__(parent=parent, color=None, bg='#cde5e5',
                                         width=0)
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
 
         self.idx = idx
@@ -29,33 +29,33 @@ class ROIWidget(RoundedWidget):
         self.dto = dto
 
         if removable:
-            self.btn_rm = QtGui.QPushButton('X')
+            self.btn_rm = QtWidgets.QPushButton('X')
             self.btn_rm.clicked.connect(self.on_remove)
         else:
-            self.btn_rm = QtGui.QWidget()
+            self.btn_rm = QtWidgets.QWidget()
         self.btn_rm.setMinimumWidth(25)
 
-        self.labelz = QtGui.QLabel('[{}, {})'.format(dfrom[0], dto[0]))
+        self.labelz = QtWidgets.QLabel('[{}, {})'.format(dfrom[0], dto[0]))
         self.labelz.setFixedWidth(67)
         self.labelz.setStyleSheet('color: #009999;')
-        self.labely = QtGui.QLabel('[{}, {})'.format(dfrom[1], dto[1]))
+        self.labely = QtWidgets.QLabel('[{}, {})'.format(dfrom[1], dto[1]))
         self.labely.setFixedWidth(67)
         self.labely.setStyleSheet('color: #009999;')
-        self.labelx = QtGui.QLabel('[{}, {})'.format(dfrom[2], dto[2]))
+        self.labelx = QtWidgets.QLabel('[{}, {})'.format(dfrom[2], dto[2]))
         self.labelx.setFixedWidth(67)
         self.labelx.setStyleSheet('color: #009999;')
 
-        self.z = QtGui.QLabel('z:')
+        self.z = QtWidgets.QLabel('z:')
         self.z.setStyleSheet('color: #6194BC; font-weight: bold;')
         self.z.setFixedWidth(7)
-        self.y = QtGui.QLabel('y:')
+        self.y = QtWidgets.QLabel('y:')
         self.y.setStyleSheet('color: #6194BC; font-weight: bold;')
         self.y.setFixedWidth(7)
-        self.x = QtGui.QLabel('x:')
+        self.x = QtWidgets.QLabel('x:')
         self.x.setStyleSheet('color: #6194BC; font-weight: bold;')
         self.x.setFixedWidth(7)
 
-        self.chk = QtGui.QCheckBox()
+        self.chk = QtWidgets.QCheckBox()
         self.chk.setChecked(checked)
         self.chk.stateChanged.connect(self.mousePressEvent)
 
@@ -100,15 +100,15 @@ class ROI(Plugin):
 
         self.addWidget(HeaderLabel('Select Region of Interest'))
 
-        dummy = QtGui.QWidget(self)
+        dummy = QtWidgets.QWidget(self)
         self.addWidget(dummy)
 
-        vbox = QtGui.QVBoxLayout(self)
+        vbox = QtWidgets.QVBoxLayout(self)
         dummy.setLayout(vbox)
 
         shape = self.DM.data_shape
 
-        self.lbl_size = QtGui.QLabel('<b>Shape:</b> ' + str(shape))
+        self.lbl_size = QtWidgets.QLabel('<b>Shape:</b> ' + str(shape))
 
         self.txt_from = HSize3D('From', default=(0, 0, 0), txtwidth=50)
         self.txt_to = HSize3D('To', default=shape, txtwidth=50)
@@ -122,8 +122,8 @@ class ROI(Plugin):
 
         vbox.addWidget(SubHeaderLabel('Available ROI'))
 
-        self.container = QtGui.QWidget(self)
-        self.container.setLayout(QtGui.QVBoxLayout(self))
+        self.container = QtWidgets.QWidget(self)
+        self.container.setLayout(QtWidgets.QVBoxLayout(self))
         vbox.addWidget(self.container)
 
         self.rois = OrderedDict()

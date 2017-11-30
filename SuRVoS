@@ -22,12 +22,12 @@ import sip
 sip.setapi("QString", 2)
 
 import matplotlib as mpl
-mpl.use('Qt4Agg')
+mpl.use('Qt5Agg')
 
 from matplotlib import style
 style.use( u'seaborn-ticks')
 
-from survos.qt_compat import QtGui, QtCore
+from survos.qt_compat import QtGui, QtCore, QtWidgets
 from survos.widgets import MainWindow
 
 root = logging.getLogger()
@@ -37,7 +37,7 @@ ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
 root.addHandler(ch)
 
-app = QtGui.QApplication(sys.argv)
+app = QtWidgets.QApplication(sys.argv)
 
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'survos.qcs')) as f:
     css = f.read()

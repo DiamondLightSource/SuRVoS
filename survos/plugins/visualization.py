@@ -1,6 +1,6 @@
 
 import numpy as np
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 from .base import Plugin
 from .contrast import Contrast
@@ -10,7 +10,7 @@ from ..core import DataModel, LayerManager, Launcher
 from .. import actions as ac
 
 
-class LayersMenu(QtGui.QMenu):
+class LayersMenu(QtWidgets.QMenu):
 
     def __init__(self, parent=None):
         super(LayersMenu, self).__init__(parent=parent)
@@ -20,14 +20,14 @@ class LayersMenu(QtGui.QMenu):
                            '    border-radius: 4px;'
                            '    min-width: 400px;'
                            '}')
-        layout = QtGui.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout(self)
         self.layers = Layers()
         layout.addWidget(self.layers)
 
     def sizeHint(self):
         return self.layers.sizeHint()
 
-class ContrastMenu(QtGui.QMenu):
+class ContrastMenu(QtWidgets.QMenu):
 
     def __init__(self, parent=None):
         super(ContrastMenu, self).__init__(parent=parent)
@@ -37,7 +37,7 @@ class ContrastMenu(QtGui.QMenu):
                            '    border-radius: 4px;'
                            '    min-width: 400px;'
                            '}')
-        layout = QtGui.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout(self)
         self.contrast = Contrast()
         layout.addWidget(self.contrast)
 

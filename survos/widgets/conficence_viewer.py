@@ -21,14 +21,14 @@ class ConfidenceViewer(Plugin):
         self.DM = DataModel.instance()
         self.LBLM = LabelManager.instance()
         self.DM.confidence_changed.connect(self.replot)
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         self.layout.addLayout(vbox, 0, 0)
 
         self.orient = 0
         self.canvases = (None,)
         self.idx = (self.DM.data.shape[self.orient]) // 2
 
-        topbox = QtGui.QHBoxLayout()
+        topbox = QtWidgets.QHBoxLayout()
         vbox.addLayout(topbox, 0)
         # Perspective
         self.combo = SComboBox()
@@ -40,7 +40,7 @@ class ConfidenceViewer(Plugin):
         topbox.addWidget(self.combo)
 
         # Slider
-        self.slider = QtGui.QSlider(1)
+        self.slider = QtWidgets.QSlider(1)
         self.slider.setMinimum(0)
         self.slider.setMaximum(self.DM.data.shape[0]-1)
         self.slider.setValue(self.idx)
@@ -49,10 +49,10 @@ class ConfidenceViewer(Plugin):
         topbox.addWidget(self.slider)
 
         # Slider Text
-        self.text_idx = QtGui.QLabel(str(self.idx))
+        self.text_idx = QtWidgets.QLabel(str(self.idx))
         topbox.addWidget(self.text_idx)
 
-        self.container = QtGui.QWidget()
+        self.container = QtWidgets.QWidget()
         self.container.setLayout(QtGui.QGridLayout())
         vbox.addWidget(self.container, 1)
 

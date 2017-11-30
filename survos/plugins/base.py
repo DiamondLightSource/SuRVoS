@@ -1,8 +1,8 @@
 
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 
-class Plugin(QtGui.QScrollArea):
+class Plugin(QtWidgets.QScrollArea):
 
     name = "Plugin"
     header = None
@@ -17,12 +17,12 @@ class Plugin(QtGui.QScrollArea):
         super(Plugin, self).__init__(parent=parent)
 
         self.ptype = ptype
-        self.container = QtGui.QWidget()
+        self.container = QtWidgets.QWidget()
         self.container.setWindowTitle(self.name)
         self.setWidget(self.container)
         self.setWidgetResizable(True)
 
-        self.layout = QtGui.QGridLayout(self.container)
+        self.layout = QtWidgets.QGridLayout(self.container)
         self.layout.setAlignment(QtCore.Qt.AlignTop)
         if ptype == self.Plugin:
             self.layout.setContentsMargins(0,10,0,0)

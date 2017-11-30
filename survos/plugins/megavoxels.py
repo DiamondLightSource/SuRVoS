@@ -1,6 +1,6 @@
 
 import numpy as np
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 import logging as log
 
@@ -14,7 +14,7 @@ from .. import actions as ac
 
 from ..lib._features import find_boundaries
 
-class MegaVoxels(QtGui.QWidget):
+class MegaVoxels(QtWidgets.QWidget):
 
     name = 'MegaVoxels'
 
@@ -23,26 +23,26 @@ class MegaVoxels(QtGui.QWidget):
 
         self.DM = DataModel.instance()
         self.LM = LayerManager.instance()
-        self.setLayout(QtGui.QVBoxLayout())
+        self.setLayout(QtWidgets.QVBoxLayout())
 
         self.source_combo = SourceCombo()
         self.layout().addWidget(HWidgets(None, 'Source:', self.source_combo, stretch=[1]))
 
         self.txt_lambda = PLineEdit(0.1, parse=float)
         self.txt_bins = PLineEdit(20, parse=int)
-        dummy = HWidgets(QtGui.QLabel('Lamda:'), self.txt_lambda,
-                         QtGui.QLabel('NumBins:'), self.txt_bins,
+        dummy = HWidgets(QtWidgets.QLabel('Lamda:'), self.txt_lambda,
+                         QtWidgets.QLabel('NumBins:'), self.txt_bins,
                          stretch=[1,0,1,0])
         self.layout().addWidget(dummy)
 
         self.txt_gamma = PLineEdit(None, parse=self.parse_gamma)
-        dummy = HWidgets(None, QtGui.QLabel('Gamma:'), self.txt_gamma,
+        dummy = HWidgets(None, QtWidgets.QLabel('Gamma:'), self.txt_gamma,
                          stretch=[1,0,0])
         self.layout().addWidget(dummy)
 
         self.btn_apply = ActionButton('Apply')
 
-        dummy = HWidgets(QtGui.QWidget(), self.btn_apply,\
+        dummy = HWidgets(QtWidgets.QWidget(), self.btn_apply,\
                          stretch=[1,0,])
 
         self.layout().addWidget(dummy)
