@@ -9,9 +9,7 @@
 
 #include "cuda.cuh"
 
-#define DLIMIT FLT_MAX
-#define i(a, b, c) ((c) * shape.y * shape.x + (b) * shape.x + (a))
-#define max(a,b)  ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a > _b ? _a : _b; })
+
 
 
 struct SLICClusterCenter

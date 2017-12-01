@@ -46,26 +46,28 @@ def get_qpbo():
 def cuda_extension(config, name, sources, CUDA, gcc_args=[], gpp_args=[]):
     config.add_extension(name, sources=sources,
                          library_dirs=[CUDA['lib64']],
-                         libraries=['cudart', 'stdc++'], language='c++',
-                         runtime_library_dirs=[CUDA['lib64']],
-                         extra_compile_args={
-                            'gcc': gcc_args,
-                            'g++': gpp_args,
-                            'nvcc': ['-arch=sm_30',
-                                     '-gencode=arch=compute_20,code=sm_20',
-                                     '-gencode arch=compute_30,code=sm_30',
-                                     '-gencode arch=compute_35,code=sm_35',
-                                     '-gencode arch=compute_37,code=sm_37',
-                                     '-gencode arch=compute_50,code=sm_50',
-                                     '-gencode arch=compute_52,code=sm_52',
-                                     '-gencode arch=compute_52,code=compute_52',
-                                     '-gencode=arch=compute_60,code=sm_60',
-                                     '-gencode=arch=compute_61,code=sm_61',
-                                     '--ptxas-options=-v', '-c',
-                                     '--compiler-options', "'-fPIC'"]
-                         },
+                         libraries=['cudart'], 
+                         language='c++',
+ #                        runtime_library_dirs=[CUDA['lib64']],
+ #                        extra_compile_args={
+ #                           'gcc': gcc_args,
+ #                           'g++': gpp_args,
+ #                           'nvcc': ['-arch=sm_30',
+ #                                    '-gencode=arch=compute_20,code=sm_20',
+ #                                    '-gencode arch=compute_30,code=sm_30',
+ #                                    '-gencode arch=compute_35,code=sm_35',
+ #                                    '-gencode arch=compute_37,code=sm_37',
+ #                                    '-gencode arch=compute_50,code=sm_50',
+ #                                    '-gencode arch=compute_52,code=sm_52',
+ #                                    '-gencode arch=compute_52,code=compute_52',
+ #                                    '-gencode=arch=compute_60,code=sm_60',
+ #                                    '-gencode=arch=compute_61,code=sm_61',
+ #                                    '--ptxas-options=-v', '-c',
+  #                                   '--compiler-options', "'-fPIC'"]
+  #                       },
                          include_dirs = [get_numpy_include_dirs()[0],
                                          CUDA['include'], 'src'])
+
 
 
 def configuration(parent_package='', top_path=None):
@@ -76,7 +78,7 @@ def configuration(parent_package='', top_path=None):
 
     files = ['_supersegments.pyx']
     config.add_extension('_supersegments', sources=files,
-                         language='c++', libraries=["stdc++"],
+                         language='c++', libraries=[],
                          include_dirs=[get_numpy_include_dirs()])
 
     sources = ['src/cuda.cu', 'src/tv.cu', 'src/diffusion.cu',
@@ -113,12 +115,11 @@ def configuration(parent_package='', top_path=None):
     files = [os.path.join(qpbo_directory, f) for f in files]
     files = ['_qpbo.pyx'] + files
     config.add_extension('_qpbo', sources=files, language='c++',
-                         libraries=["stdc++"],
+                         libraries=[],
                          include_dirs=[qpbo_directory, get_numpy_include_dirs()],
                          library_dirs=[qpbo_directory],
                          extra_compile_args=[],
                          extra_link_args=[])
-
     return config
 
 

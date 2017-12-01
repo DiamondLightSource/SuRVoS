@@ -1,7 +1,9 @@
 
 #include "slic.cuh"
 
-
+#define DLIMIT FLT_MAX
+#define i(a, b, c) ((c) * shape.y * shape.x + (b) * shape.x + (a))
+#define max_cu(a,b)  ({ __typeof__ (a) _a = (a); __typeof__ (b) _b = (b); _a > _b ? _a : _b; })
 
 __global__
 void initSupervoxels(const float *data,
@@ -352,8 +354,8 @@ void slicSupervoxels(const float *h_src, int *h_dest, const float compactness, \
                  (im_shape.y + sp_shape.y - 1) / sp_shape.y, \
                  (im_shape.z + sp_shape.z - 1) / sp_shape.z};
     size_t total = nsp.x * nsp.y * nsp.z;
-
-    float m = compactness / (float)(max(max(im_shape.x, im_shape.y), im_shape.z));
+    int max_xy = max(im_shape.x, im_shape.y);
+    float m = compactness / (float)(max(max_xy, im_shape.z));
     m /= sqrt(im_shape.x * im_shape.y * im_shape.z / total);
 
     // Init cuda memory
