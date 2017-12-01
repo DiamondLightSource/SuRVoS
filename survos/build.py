@@ -3,6 +3,7 @@ import os
 import numpy as np
 from Cython.Distutils import build_ext
 from sys import platform
+import sys
 import distutils
 from distutils.spawn import spawn, find_executable
 from distutils.debug import DEBUG
@@ -141,7 +142,7 @@ class custom_build_ext(build_ext):
             # - Secondly, we fix a bunch of command line arguments.
             for idx, c in enumerate(cmd):
                 # create .dll instead of .pyd files
-                if '.pyd' in c: cmd[idx] = c = c.replace('.pyd', '.dll')
+                #if '.pyd' in c: cmd[idx] = c = c.replace('.pyd', '.dll')
                 # replace /c by -c
                 if c == '/c': cmd[idx] = '-c'
                 # replace /DLL by --shared
