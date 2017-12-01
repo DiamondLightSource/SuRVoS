@@ -605,18 +605,15 @@ class Training(Plugin):
 
         self.parent_labels = []
         self.levels = self.LBLM.levels()
-        print(self.levels)
 
     def on_level_selected(self, idx):
         if idx < 0:
             self.train_widget.select_level(None, None, -1)
             return
-        print(type(self.levels))
         self.train_widget.select_level(list(self.levels)[idx], None, -1)
 
         self.parent_labels = [(None, None)]
         self.use_parent.clear()
-        print(type(self.levels))
         self.use_parent.addItem('None')
         for i in range(len(self.levels)):
             if i == idx:
