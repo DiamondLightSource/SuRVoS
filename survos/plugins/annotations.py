@@ -15,7 +15,7 @@ from ..widgets import HWidgets, HEditLabel, HeaderLabel, PLineEdit, \
                       ComboDialog, RCheckBox, HSize3D, SComboBox, ActionButton
 from ..core import DataModel, LabelManager, LayerManager, Launcher
 from .. import actions as ac
-
+from six import iteritems
 
 class AnnotationLayerLabel(QtWidgets.QWidget):
 
@@ -152,7 +152,7 @@ class Level(RoundedWidget):
             del self.labels[label]
 
     def setSelected(self, label):
-        for k, lbl in self.labels.iteritems():
+        for k, lbl in iteritems(self.labels):
             lbl.setSelected(k == label)
         self.btn_erase.setChecked(label is not None and label < 0)
 
@@ -337,7 +337,7 @@ class Annotations(Plugin):
         else:
             self.DM.set_attrs(ds, dict(active=True, levelid=idx))
 
-        name = 'Level {}'.format(idx)
+        name = u'Level {}'.format(idx)
         level = Level(name, idx, ds)
         level.level_toggled.connect(self.on_level_toggled)
         level.erase.connect(self.on_erase_clicked)
@@ -357,7 +357,7 @@ class Annotations(Plugin):
     def on_load_level(self, idx, ds):
         assert idx not in self.levels, "Error, level ID already exists"
 
-        name = 'Level {}'.format(idx)
+        name = u'Level {}'.format(idx)
         level = Level(name, idx, ds)
         level.level_toggled.connect(self.on_level_toggled)
         level.erase.connect(self.on_erase_clicked)
@@ -549,7 +549,7 @@ class Annotations(Plugin):
         self.launcher.cleanup()
 
     def on_select_label(self, level, dataset, label):
-        for idx, lobj in self.levels.iteritems():
+        for idx, lobj in iteritems(self.levels):
             if idx == level:
                 lobj.setSelected(label)
                 self.LM.setVisible(lobj.name, 'Annotations', True)
@@ -625,7 +625,7 @@ class Annotations(Plugin):
         self.DM.set_attrs(dataset, dict(label   = self.LBLM.idxs(level),
                                         names   = self.LBLM.names(level),
                                         colors  = self.LBLM.colors(level),
-                                        visible = map(int, self.LBLM.visibility(level)),
+                                        visible = list(map(int, self.LBLM.visibility(level))),
                                         parent_levels = self.LBLM.parent_levels(level),
                                         parent_labels = self.LBLM.parent_labels(level)))
 
@@ -662,7 +662,7 @@ class Annotations(Plugin):
         if len(labels) == 0:
             return
 
-        options = ['None'] + ['Level {}/{}'.format(parent_level, l.name) for l in labels]
+        options = ['None'] + [u'Level {}/{}'.format(parent_level, l.name) for l in labels]
         option, result = ComboDialog.getOptionIdx(options)
 
         if not result:
