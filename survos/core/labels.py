@@ -142,8 +142,8 @@ class LabelManager(QtCore.QObject):
         self._counts[level] += 1
 
     def loadLabel(self, level, label, name, color, visible, parent_level, parent_label):
-        self._levels[level][label] = Label(name, label, color, visible, parent_level, parent_label)
-        self.labelLoaded.emit(level, self._datasets[level], label, name, color,
+        self._levels[level][label] = Label(name, label, color.decode('UTF-8'), visible, parent_level, parent_label)
+        self.labelLoaded.emit(level, self._datasets[level], label, name.decode('UTF-8'), color.decode('UTF-8'),
                               visible, parent_level, parent_label)
         if label >= self._counts[level]:
             self._counts[level] = label+1

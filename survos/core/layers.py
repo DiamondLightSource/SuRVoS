@@ -103,7 +103,7 @@ class LayerManager(QtCore.QObject):
         return len(self._layers)
 
     def levels(self):
-        return self._levels.keys()
+        return list(self._levels.copy().keys())
 
     def layers(self, level=None):
         if level is None:

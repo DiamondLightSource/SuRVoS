@@ -605,16 +605,18 @@ class Training(Plugin):
 
         self.parent_labels = []
         self.levels = self.LBLM.levels()
+        print(self.levels)
 
     def on_level_selected(self, idx):
         if idx < 0:
             self.train_widget.select_level(None, None, -1)
             return
-        self.train_widget.select_level(self.levels[idx], None, -1)
+        print(type(self.levels))
+        self.train_widget.select_level(list(self.levels)[idx], None, -1)
 
         self.parent_labels = [(None, None)]
         self.use_parent.clear()
-
+        print(type(self.levels))
         self.use_parent.addItem('None')
         for i in range(len(self.levels)):
             if i == idx:
@@ -639,12 +641,12 @@ class Training(Plugin):
 
     def on_label_added(self, level, dataset, label):
         current = self.use_level.currentIndex()
-        if current >= 0 and self.levels[current] != level:
+        if current >= 0 and list(self.levels)[current] != level:
             self.use_level.setCurrentIndex(self.levels.index(level))
 
     def on_label_name_changed(self, level, ds, label, name):
         current = self.use_level.currentIndex()
-        if current >= 0 and self.levels[current] != level:
+        if current >= 0 and list(self.levels)[current] != level:
             idx = -1
             for n, (lvl, lbl) in enumerate(self.parent_labels):
                 if lvl == level and lbl.idx == label:
@@ -656,7 +658,7 @@ class Training(Plugin):
 
     def on_label_removed(self, level, ds, label):
         current = self.use_level.currentIndex()
-        if current >= 0 and self.levels[current] != level:
+        if current >= 0 and list(self.levels)[current] != level:
             idx = -1
             for n, (lvl, lbl) in enumerate(self.parent_labels):
                 if lvl == level and lbl.idx == label:
