@@ -2,15 +2,12 @@
 import os
 import numpy as np
 from Cython.Distutils import build_ext
-PATH = os.environ.get('PATH')
-from distutils.spawn import spawn, find_executable
-import os
 from sys import platform
-import sys
 import distutils
+from distutils.spawn import spawn, find_executable
 from distutils.debug import DEBUG
 from distutils.errors import DistutilsPlatformError, DistutilsExecError
-
+PATH = os.environ.get('PATH')
 
 #adapted fom http://code.activestate.com/recipes/52224-find-a-file-given-a-search-path/
 
@@ -25,17 +22,23 @@ def find_in_path(name, path):
 
 def locate_cuda():
     nvcc = None
+    nvcc_exe = None
+    nvcc_lib_path = None
+    if platform == "win32":
+        nvcc_exe = 'nvcc.exe'
+        nvcc_lib_path = 'lib\\x64'
+    else:
+        nvcc_exe = 'nvcc'
+        nvcc_lib_path = 'lib64'
+
     if 'CUDAHOME' in os.environ:
         home = os.environ['CUDAHOME']
-        if platform == "win32" :
-            nvcc_path = os.path.join(home, 'bin', 'nvcc.exe')
-        else:
-            nvcc_path = os.path.join(home, 'bin', 'nvcc')
+        nvcc_path = os.path.join(home, 'bin', nvcc_exe)
         if os.path.isfile(nvcc_path):
             nvcc = nvcc_path
 
     if nvcc is None:
-        nvcc_path = find_in_path('nvcc.exe', os.environ['PATH'])
+        nvcc_path = find_in_path(nvcc_exe, os.environ['PATH'])
         if nvcc_path is None or not os.path.isfile(nvcc_path):
             raise EnvironmentError('The nvcc binary could not be located in your'
                                    ' $PATH. Either add it to your path, or set'
@@ -47,7 +50,7 @@ def locate_cuda():
         'home': home,
         'nvcc': nvcc,
         'include': os.path.join(home, 'include'),
-        'lib64': os.path.join(home, 'lib\\x64')
+        'lib64': os.path.join(home, nvcc_lib_path)
     }
 
     errmsg = 'The CUDA {} path could not be located in {}'
@@ -60,45 +63,48 @@ def locate_cuda():
 
 CUDA = locate_cuda()
 
-def customize_compiler_for_nvcc(self):
+def customize_compiler_for_nvcc_unix(self):
+    self.src_extensions.append('.cu')
+
+    default_compiler_so = self.compiler_so
+    super = self._compile
+
+    def _compile(obj, src, ext, cc_args, extra_postargs, pp_opts):
+        ext = os.path.splitext(src)[1]
+        if ext == '.cu':
+            self.set_executable('compiler_so', CUDA['nvcc'])
+            postargs = extra_postargs['nvcc']
+        elif type(extra_postargs) == dict:
+            if ext == '.cpp':
+                postargs = extra_postargs['g++']
+            else:
+                postargs = extra_postargs['gcc']
+        else:
+            postargs = extra_postargs
+
+        super(obj, src, ext, cc_args, postargs, pp_opts)
+
+        self.compiler_so = default_compiler_so
+
+    self._compile = _compile
+
+def customize_compiler_for_nvcc_win32(self):
     self.src_extensions.append('.cu')
     self.initialize()
-    default_compiler_so = self.cc    
-#    super = self._compile
+    default_compiler_so = self.cc
     self.cc = CUDA['nvcc']
-    print("CUDA Compiler:"+CUDA['nvcc'])
     self._cpp_extensions.append('.cu')
-    self.src_extensions.append('.cu')
-   
-#    def _compile(obj, src, ext, cc_args, extra_postargs, pp_opts):
-#        print("CUDA Compiler"+CUDA['nvcc'])
-#        ext = os.path.splitext(src)[1]
-#        if ext == '.cu':
-#            self.set_executable('cc', CUDA['nvcc'])
-#            postargs = extra_postargs['nvcc']
-#        elif type(extra_postargs) == dict:
-#            if ext == '.cpp':
-#                postargs = extra_postargs['g++']
-#            else:
-#                postargs = extra_postargs['gcc']
-#        else:
-#            postargs = extra_postargs
-#
-#        super(obj, src, ext, cc_args, postargs, pp_opts)
-
-        #self.cc = default_compiler_so
- #   self._compile = _compile
-
 
 # Run the customize_compiler
 class custom_build_ext(build_ext):
 
     def build_extensions(self):
-        print("Setting custom extension")
-        customize_compiler_for_nvcc(self.compiler)
-        self.compiler.spawn = self.spawn
+        if platform == 'win32':
+            customize_compiler_for_nvcc_win32(self.compiler)
+            self.compiler.spawn = self.spawn
+        else:
+            customize_compiler_for_nvcc_unix(self.compiler)
         build_ext.build_extensions(self)
-
 
 
     def spawn(self, cmd, search_path=1, verbose=1, dry_run=0):
@@ -198,4 +204,4 @@ class custom_build_ext(build_ext):
                 if not DEBUG:
                     cmd = executable
                 raise DistutilsExecError(
-    "command %r failed with exit status %d" % (cmd, rc))
+                      "command %r failed with exit status %d" % (cmd, rc))
