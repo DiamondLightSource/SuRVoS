@@ -21,7 +21,7 @@ from collections import OrderedDict
 import seaborn as sns
 
 from .label_partitioning import FEATURE_TYPES, FEATURE_OPTIONS
-
+from six import iteritems
 
 class LevelStats(Plugin):
 
@@ -240,7 +240,7 @@ class LevelStats(Plugin):
         self.replot()
 
     def reset(self):
-        for k, v in self.options.iteritems():
+        for k, v in iteritems(self.options):
             if type(k) == tuple:
                 v[1].setParent(None)
                 del self.options[k]
