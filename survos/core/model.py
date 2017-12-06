@@ -268,7 +268,7 @@ class DataModel(QtCore.QObject):
 
     def scan_datasets_group(self, group, shape=None, dtype=None, path=''):
         datasets = []
-        for name, ds in group.iteritems():
+        for name, ds in group.items():
             curr_path = '{}/{}'.format(path, name)
             if hasattr(ds, 'shape'):
                 if len(ds.shape) == 3 \
