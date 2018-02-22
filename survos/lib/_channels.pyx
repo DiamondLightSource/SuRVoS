@@ -2,6 +2,7 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
+# distutils: language=c++
 
 
 import numpy as np
@@ -12,7 +13,7 @@ from libcpp cimport bool
 from libc.math cimport sqrt, acos, cos, M_PI
 
 
-cdef extern from "src/symmetric_eigvals3S.cuh":
+cdef extern from "channels.h":
     void symmetric3_eigenvalues(const float *Hzz, const float *Hzy, const float *Hzx,
                                 const float *Hyy, const float *Hyx, const float *Hxx,
                                 float* out, size_t total_size, bool doabs,

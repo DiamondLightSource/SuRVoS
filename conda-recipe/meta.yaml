@@ -1,0 +1,38 @@
+package:
+  name: survos
+  version: 1.0
+
+
+build:
+  preserve_egg_dir: False
+
+    
+requirements:
+  build:
+    - python x.x
+    - numpy
+    - scipy
+    - cudatoolkit =9.0
+    - cython
+    - cmake >=3.9
+    - matplotlib
+  run:
+    - python x.x
+    - numpy
+    - scipy
+    - cudatoolkit =9.0
+    - matplotlib
+    - scikit-tensor
+    - tifffile
+    - scikit-image
+    - scikit-learn
+    - networkx
+    - h5py
+    - decorator
+    - sip
+    - seaborn
+	
+about:
+  home: https://github.com/DiamondLightSource/SuRVoS
+  license:  GPLv3 license
+  summary: (Su)per (R)egion (Vo)lume (S)egmentaton workbench

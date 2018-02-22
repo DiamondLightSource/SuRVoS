@@ -7,7 +7,7 @@ cimport numpy as np
 from libcpp cimport bool
 
 
-cdef extern from "src/cuda.cuh":
+cdef extern from "preprocess.h":
     int ireduce_gpu "reduce<int>" (const int* src, Py_ssize_t num, int gpu) nogil except +
     float freduce_gpu "reduce<float>" (const float* src, Py_ssize_t num, int gpu) nogil except +
     long lreduce_gpu "reduce<long>" (const long* src, Py_ssize_t num, int gpu) nogil except +
@@ -19,7 +19,7 @@ cdef extern from "src/cuda.cuh":
     double dmax_gpu "reduceMax<double>" (const double* src, Py_ssize_t num, int gpu) nogil except +
 
 
-cdef extern from "src/preprocess.cuh":
+cdef extern:
     struct int3:
         int x, y, z
     struct float3:

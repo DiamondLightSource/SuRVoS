@@ -1,3 +1,4 @@
+# distutils: language = c++
 
 
 import numpy as np
@@ -6,7 +7,7 @@ cimport numpy as np
 from cpython cimport bool
 from libcpp cimport bool
 
-cdef extern from "src/slic.cuh":
+cdef extern from "superpixels.h":
     struct int3:
         int x, y, z
     struct float3:

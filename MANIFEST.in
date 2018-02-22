@@ -1,0 +1,5 @@
+recursive-include survos/images *.png
+recursive-include survos/images/SVG *.png
+recursive-include survos/images/PNG *.png
+recursive-include survos/launcher *.qcs
+include LICENSE
