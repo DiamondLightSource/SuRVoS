@@ -58,10 +58,10 @@ class LabelManager(QtCore.QObject):
             return len(self._levels[level])
 
     def levels(self):
-        return self._levels.keys()
+        return list(self._levels.keys())
 
     def labels(self, level):
-        return self._levels[level].values()
+        return list(self._levels[level].values())
 
     def dataset(self, level):
         return self._datasets[level]

@@ -402,7 +402,7 @@ class ComboDialog(QtWidgets.QDialog):
 
         # OK and Cancel buttons
         buttons = QtWidgets.QDialogButtonBox(
-            QtWidgets.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel,
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
             QtCore.Qt.Horizontal, self)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)

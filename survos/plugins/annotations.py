@@ -423,7 +423,7 @@ class Annotations(Plugin):
                 self.launcher.show_error('No annotation level found')
                 return self.launcher.cleanup()
             selected, accepted = ComboDialog.getOption(av)
-            if accepted == QtGui.QDialog.Rejected:
+            if accepted == QtWidgets.QDialog.Rejected:
                 return
             dataset = selected
 

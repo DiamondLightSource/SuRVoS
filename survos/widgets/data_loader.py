@@ -114,7 +114,7 @@ class LoadWidget(QtWidgets.QWidget):
             if path.endswith('.h5') or path.endswith('.hdf5'):
                 available_hdf5 = self.DM.available_hdf5_datasets(path)
                 selected, accepted = ComboDialog.getOption(available_hdf5, parent=self)
-                if accepted == QtGui.QDialog.Rejected:
+                if accepted == QtWidgets.QDialog.Rejected:
                     return
                 dataset = selected
 
@@ -170,7 +170,7 @@ class LoadWidget(QtWidgets.QWidget):
             idx = self.data.shape[0]//2
             self.slider.blockSignals(True)
             self.slider.setMinimum(0)
-            self.slider.setMaximum(self.data.shape[0])
+            self.slider.setMaximum(self.data.shape[0] - 1)
             self.slider.setValue(idx)
             self.slider.blockSignals(False)
             self.canvas.ax.set_ylim([self.data.shape[1] + 1, -1])
