@@ -9,20 +9,26 @@
 
 #include "cuda.cuh"
 
-void __declspec(dllexport) convolution(const float *h_src, const float *h_kernel, float *h_dest,
+#ifdef WIN32
+#define SURVOS_EXPORT __declspec(dllexport)
+#else
+#define SURVOS_EXPORT
+#endif
+
+void SURVOS_EXPORT convolution(const float *h_src, const float *h_kernel, float *h_dest,
                  const int3 im_shape, const int3 kernel_shape, int gpu=-1);
 
-void __declspec(dllexport) convolution_separable(const float *h_src, const float *h_kernelz,
+void SURVOS_EXPORT convolution_separable(const float *h_src, const float *h_kernelz,
                            const float *h_kernely, const float *h_kernelx,
                            float *h_dest, const int3 ishape, const int3 kshape,
                            int gpu=-1);
 
-void __declspec(dllexport) convolution_separable_shared(const float *h_src, const float *h_kernelz,
+void SURVOS_EXPORT convolution_separable_shared(const float *h_src, const float *h_kernelz,
                                   const float *h_kernely, const float *h_kernelx,
                                   float *h_dest, const int3 ishape, const int3 kshape,
                                   int gpu=-1);
 
-void __declspec(dllexport) n_convolution_separable_shared(const float *h_src, const float *h_kernels, float *h_dest,
+void SURVOS_EXPORT n_convolution_separable_shared(const float *h_src, const float *h_kernels, float *h_dest,
                                     const int3 ishape, const int3 kshape, const int n_kernels,
                                     int gpu=-1);
 

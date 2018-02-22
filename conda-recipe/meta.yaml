@@ -12,7 +12,7 @@ requirements:
     - python x.x
     - numpy
     - scipy
-    - cudatoolkit =9.0
+    - cudatoolkit ==9.0
     - cython
     - cmake >=3.9
     - matplotlib
@@ -20,9 +20,8 @@ requirements:
     - python x.x
     - numpy
     - scipy
-    - cudatoolkit =9.0
+    - cudatoolkit ==9.0
     - matplotlib
-    - scikit-tensor
     - tifffile
     - scikit-image
     - scikit-learn
