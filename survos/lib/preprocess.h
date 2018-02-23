@@ -1,12 +1,10 @@
-
-template<typename T> T reduce(const T* h_in, size_t num_items, int gpu);
-template<typename T> T reduceMax(const T* h_in, size_t num_items, int gpu);
-
 #ifdef WIN32
 #define SURVOS_EXPORT __declspec(dllimport)
 #else
 #define SURVOS_EXPORT
 #endif
+
+
 struct int3{
 	int x;
 	int y;
@@ -17,6 +15,9 @@ struct float3{
 	float y;
 	float z;
 };
+template<typename T> T SURVOS_EXPORT reduce(const T *h_in, size_t num_items, int gpu=-1);
+template<typename T> T SURVOS_EXPORT reduceMax(const T *h_in, size_t num_items, int gpu=-1);
+
 void anidiffusion_gpu(const float* src, float* dst, const float lambda,
                   const int3 shape, const float gamma=1.0f/8.0f, const int mode=3,
                   const int maxIter=100, const float eps=1e-6, int gpu=-1);
