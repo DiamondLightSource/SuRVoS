@@ -140,7 +140,7 @@ void update_pv(const float* up, float* pz, float* py, float* px, float* err,
 
 
 // Main function
-void tvchambolle1st(const float* src, float* dst,
+void tvchambolle1st_gpu(const float* src, float* dst,
                     float lambda, float rho, float theta, float sigma, float gamma,
                     int3 shape, int maxIter, float eps, bool l2, int gpu)
 {

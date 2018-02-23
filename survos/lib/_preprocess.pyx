@@ -19,33 +19,28 @@ cdef extern from "preprocess.h":
     double dmax_gpu "reduceMax<double>" (const double* src, Py_ssize_t num, int gpu) nogil except +
 
 
-cdef extern:
+cdef extern from "preprocess.h":
     struct int3:
         int x, y, z
     struct float3:
         float x, y, z
 
-    void anidiffusion_gpu "anidiffusion" \
-                     (const float* src, float* dst, const float lamda,
+    void anidiffusion_gpu(const float* src, float* dst, const float lamda,
                       const int3 shape, const float gamma, const int mode,
                       const int maxIter, const float eps, int gpu) nogil except +
-    void tvdenoising_gpu "tvdenoising" \
-                    (const float* src, float* dst, float lamda,
+    void tvdenoising_gpu(const float* src, float* dst, float lamda,
                      float3 spacing, int3 shape, int maxIter, float eps,
                      int gpu) nogil except +
 
-    void tvchambolle_gpu "tvchambolle" \
-                    (const float* src, float* dst, float lamda,
+    void tvchambolle_gpu(const float* src, float* dst, float lamda,
                      float tau, int3 shape, int maxIter, float eps,
                      int gpu) nogil except +
 
-    void tvbregman_gpu "tvbregman" \
-                    (const float* src, float* dst, float lamda, float mu,
+    void tvbregman_gpu(const float* src, float* dst, float lamda, float mu,
                      int3 shape, int maxIter, float eps, bool isotropic, int method,
                      int gpu) nogil except +
 
-    void tvchambolle1st_gpu "tvchambolle1st" \
-                    (const float* src, float* dst,
+    void tvchambolle1st_gpu(const float* src, float* dst,
                      float lamda, float rho, float theta, float sigma, float gamma,
                      int3 shape, int maxIter, float eps, bool l2, int gpu) nogil except +
 

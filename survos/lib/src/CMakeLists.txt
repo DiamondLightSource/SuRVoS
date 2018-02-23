@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(survos_cuda_project LANGUAGES CXX CUDA)
  
 add_library(survos_cuda SHARED
-						cuda.cu 
+						cuda.cu
 						tv.cu
 						diffusion.cu
 						chambolle2005.cu

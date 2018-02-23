@@ -112,7 +112,7 @@ void update_p(const float* u, float* pz, float* py, float* px,
 
 
 // Main function
-void tvdenoising(const float* src, float* dst, float lambda,
+void tvdenoising_gpu(const float* src, float* dst, float lambda,
                  float3 spacing, int3 shape, int maxIter, float eps,
                  int gpu)
 {

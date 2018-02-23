@@ -112,7 +112,7 @@ void update_p(const float* v, float* pz, float* py, float* px,
 
 
 // Main function
-void tvchambolle(const float* src, float* dst, float lambda, float rho,
+void tvchambolle_gpu(const float* src, float* dst, float lambda, float rho,
                  int3 shape, int maxIter, float eps, int gpu)
 {
     // Init params
