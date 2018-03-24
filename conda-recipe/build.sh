@@ -5,4 +5,4 @@ cmake -G "Unix Makefiles" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DCM
 make
 make install
 python setup.py build
-python setup.py install
+python setup.py install --single-version-externally-managed --record=record.txt
