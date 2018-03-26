@@ -1,11 +1,12 @@
 
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
+import six
 import os
 from collections import defaultdict
 from ..core import DataModel, LabelManager
 
-class SectionCombo(QtGui.QToolButton):
+class SectionCombo(QtWidgets.QToolButton):
 
     currentIndexChanged = QtCore.pyqtSignal(int)
 
@@ -15,10 +16,10 @@ class SectionCombo(QtGui.QToolButton):
         self.setStyleSheet('QToolButton {background-color: #D0EAFF; padding-right: 20px;}'
                            'QMenu {background-color: #A5D1F3;}')
         self.setText(text)
-        self.toolmenu = QtGui.QMenu(self)
+        self.toolmenu = QtWidgets.QMenu(self)
         self.toolmenu.setContentsMargins(3,3,3,3)
         self.setMenu(self.toolmenu)
-        self.setPopupMode(QtGui.QToolButton.InstantPopup)
+        self.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         self.setMinimumWidth(100)
         self._names = []
         self._actions = []
@@ -31,16 +32,16 @@ class SectionCombo(QtGui.QToolButton):
 
     def addItem(self, item, section=False):
         curr_item = item
-        widget = QtGui.QWidgetAction(self.toolmenu)
+        widget = QtWidgets.QWidgetAction(self.toolmenu)
         if section:
-            lbl = QtGui.QLabel(item)
+            lbl = QtWidgets.QLabel(item)
             lbl.setStyleSheet('background-color: #fefefe; color: #000;'
                               'padding-top: 4px; padding-bottom: 4px;'
                               'padding-left: 10px; padding-right: 0px;'
                               'font-weight: bold;')
             widget.setEnabled(False)
         else:
-            lbl = QtGui.QPushButton(item)
+            lbl = QtWidgets.QPushButton(item)
             lbl.setStyleSheet('border-radius: 0px; border: 0px;'
                               'text-align: left; padding-left: 15px;')
             lbl.clicked.connect(lambda: self.on_clicked(curr_item))
@@ -84,13 +85,13 @@ class SectionCombo(QtGui.QToolButton):
         self.toolmenu.clear()
 
 
-class FileWidget(QtGui.QWidget):
+class FileWidget(QtWidgets.QWidget):
 
     path_updated = QtCore.pyqtSignal(str)
 
     def __init__(self, extensions='*.h5', home=None, folder=False, save=True, parent=None):
         super(FileWidget, self).__init__(parent)
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         hbox.setContentsMargins(0,0,0,0)
         self.setLayout(hbox)
 
@@ -103,7 +104,7 @@ class FileWidget(QtGui.QWidget):
         elif home is None:
             home = 'Click to select Folder' if folder else 'Click to select File'
 
-        self.path = QtGui.QLineEdit(home)
+        self.path = QtWidgets.QLineEdit(home)
         self.path.setReadOnly(True)
         self.path.mousePressEvent = self.find_path
         self.selected = False
@@ -116,18 +117,18 @@ class FileWidget(QtGui.QWidget):
         selected = False
         path = None
         if self.folder:
-            flags = QtGui.QFileDialog.ShowDirsOnly
+            flags = QtWidgets.QFileDialog.ShowDirsOnly
             message = 'Select Output Folder'
-            path = QtGui.QFileDialog.getExistingDirectory(self, message,
+            path = QtWidgets.QFileDialog.getExistingDirectory(self, message,
                                                           self.path.text(), flags)
             if path is not None and len(path) > 0 and os.path.isdir(path):
                 selected = True
         else:
             if self.save:
-                path = QtGui.QFileDialog.getSaveFileName(self, "Select input source",
+                path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Select input source",
                                                          filter=self.extensions)
             else:
-                path = QtGui.QFileDialog.getOpenFileName(self, "Select input source",
+                path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select input source",
                                                          filter=self.extensions)
             if path is not None and len(path) > 0:
                 selected = True
@@ -141,19 +142,19 @@ class FileWidget(QtGui.QWidget):
         return self.path.text() if self.selected else None
 
 
-class ActionButton(QtGui.QPushButton):
+class ActionButton(QtWidgets.QPushButton):
     def __init__(self, text, parent=None):
         super(ActionButton, self).__init__(text, parent=parent)
         self.setMinimumWidth(70)
 
 
-class ActionButton(QtGui.QPushButton):
+class ActionButton(QtWidgets.QPushButton):
     def __init__(self, text, parent=None):
         super(ActionButton, self).__init__(text, parent=parent)
         self.setMinimumWidth(70)
 
 
-class CheckableCombo(QtGui.QToolButton):
+class CheckableCombo(QtWidgets.QToolButton):
 
     selectionChanged = QtCore.pyqtSignal()
 
@@ -161,9 +162,9 @@ class CheckableCombo(QtGui.QToolButton):
         super(CheckableCombo, self).__init__(parent)
         self.setMaximumHeight(30)
         self.setText(text)
-        self.toolmenu = QtGui.QMenu(self)
+        self.toolmenu = QtWidgets.QMenu(self)
         self.setMenu(self.toolmenu)
-        self.setPopupMode(QtGui.QToolButton.InstantPopup)
+        self.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         self.setStyleSheet('QToolButton {'
                            '  color: #0056b3; background-color: #D0EAFF;'
                            '  padding-right: 25px; border-radius: 4px;'
@@ -185,9 +186,9 @@ class CheckableCombo(QtGui.QToolButton):
         return size
 
     def addItem(self, item):
-        chk = QtGui.QCheckBox(item + '    ')
+        chk = QtWidgets.QCheckBox(item + '    ')
         chk.stateChanged.connect(self.on_selection_changed)
-        widget = QtGui.QWidgetAction(self.toolmenu)
+        widget = QtWidgets.QWidgetAction(self.toolmenu)
         widget.setDefaultWidget(chk)
         self.toolmenu.addAction(widget)
         self._names.append(item)
@@ -322,7 +323,7 @@ class SourceCombo(SectionCombo):
         if listen_self:
             self.DM.select_channel.connect(self.other_selection)
 
-        #self.setSizeAdjustPolicy(QtGui.QComboBox.AdjustToContents)
+        #self.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToContents)
 
     def repopulate(self):
         sources = sorted(self.DM.available_channels(return_names=True))
@@ -384,15 +385,15 @@ class SourceCombo(SectionCombo):
         self.on_update_channel(source)
         self.blockSignals(False)
 
-class SComboBox(QtGui.QComboBox):
+class SComboBox(QtWidgets.QComboBox):
     def __init__(self, *args):
         super(SComboBox, self).__init__(*args)
 
-class ComboDialog(QtGui.QDialog):
+class ComboDialog(QtWidgets.QDialog):
     def __init__(self, options=None, parent=None):
         super(ComboDialog, self).__init__(parent=parent)
 
-        layout = QtGui.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout(self)
 
         self.combo = SComboBox()
         for option in options:
@@ -400,8 +401,8 @@ class ComboDialog(QtGui.QDialog):
         layout.addWidget(self.combo)
 
         # OK and Cancel buttons
-        buttons = QtGui.QDialogButtonBox(
-            QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel,
+        buttons = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel,
             QtCore.Qt.Horizontal, self)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
@@ -412,16 +413,16 @@ class ComboDialog(QtGui.QDialog):
         dialog = ComboDialog(options, parent=parent)
         result = dialog.exec_()
         option = dialog.combo.currentText()
-        return (option, result == QtGui.QDialog.Accepted)
+        return (option, result == QtWidgets.QDialog.Accepted)
 
     @staticmethod
     def getOptionIdx(options, parent=None):
         dialog = ComboDialog(options, parent=parent)
         result = dialog.exec_()
         option = dialog.combo.currentIndex()
-        return (option, result == QtGui.QDialog.Accepted)
+        return (option, result == QtWidgets.QDialog.Accepted)
 
-class RoundedWidget(QtGui.QWidget):
+class RoundedWidget(QtWidgets.QWidget):
 
     def __init__(self, parent=None, color=(168, 34, 3), bg=None, width=2, radius=3):
         super(RoundedWidget, self).__init__(parent=parent)
@@ -463,7 +464,7 @@ class RoundedWidget(QtGui.QWidget):
         qp.end()
 
 
-class PicButton(QtGui.QToolButton):
+class PicButton(QtWidgets.QToolButton):
     def __init__(self, pixmap, parent=None):
         super(PicButton, self).__init__(parent)
         self.icon = QtGui.QIcon(pixmap)
@@ -473,7 +474,7 @@ class PicButton(QtGui.QToolButton):
         return QtCore.QSize(50, 30)
 
 
-class HeaderLabel(QtGui.QLabel):
+class HeaderLabel(QtWidgets.QLabel):
 
     def __init__(self, text, parent=None, height=30,
                  bgcolor='#6194BC', color='#fefefe', bradius=0,
@@ -513,17 +514,17 @@ class HeaderButton(object):
         #self.parent.setCurrentIndex(self.index)
         pass
 
-class MHBoxLayout(QtGui.QHBoxLayout):
+class MHBoxLayout(QtWidgets.QHBoxLayout):
     def __init__(self, *widgets, **kwargs):
         super(MHBoxLayout, self).__init__()
         self.setContentsMargins(0,0,0,0)
 
-class MVBoxLayout(QtGui.QVBoxLayout):
+class MVBoxLayout(QtWidgets.QVBoxLayout):
     def __init__(self, *widgets, **kwargs):
         super(MVBoxLayout, self).__init__()
         self.setContentsMargins(0,0,0,0)
 
-class HWidgets(QtGui.QWidget):
+class HWidgets(QtWidgets.QWidget):
 
     def __init__(self, *widgets, **kwargs):
         kwargs.setdefault('parent', None)
@@ -533,14 +534,15 @@ class HWidgets(QtGui.QWidget):
         if len(s) < len(widgets):
             s += [0] * (len(widgets) - len(s))
 
-        hbox = QtGui.QHBoxLayout(self)
+        hbox = QtWidgets.QHBoxLayout(self)
         self.setLayout(hbox)
         hbox.setContentsMargins(0,0,0,0)
         for i, widget in enumerate(widgets):
             if widget is None:
-                widget = QtGui.QWidget()
-            elif type(widget) in [str, unicode]:
-                widget = QtGui.QLabel(widget)
+                widget = QtWidgets.QWidget()
+            elif isinstance(widget, six.string_types):
+#            elif type(widget) in [str, unicode]:
+                widget = QtWidgets.QLabel(widget)
             hbox.addWidget(widget, s[i])
         self.widgets = widgets
 
@@ -549,32 +551,32 @@ class HWidgets(QtGui.QWidget):
             widget.setStyleSheet(style)
         self.setStyleSheet(style)
 
-class BLabel(QtGui.QLabel):
+class BLabel(QtWidgets.QLabel):
 
     def __init__(self, *args, **kwargs):
         super(BLabel, self).__init__(*args, **kwargs)
         self.setStyleSheet('font-weight: bold;')
 
-class RLabel(QtGui.QLabel):
+class RLabel(QtWidgets.QLabel):
 
     def __init__(self, *args, **kwargs):
         super(RLabel, self).__init__(*args, **kwargs)
         self.setAlignment(QtCore.Qt.AlignRight)
 
-class ULabel(QtGui.QLabel):
+class ULabel(QtWidgets.QLabel):
 
     def __init__(self, *args, **kwargs):
         super(ULabel, self).__init__(*args, **kwargs)
         self.setStyleSheet('color: #6194BC;')
 
-class TComboBox(QtGui.QWidget):
+class TComboBox(QtWidgets.QWidget):
 
     def __init__(self, label, options, selected=None, parse=str, default=0, *args, **kwargs):
         super(TComboBox, self).__init__(*args, **kwargs)
         self.default = default
         hbox = MHBoxLayout()
         if label is not None:
-            hbox.addWidget(QtGui.QLabel(label))
+            hbox.addWidget(QtWidgets.QLabel(label))
         self.combo = SComboBox()
         for option in options:
             self.combo.addItem(str(option))
@@ -624,7 +626,7 @@ class TComboBox(QtGui.QWidget):
         except:
             return self.parse(self.default)
 
-class PLineEdit(QtGui.QLineEdit):
+class PLineEdit(QtWidgets.QLineEdit):
 
     def __init__(self, default=0, parse=int, fontsize=None, *args, **kwargs):
         super(PLineEdit, self).__init__(*args, **kwargs)
@@ -648,7 +650,7 @@ class PLineEdit(QtGui.QLineEdit):
         self.setPlaceholderText(str(val))
 
 
-class RCheckBox(QtGui.QWidget):
+class RCheckBox(QtWidgets.QWidget):
 
     def __init__(self, text, fontsize=None, **kwargs):
         super(RCheckBox, self).__init__(**kwargs)
@@ -657,7 +659,7 @@ class RCheckBox(QtGui.QWidget):
         self.setLayout(hbox)
 
         self.label = RClickableLabel(text)
-        self.check = QtGui.QCheckBox()
+        self.check = QtWidgets.QCheckBox()
         self.label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.check.setChecked(True)
         hbox.addWidget(self.label, 1)
@@ -692,12 +694,12 @@ class RClickableLabel(RLabel):
     def mousePressEvent(self, ev):
         self.clicked.emit()
 
-class ClickableLabel(QtGui.QLabel):
+class ClickableLabel(QtWidgets.QLabel):
     clicked = QtCore.pyqtSignal()
     def mousePressEvent(self, ev):
         self.clicked.emit()
 
-class LCheckBox(QtGui.QWidget):
+class LCheckBox(QtWidgets.QWidget):
 
     def __init__(self, text, fontsize=None, **kwargs):
         super(LCheckBox, self).__init__(**kwargs)
@@ -706,7 +708,7 @@ class LCheckBox(QtGui.QWidget):
         self.setLayout(hbox)
 
         self.label = ClickableLabel(text)
-        self.check = QtGui.QCheckBox()
+        self.check = QtWidgets.QCheckBox()
         self.check.setMaximumWidth(20)
         self.check.setChecked(True)
         hbox.addWidget(self.check)
@@ -736,7 +738,7 @@ class LCheckBox(QtGui.QWidget):
     def setCheckStyle(self, style):
         self.check.setStyleSheet(style)
 
-class HLayer(QtGui.QWidget):
+class HLayer(QtWidgets.QWidget):
 
     valueChanged = QtCore.pyqtSignal(str, str, int)
     toggled  = QtCore.pyqtSignal(str, str, bool)
@@ -750,14 +752,14 @@ class HLayer(QtGui.QWidget):
         self.name = name
         self.level = level
 
-        self.label = QtGui.QLabel(name + ':')
+        self.label = QtWidgets.QLabel(name + ':')
         self.label.setFixedWidth(90)
         self.label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.slider = CSlider(self.name, current=current)
         self.slider.lbl_current.setFixedWidth(25)
-        self.check = QtGui.QCheckBox()
+        self.check = QtWidgets.QCheckBox()
         self.check.setChecked(visible)
-        #self.btn_tiff = QtGui.QPushButton('.rec')
+        #self.btn_tiff = QtWidgets.QPushButton('.rec')
         #self.btn_tiff.setFixedWidth(40)
 
         hbox.addWidget(self.label)
@@ -782,7 +784,7 @@ class HLayer(QtGui.QWidget):
         self.check.setChecked(value)
 
 
-class FLineEdit(QtGui.QLineEdit):
+class FLineEdit(QtWidgets.QLineEdit):
 
     strChanged = QtCore.pyqtSignal(str)
 
@@ -794,7 +796,7 @@ class FLineEdit(QtGui.QLineEdit):
         super(FLineEdit, self).focusOutEvent(ev)
         self.strChanged.emit(self.text())
 
-class ColorButton(QtGui.QPushButton):
+class ColorButton(QtWidgets.QPushButton):
 
     colorChanged = QtCore.pyqtSignal(str)
 
@@ -827,20 +829,20 @@ class ColorButton(QtGui.QPushButton):
         self.color = color
 
     def on_click(self):
-        c = QtGui.QColorDialog.getColor(QtGui.QColor(self.color), self.parent())
+        c = QtWidgets.QColorDialog.getColor(QtGui.QColor(self.color), self.parent())
         if not c.isValid():
             return
         self.setColor(self.c2h(c))
         self.colorChanged.emit(self.color)
 
-class HLabelParent(QtGui.QWidget):
+class HLabelParent(QtWidgets.QWidget):
 
     def __init__(self, name, **kwargs):
         super(HLabelParent, self).__init__(**kwargs)
         hbox = MHBoxLayout()
         self.setLayout(hbox)
 
-        self.txt_label_name = QtGui.QLabel(name)
+        self.txt_label_name = QtWidgets.QLabel(name)
         self.combo_parent = SComboBox()
         self.combo_parent.addItem('None')
         dummy = HWidgets(self.txt_label_name, self.combo_parent,
@@ -860,7 +862,7 @@ class HLabelParent(QtGui.QWidget):
         return str(self.combo_parent.currentText())
 
 
-class HEditLabel(QtGui.QWidget):
+class HEditLabel(QtWidgets.QWidget):
 
     selected = QtCore.pyqtSignal(int)
     removed = QtCore.pyqtSignal(int)
@@ -876,7 +878,7 @@ class HEditLabel(QtGui.QWidget):
 
         self.idx = idx
 
-        self.btn_remove = QtGui.QPushButton('X')
+        self.btn_remove = QtWidgets.QPushButton('X')
         self.btn_remove.setContentsMargins(0,0,0,0)
         self.btn_remove.setMaximumWidth(25)
         self.btn_remove.setCheckable(True)
@@ -889,12 +891,12 @@ class HEditLabel(QtGui.QWidget):
         self.pbutton = ColorButton(color=None)
         self.pbutton.clicked.disconnect()
 
-        self.sbutton = QtGui.QPushButton(u'\u2713')
+        self.sbutton = QtWidgets.QPushButton(u'\u2713')
         self.sbutton.setContentsMargins(0,0,0,0)
         self.sbutton.setMaximumWidth(25)
         self.sbutton.setCheckable(True)
 
-        self.check = QtGui.QCheckBox()
+        self.check = QtWidgets.QCheckBox()
         self.check.setChecked(True)
 
         hbox.addWidget(self.btn_remove)
@@ -946,7 +948,7 @@ class HEditLabel(QtGui.QWidget):
         self.pbutton.setColor(color)
 
 
-class CSlider(QtGui.QWidget):
+class CSlider(QtWidgets.QWidget):
 
     valueChanged = QtCore.pyqtSignal(int)
 
@@ -964,12 +966,12 @@ class CSlider(QtGui.QWidget):
         self.initial = self.current
 
         # Header
-        self.lbl_current = QtGui.QLabel("%d" % self.current)
+        self.lbl_current = QtWidgets.QLabel("%d" % self.current)
         self.lbl_current.setMinimumWidth(lblwidth)
         self.lbl_current.setStyleSheet('color: #6194BC;')
 
         # Slider
-        self.sld_val = QtGui.QSlider(1)
+        self.sld_val = QtWidgets.QSlider(1)
         self.sld_val.setMinimum(vmin)
         self.sld_val.setMaximum(vmax)
         self.sld_val.setValue(self.current)
@@ -977,7 +979,7 @@ class CSlider(QtGui.QWidget):
         self.sld_val.setSingleStep(interval)
         self.sld_val.setTracking(True)
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         hbox.addWidget(self.sld_val, 1)
         hbox.addWidget(self.lbl_current)
         vbox.addLayout(hbox)
@@ -1027,7 +1029,7 @@ class OddSlider(CSlider):
         self.valueChanged.emit(self.current)
 
 
-class WSlider(QtGui.QSlider):
+class WSlider(QtWidgets.QSlider):
 
     def __init__(self, maximum, minimum=0, orient=1, parent=None):
         super(WSlider, self).__init__(orient, parent=parent)
@@ -1043,12 +1045,12 @@ class WSlider(QtGui.QSlider):
         elif e.delta() < 0 and self.value() > self.minimum():
             self.setValue(self.value()-1)
 
-class WSliderPane(QtGui.QWidget):
+class WSliderPane(QtWidgets.QWidget):
 
     def __init__(self,  maximum, minimum=0, orient=1, parent=None):
         super(WSliderPane, self).__init__(parent=parent)
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         self.setLayout(hbox)
         self.slider = WSlider(maximum, minimum=minimum, orient=orient)
 
@@ -1066,7 +1068,7 @@ class WSliderPane(QtGui.QWidget):
         self.minimum = self.slider.minimum
         self.setTracking = self.slider.setTracking
 
-class HSlider(QtGui.QWidget):
+class HSlider(QtWidgets.QWidget):
 
     valueChanged = QtCore.pyqtSignal(float)
 
@@ -1084,9 +1086,9 @@ class HSlider(QtGui.QWidget):
 
         # Header
         hbox = MHBoxLayout()
-        self.lbl_name = QtGui.QLabel(name)
+        self.lbl_name = QtWidgets.QLabel(name)
         self.lbl_name.setStyleSheet('font-weight: bold;')
-        self.lbl_current = QtGui.QLabel("%.2f" % self.current)
+        self.lbl_current = QtWidgets.QLabel("%.2f" % self.current)
         self.lbl_current.setStyleSheet('color: #6194BC;')
 
         hbox.addWidget(self.lbl_name)
@@ -1094,18 +1096,18 @@ class HSlider(QtGui.QWidget):
         vbox.addLayout(hbox)
 
         # Slider
-        self.lbl_min = QtGui.QLabel('%.2f' % vmin)
+        self.lbl_min = QtWidgets.QLabel('%.2f' % vmin)
         self.lbl_min.setMinimumWidth(40)
         self.lbl_min.setAlignment(QtCore.Qt.AlignCenter)
-        self.lbl_max = QtGui.QLabel('%.2f' % vmax)
+        self.lbl_max = QtWidgets.QLabel('%.2f' % vmax)
         self.lbl_max.setAlignment(QtCore.Qt.AlignCenter)
         self.lbl_max.setMinimumWidth(40)
-        self.sld_val = QtGui.QSlider(1)
+        self.sld_val = QtWidgets.QSlider(1)
         self.sld_val.setMinimum(0)
         self.sld_val.setMaximum(1000)
         self.sld_val.setValue(self.val2slider(self.current))
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         hbox.addWidget(self.lbl_min)
         hbox.addWidget(self.sld_val)
         hbox.addWidget(self.lbl_max)
@@ -1139,7 +1141,7 @@ class HSlider(QtGui.QWidget):
     def setValue(self, val):
         self.sld_val.setValue(int(self.val2slider(float(val))))
 
-class HSize3D(QtGui.QWidget):
+class HSize3D(QtWidgets.QWidget):
 
     def __init__(self, name, default=(0, 0, 0), txtwidth=None,
                  parse=int, coordwidth=None):
@@ -1151,9 +1153,9 @@ class HSize3D(QtGui.QWidget):
         hbox = MHBoxLayout()
         self.setLayout(hbox)
 
-        self.zbox = QtGui.QLineEdit()
-        self.ybox = QtGui.QLineEdit()
-        self.xbox = QtGui.QLineEdit()
+        self.zbox = QtWidgets.QLineEdit()
+        self.ybox = QtWidgets.QLineEdit()
+        self.xbox = QtWidgets.QLineEdit()
 
         if coordwidth is not None:
             self.zbox.setMaximumWidth(coordwidth)
@@ -1164,14 +1166,14 @@ class HSize3D(QtGui.QWidget):
         self.ybox.setPlaceholderText(str(default[1]))
         self.xbox.setPlaceholderText(str(default[2]))
 
-        zlbl = QtGui.QLabel('z')
+        zlbl = QtWidgets.QLabel('z')
         zlbl.setStyleSheet('color: #6194BC;')
-        ylbl = QtGui.QLabel('y')
+        ylbl = QtWidgets.QLabel('y')
         ylbl.setStyleSheet('color: #6194BC;')
-        xlbl = QtGui.QLabel('x')
+        xlbl = QtWidgets.QLabel('x')
         xlbl.setStyleSheet('color: #6194BC;')
 
-        title = QtGui.QLabel(name + ':')
+        title = QtWidgets.QLabel(name + ':')
 
         if txtwidth is not None:
             title.setMinimumWidth(txtwidth)

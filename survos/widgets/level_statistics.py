@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 from .mpl_widgets import PerspectiveCanvas, MplCanvas
 from .base import HWidgets, TComboBox, RoundedWidget, ColorButton, PLineEdit, \
@@ -21,7 +21,7 @@ from collections import OrderedDict
 import seaborn as sns
 
 from .label_partitioning import FEATURE_TYPES, FEATURE_OPTIONS
-
+from six import iteritems
 
 class LevelStats(Plugin):
 
@@ -39,7 +39,7 @@ class LevelStats(Plugin):
         self.label_combo.setMinimumWidth(200)
         self.source_combo = SourceCombo()
         self.source_combo.setMinimumWidth(200)
-        self.label_btn = QtGui.QPushButton('Label')
+        self.label_btn = QtWidgets.QPushButton('Label')
         self.addWidget(HWidgets(self.level_combo, self.label_combo,
                                 self.source_combo, self.label_btn,
                                 stretch=[1, 1, 1, 1]))
@@ -50,18 +50,18 @@ class LevelStats(Plugin):
         self.kernels = TComboBox('Fit kernel:', ['gau', 'cos', 'biw', 'epa',
                                                 'tri', 'triw'],
                                  selected=0)
-        self.update_plot = QtGui.QPushButton('Update plot')
-        self.export_plot = QtGui.QPushButton('Export plot')
-        self.export_stats = QtGui.QPushButton('Export Stats')
+        self.update_plot = QtWidgets.QPushButton('Update plot')
+        self.export_plot = QtWidgets.QPushButton('Export plot')
+        self.export_stats = QtWidgets.QPushButton('Export Stats')
         self.addWidget(HWidgets(self.kernels, None, self.update_plot,
                                 self.export_plot, self.export_stats,
                                 stretch=[0, 1, 0, 0]))
 
-        splitter = QtGui.QSplitter(1)
+        splitter = QtWidgets.QSplitter(1)
         self.addWidget(splitter)
 
-        group = QtGui.QGroupBox()
-        vbox = QtGui.QVBoxLayout()
+        group = QtWidgets.QGroupBox()
+        vbox = QtWidgets.QVBoxLayout()
         group.setLayout(vbox)
 
         self.options = OrderedDict()
@@ -143,14 +143,14 @@ class LevelStats(Plugin):
     def on_objects_labelled(self, params):
         self.objects, self.num_objects, self.labels = params
         if self.num_objects == 0:
-            QtGui.QMessageBox.critical(self, "Error", 'No objects found')
+            QtWidgets.QMessageBox.critical(self, "Error", 'No objects found')
             return
         self.on_update_plot()
 
 
     def on_update_plot(self, res=None):
         if self.objects is None:
-            QtGui.QMessageBox.critical(self, 'Error', 'No objects labelled')
+            QtWidgets.QMessageBox.critical(self, 'Error', 'No objects labelled')
             return
 
         self.replot()
@@ -207,7 +207,7 @@ class LevelStats(Plugin):
             self.mplcanvas.redraw()
 
     def on_export_plot(self):
-        full_path = QtGui.QFileDialog.getSaveFileName(self, "Select output filename",
+        full_path = QtWidgets.QFileDialog.getSaveFileName(self, "Select output filename",
                                                       filter='*.png')
         if full_path is not None and len(full_path) > 0:
             if not full_path.endswith('.png'):
@@ -225,7 +225,7 @@ class LevelStats(Plugin):
             feature = self.DM.load_ds('objects/{}'.format(ftype))
             data[:, n] = feature
 
-        full_path = QtGui.QFileDialog.getSaveFileName(self, "Select output filename",
+        full_path = QtWidgets.QFileDialog.getSaveFileName(self, "Select output filename",
                                                       filter='*.csv')
         if full_path is not None and len(full_path) > 0:
             if not full_path.endswith('.csv'):
@@ -240,7 +240,7 @@ class LevelStats(Plugin):
         self.replot()
 
     def reset(self):
-        for k, v in self.options.iteritems():
+        for k, v in iteritems(self.options):
             if type(k) == tuple:
                 v[1].setParent(None)
                 del self.options[k]

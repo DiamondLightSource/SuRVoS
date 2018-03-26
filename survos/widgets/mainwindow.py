@@ -2,8 +2,9 @@
 import math
 import numpy as np
 
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
+import six
 import logging as log
 import time
 import re
@@ -43,7 +44,7 @@ class QPlainTextEditLogger(log.Handler):
     def write(self, m):
         pass
 
-class MainWindow(QtGui.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, title="SuRVoS: Super-Region Volume Segmentation workbench"):
         super(MainWindow, self).__init__()
@@ -53,7 +54,7 @@ class MainWindow(QtGui.QMainWindow):
         self.pre_widget = PreWidget()
         self.load_widget = LoadWidget()
         self.main_widget = MainWidget()
-        self.main_container = QtGui.QStackedWidget()
+        self.main_container = QtWidgets.QStackedWidget()
         self.main_container.addWidget(self.pre_widget)
         self.main_container.addWidget(self.load_widget)
         self.main_container.addWidget(self.main_widget)
@@ -68,7 +69,7 @@ class MainWindow(QtGui.QMainWindow):
         self.launcher.error.connect(self.on_error)
 
         self.status = self.statusBar()
-        self.edit = QtGui.QLabel()
+        self.edit = QtWidgets.QLabel()
         self.edit.setStyleSheet('color: #fefefe; padding-left: 10px;');
         self.edit.setFixedHeight(25)
         self.status.insertPermanentWidget(0, self.edit, 1)
@@ -76,35 +77,35 @@ class MainWindow(QtGui.QMainWindow):
         self.loghandler = QPlainTextEditLogger(self.edit)
         log.getLogger().addHandler(self.loghandler)
 
-        menubar = QtGui.QMenuBar()
+        menubar = QtWidgets.QMenuBar()
         menubar.setStyleSheet('QMenuBar {padding: 6px;}')
         menubar.setContentsMargins(20,10,0,0)
         self.setMenuBar(menubar)
         fileMenu = menubar.addMenu('&File')
         helpMenu = menubar.addMenu('&Help')
 
-        self.openAction = QtGui.QAction('&Open Dataset..', self)
+        self.openAction = QtWidgets.QAction('&Open Dataset..', self)
         self.openAction.setShortcut('Ctrl+O')
         self.openAction.setStatusTip('Open Dataset (.rec, .hdf5, .tiff)')
         self.openAction.triggered.connect(self.load_data_view)
         self.pre_widget.open.clicked.connect(self.load_data_view)
 
-        self.loadAction = QtGui.QAction('&Load Workspace..', self)
+        self.loadAction = QtWidgets.QAction('&Load Workspace..', self)
         self.loadAction.setShortcut('Ctrl+L')
         self.loadAction.setStatusTip('Load previously created workspace.')
         self.loadAction.triggered.connect(self.load_workspace)
         self.pre_widget.load.clicked.connect(self.load_workspace)
 
-        self.saveAction = QtGui.QAction('&Save annotations', self)
+        self.saveAction = QtWidgets.QAction('&Save annotations', self)
         self.saveAction.setShortcut('Ctrl+S')
         self.saveAction.setStatusTip('Save and backup current annotations.')
         self.saveAction.triggered.connect(self.main_widget.save_backup)
         self.saveAction.setEnabled(False)
 
-        exitAction = QtGui.QAction('&Exit', self)
+        exitAction = QtWidgets.QAction('&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit application')
-        exitAction.triggered.connect(QtGui.qApp.quit)
+        exitAction.triggered.connect(QtWidgets.qApp.quit)
 
         fileMenu.addAction(self.openAction)
         fileMenu.addAction(self.loadAction)
@@ -113,11 +114,11 @@ class MainWindow(QtGui.QMainWindow):
         fileMenu.addAction(exitAction)
 
         # HEEEEEELP
-        self.docAction = QtGui.QAction('Documentation..', self)
+        self.docAction = QtWidgets.QAction('Documentation..', self)
         self.docAction.triggered.connect(self.open_docs)
-        self.bugAction = QtGui.QAction('Issues and Bugs..', self)
+        self.bugAction = QtWidgets.QAction('Issues and Bugs..', self)
         self.bugAction.triggered.connect(self.open_issues)
-        self.aboutAction = QtGui.QAction('About', self)
+        self.aboutAction = QtWidgets.QAction('About', self)
 
         helpMenu.addAction(self.docAction)
         helpMenu.addAction(self.bugAction)
@@ -154,10 +155,10 @@ class MainWindow(QtGui.QMainWindow):
         self.main_container.setCurrentIndex(2)
 
     def load_workspace(self, path=None):
-        if type(path) not in [str, unicode]:
+        if type(path) not in six.string_types:
             msg = "Select the workspace folder"
-            flags = QtGui.QFileDialog.ShowDirsOnly
-            path = QtGui.QFileDialog.getExistingDirectory(self, msg, '.', flags)
+            flags = QtWidgets.QFileDialog.ShowDirsOnly
+            path = QtWidgets.QFileDialog.getExistingDirectory(self, msg, '.', flags)
             if path is None or len(path) == 0:
                 return
 
@@ -165,7 +166,7 @@ class MainWindow(QtGui.QMainWindow):
             self.main_container.setCurrentIndex(2)
 
     def on_error(self, msg):
-        QtGui.QMessageBox.critical(self, "Error", msg)
+        QtWidgets.QMessageBox.critical(self, "Error", msg)
         self.overlay.post()
 
     def addWidget(self, widget, ptype=None):
@@ -180,7 +181,7 @@ class MainWindow(QtGui.QMainWindow):
         event.accept()
 
     def keyPressEvent(self, event):
-        modifiers = QtGui.QApplication.keyboardModifiers()
+        modifiers = QtWidgets.QApplication.keyboardModifiers()
         if event.key() == QtCore.Qt.Key_Escape:
             self.setFocus()
         elif event.key() >= QtCore.Qt.Key_1 and \
@@ -210,7 +211,7 @@ class MainWindow(QtGui.QMainWindow):
     def mousePressEvent(self, event):
         self.setFocus()
 
-class MainWidget(QtGui.QWidget):
+class MainWidget(QtWidgets.QWidget):
 
     completed = QtCore.pyqtSignal()
 
@@ -220,18 +221,18 @@ class MainWidget(QtGui.QWidget):
 
         self.pluginCount = 0
 
-        self.setLayout(QtGui.QHBoxLayout())
-        self.splitter = QtGui.QSplitter()
+        self.setLayout(QtWidgets.QHBoxLayout())
+        self.splitter = QtWidgets.QSplitter()
         self.layout().setContentsMargins(20,20,20,20)
         self.layout().addWidget(self.splitter)
 
         dirp = os.path.dirname(os.path.realpath(__file__))
-        self.leftPanel = QtGui.QTabWidget(self)
-        self.leftPanel.setTabPosition(QtGui.QTabWidget.West)
+        self.leftPanel = QtWidgets.QTabWidget(self)
+        self.leftPanel.setTabPosition(QtWidgets.QTabWidget.West)
         self.leftPanel.setMaximumWidth(400)
 
-        self.centerPanel = QtGui.QTabWidget()
-        self.centerPanel.setTabPosition(QtGui.QTabWidget.West)
+        self.centerPanel = QtWidgets.QTabWidget()
+        self.centerPanel.setTabPosition(QtWidgets.QTabWidget.West)
 
         self.splitter.addWidget(self.leftPanel)
         self.splitter.addWidget(self.centerPanel)
@@ -314,7 +315,7 @@ class MainWidget(QtGui.QWidget):
             return True
         else:
             errmsg = 'No valid workspace found'
-            QtGui.QMessageBox.critical(self, 'Error', errmsg)
+            QtWidgets.QMessageBox.critical(self, 'Error', errmsg)
         return False
 
     def save_backup(self):
@@ -329,10 +330,10 @@ class MainWidget(QtGui.QWidget):
             if os.path.isfile(out_dataset):
                 err_msg = 'Backup for [Level {}] already exists, ' \
                           'do you want to overwrite it?'.format(level)
-                ans = QtGui.QMessageBox.question(self, "Error", err_msg,
-                                                 QtGui.QMessageBox.Yes,
-                                                 QtGui.QMessageBox.No)
-                if ans == QtGui.QMessageBox.No:
+                ans = QtWidgets.QMessageBox.question(self, "Error", err_msg,
+                                                 QtWidgets.QMessageBox.Yes,
+                                                 QtWidgets.QMessageBox.No)
+                if ans == QtWidgets.QMessageBox.No:
                     log.info('  * Skipping.')
                     continue
 
@@ -361,7 +362,7 @@ class MainWidget(QtGui.QWidget):
             log.info('+ Loading Feature Channels')
             for fidx, desc in sorted(self.DM.available_channels(filter_active=False)):
                 attrs = self.DM.attrs(desc)
-                keys = attrs.keys()
+                keys = list(attrs.keys())
                 active = attrs['active']
                 fname = attrs['feature_name']
                 ftype = attrs['feature_type']
@@ -437,10 +438,10 @@ class MainWidget(QtGui.QWidget):
         return self
 
 
-class Overlay(QtGui.QWidget):
+class Overlay(QtWidgets.QWidget):
 
     def __init__(self, title='Loading...', parent=None):
-        QtGui.QWidget.__init__(self, parent)
+        QtWidgets.QWidget.__init__(self, parent)
         palette = QtGui.QPalette(self.palette())
         palette.setColor(palette.Background, QtCore.Qt.transparent)
 

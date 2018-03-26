@@ -2,7 +2,7 @@
 import numpy as np
 import h5py as h5
 
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 from matplotlib.colors import ListedColormap
 
 import os
@@ -15,17 +15,17 @@ from ..widgets import HWidgets, HEditLabel, HeaderLabel, PLineEdit, \
                       ComboDialog, RCheckBox, HSize3D, SComboBox, ActionButton
 from ..core import DataModel, LabelManager, LayerManager, Launcher
 from .. import actions as ac
+from six import iteritems
 
-
-class AnnotationLayerLabel(QtGui.QWidget):
+class AnnotationLayerLabel(QtWidgets.QWidget):
 
     def __init__(self, text, parent=None):
         super(AnnotationLayerLabel, self).__init__(parent=parent)
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         self.setLayout(hbox)
 
-        spacing = QtGui.QPushButton('X')
+        spacing = QtWidgets.QPushButton('X')
         spacing.setMaximumWidth(25)
         spacing.setMaximumHeight(30)
         spacing.setMinimumHeight(30)
@@ -37,7 +37,7 @@ class AnnotationLayerLabel(QtGui.QWidget):
 
         hbox.addWidget(spacing)
 
-        label = QtGui.QLabel(text)
+        label = QtWidgets.QLabel(text)
         label.setMinimumHeight(30)
         label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         label.setStyleSheet('background-color: #6DC7C7; color: #006161;'
@@ -47,12 +47,12 @@ class AnnotationLayerLabel(QtGui.QWidget):
                             'font-weight: bold; font-size: 13px;')
 
         self.layout().setContentsMargins(0,0,0,0)
-        self.layout().setMargin(0)
+#        self.layout().setMargin(0)
         self.layout().setSpacing(0)
 
         hbox.addWidget(label, 1)
 
-        self.chk = QtGui.QCheckBox()
+        self.chk = QtWidgets.QCheckBox()
         self.chk.setMinimumHeight(30)
         self.chk.setMaximumWidth(25)
         self.chk.setMaximumHeight(30)
@@ -86,7 +86,7 @@ class Level(RoundedWidget):
         self.level = level
         self.dataset = ds
 
-        self.setLayout(QtGui.QVBoxLayout())
+        self.setLayout(QtWidgets.QVBoxLayout())
         self.setContentsMargins(0,0,0,0)
 
         self.header = AnnotationLayerLabel(name)
@@ -152,7 +152,7 @@ class Level(RoundedWidget):
             del self.labels[label]
 
     def setSelected(self, label):
-        for k, lbl in self.labels.iteritems():
+        for k, lbl in iteritems(self.labels):
             lbl.setSelected(k == label)
         self.btn_erase.setChecked(label is not None and label < 0)
 
@@ -212,8 +212,8 @@ class Annotations(Plugin):
         super(Annotations, self).__init__(ptype=Plugin.Plugin)
 
         # Relayout
-        QtGui.QWidget().setLayout(self.layout)
-        vbox2 = QtGui.QVBoxLayout()
+        QtWidgets.QWidget().setLayout(self.layout)
+        vbox2 = QtWidgets.QVBoxLayout()
         vbox2.setContentsMargins(0, 10, 0, 0)
         self.setLayout(vbox2)
 
@@ -228,8 +228,8 @@ class Annotations(Plugin):
         #######
         vbox2.addWidget(HeaderLabel('Annotations'))
 
-        dummy = QtGui.QWidget()
-        vbox = QtGui.QVBoxLayout()
+        dummy = QtWidgets.QWidget()
+        vbox = QtWidgets.QVBoxLayout()
         dummy.setLayout(vbox)
 
         vbox2.addWidget(dummy, 1)
@@ -244,12 +244,12 @@ class Annotations(Plugin):
                                 self.btn_loadlevel, None, self.btn_addlevel,
                                 stretch=[0, 0, 0, 1,0]))
 
-        groupbox = QtGui.QWidget()
-        self.form = QtGui.QFormLayout()
+        groupbox = QtWidgets.QWidget()
+        self.form = QtWidgets.QFormLayout()
         self.form.setContentsMargins(0, 0, 0, 0)
         groupbox.setLayout(self.form)
 
-        scroll = QtGui.QScrollArea()
+        scroll = QtWidgets.QScrollArea()
         scroll.setWidget(groupbox)
         scroll.setWidgetResizable(True)
         vbox.addWidget(scroll, 1)
@@ -290,7 +290,7 @@ class Annotations(Plugin):
 
     def refine_level(self):
         if self.DM.gtselected is None:
-            QtGui.QMessageBox.critical(self, 'Error', 'No label selected')
+            QtWidgets.QMessageBox.critical(self, 'Error', 'No label selected')
             return
 
         level = self.DM.gtselected['level']
@@ -332,12 +332,12 @@ class Annotations(Plugin):
         success = self.create_level_ds(ds)
         if not success:
             errmsg = 'Dataset "{}" already exists'.format(ds)
-            QtGui.QMessageBox.critical(self, 'Error', errmsg)
+            QtWidgets.QMessageBox.critical(self, 'Error', errmsg)
             return
         else:
             self.DM.set_attrs(ds, dict(active=True, levelid=idx))
 
-        name = 'Level {}'.format(idx)
+        name = u'Level {}'.format(idx)
         level = Level(name, idx, ds)
         level.level_toggled.connect(self.on_level_toggled)
         level.erase.connect(self.on_erase_clicked)
@@ -357,7 +357,7 @@ class Annotations(Plugin):
     def on_load_level(self, idx, ds):
         assert idx not in self.levels, "Error, level ID already exists"
 
-        name = 'Level {}'.format(idx)
+        name = u'Level {}'.format(idx)
         level = Level(name, idx, ds)
         level.level_toggled.connect(self.on_level_toggled)
         level.erase.connect(self.on_erase_clicked)
@@ -374,7 +374,7 @@ class Annotations(Plugin):
 
     def on_load_external_level(self):
         self.launcher.setup("Importing annotation level")
-        path = QtGui.QFileDialog.getOpenFileName(self, "Select input source",
+        path = QtWidgets.QFileDialog.getOpenFileName(self, "Select input source",
                                                  filter='*.h5 *.hdf5 *.h5.bak')
         if path is None or len(path) == 0:
             self.launcher.cleanup()
@@ -411,7 +411,7 @@ class Annotations(Plugin):
                     labels = self.DM.attr(dataset, 'label')
                 else:
                     errmsg = 'Selected level is already loaded'
-                    QtGui.QMessageBox.critical(self, 'Error', errmsg)
+                    QtWidgets.QMessageBox.critical(self, 'Error', errmsg)
                     return self.launcher.cleanup()
             else:
                 log.info('    * Not possible to re-activate')
@@ -423,7 +423,7 @@ class Annotations(Plugin):
                 self.launcher.show_error('No annotation level found')
                 return self.launcher.cleanup()
             selected, accepted = ComboDialog.getOption(av)
-            if accepted == QtGui.QDialog.Rejected:
+            if accepted == QtWidgets.QDialog.Rejected:
                 return
             dataset = selected
 
@@ -549,7 +549,7 @@ class Annotations(Plugin):
         self.launcher.cleanup()
 
     def on_select_label(self, level, dataset, label):
-        for idx, lobj in self.levels.iteritems():
+        for idx, lobj in iteritems(self.levels):
             if idx == level:
                 lobj.setSelected(label)
                 self.LM.setVisible(lobj.name, 'Annotations', True)
@@ -625,7 +625,7 @@ class Annotations(Plugin):
         self.DM.set_attrs(dataset, dict(label   = self.LBLM.idxs(level),
                                         names   = self.LBLM.names(level),
                                         colors  = self.LBLM.colors(level),
-                                        visible = map(int, self.LBLM.visibility(level)),
+                                        visible = list(map(int, self.LBLM.visibility(level))),
                                         parent_levels = self.LBLM.parent_levels(level),
                                         parent_labels = self.LBLM.parent_labels(level)))
 
@@ -636,10 +636,10 @@ class Annotations(Plugin):
 
     def remove_level_ds(self, idx, ds):
         quit_msg = "Do you want to permanently remove the data from [Level {}]?".format(idx)
-        wipe = QtGui.QMessageBox.question(self, 'Message', quit_msg,
-                                          QtGui.QMessageBox.Yes,
-                                          QtGui.QMessageBox.No)
-        if wipe == QtGui.QMessageBox.Yes:
+        wipe = QtWidgets.QMessageBox.question(self, 'Message', quit_msg,
+                                          QtWidgets.QMessageBox.Yes,
+                                          QtWidgets.QMessageBox.No)
+        if wipe == QtWidgets.QMessageBox.Yes:
             log.info('### Removing [Level {}] annotations ###'.format(idx))
             self.DM.remove_dataset(ds)
         else:
@@ -662,7 +662,7 @@ class Annotations(Plugin):
         if len(labels) == 0:
             return
 
-        options = ['None'] + ['Level {}/{}'.format(parent_level, l.name) for l in labels]
+        options = ['None'] + [u'Level {}/{}'.format(parent_level, l.name) for l in labels]
         option, result = ComboDialog.getOptionIdx(options)
 
         if not result:
@@ -696,10 +696,10 @@ class Annotations(Plugin):
         mintersection = mcurrent & mparent
         if not (mcurrent == mintersection).all():
             err_msg = "Some annotations of the label will be lost, do you wish to continue?"
-            ans = QtGui.QMessageBox.question(self, "Data will be lost", err_msg,
-                                             QtGui.QMessageBox.Yes,
-                                             QtGui.QMessageBox.No)
-            if ans == QtGui.QMessageBox.No:
+            ans = QtWidgets.QMessageBox.question(self, "Data will be lost", err_msg,
+                                             QtWidgets.QMessageBox.Yes,
+                                             QtWidgets.QMessageBox.No)
+            if ans == QtWidgets.QMessageBox.No:
                 return
 
             dcurrent[mcurrent] = -1

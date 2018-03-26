@@ -1,7 +1,8 @@
+# distutils: language=c++
 import numpy as np
 cimport numpy as np
 
-cdef extern from "src/convolutions.cuh":
+cdef extern from "convolutions.h":
     struct int3:
         int x, y, z
     void convolution(const float *h_src, const float *h_kernel, float *h_dest,

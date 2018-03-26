@@ -1,6 +1,6 @@
 
 import numpy as np
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 from collections import OrderedDict
 
@@ -10,14 +10,14 @@ from ..core import DataModel, LayerManager, Launcher
 from .. import actions as ac
 
 
-class Layers(QtGui.QWidget):
+class Layers(QtWidgets.QWidget):
 
     name = 'Layers'
 
     def __init__(self, parent=None):
         super(Layers, self).__init__(parent=parent)
 
-        self.setLayout(QtGui.QVBoxLayout())
+        self.setLayout(QtWidgets.QVBoxLayout())
 
         self.levels = OrderedDict()
         self.DM = DataModel.instance()
@@ -69,7 +69,7 @@ class Layers(QtGui.QWidget):
         self.levels[level][name].setChecked(bol)
 
     def on_tiff_export(self, name, level):
-        path = str(QtGui.QFileDialog.getSaveFileName(self, filter='*.rec'))
+        path = str(QtWidgets.QFileDialog.getSaveFileName(self, filter='*.rec'))
         if path is None or path == '':
             return
         if not path.endswith('.rec'):

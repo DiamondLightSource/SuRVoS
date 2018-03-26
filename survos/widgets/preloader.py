@@ -1,29 +1,29 @@
 
 
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 from .base import HWidgets, HeaderLabel
 
-class RefContainer(QtGui.QWidget):
+class RefContainer(QtWidgets.QWidget):
 
     def __init__(self, title, link_url, description, parent=None):
         super(RefContainer, self).__init__(parent)
         self.setFixedWidth(250)
         self.setFixedHeight(150)
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
-        title = QtGui.QLabel('<a href="{}">{}</a>'.format(link_url, title))
+        title = QtWidgets.QLabel('<a href="{}">{}</a>'.format(link_url, title))
         title.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter)
         title.setStyleSheet('font-size: 18pt; color: #6194BC;')
         title.setOpenExternalLinks(True)
         vbox.addWidget(title)
-        desc = QtGui.QLabel(description)
+        desc = QtWidgets.QLabel(description)
         desc.setWordWrap(True)
         desc.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter)
         desc.setStyleSheet('font-size: 14pt;')
         vbox.addWidget(desc, 1)
 
-class PreButton(QtGui.QPushButton):
+class PreButton(QtWidgets.QPushButton):
 
     def __init__(self, title, description, parent=None):
         super(PreButton, self).__init__(parent)
@@ -34,14 +34,14 @@ class PreButton(QtGui.QPushButton):
                            '  background-color: #009999;'
                            '}')
         self.setFixedWidth(250)
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
-        title = QtGui.QLabel('{}'.format(title))
+        title = QtWidgets.QLabel('{}'.format(title))
         title.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter)
         title.setStyleSheet('font-size: 18pt; border-radius: 2px;')
         vbox.addWidget(title)
 
-        desc = QtGui.QLabel(description)
+        desc = QtWidgets.QLabel(description)
         desc.setWordWrap(True)
         desc.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter)
         desc.setStyleSheet('background-color: transparent; font-size: 14pt; color: #fefefe;')
@@ -49,16 +49,16 @@ class PreButton(QtGui.QPushButton):
         title.mousePressEvent = self.mousePressEvent
         desc.mousePressEvent = self.mousePressEvent
 
-class PreWidget(QtGui.QWidget):
+class PreWidget(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(PreWidget, self).__init__(parent)
-        main_layout = QtGui.QVBoxLayout()
+        main_layout = QtWidgets.QVBoxLayout()
         main_layout.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         self.setLayout(main_layout)
 
-        container = QtGui.QWidget(self)
-        vbox = QtGui.QVBoxLayout(container)
+        container = QtWidgets.QWidget(self)
+        vbox = QtWidgets.QVBoxLayout(container)
         container.setMaximumWidth(950)
         container.setMaximumHeight(530)
         container.setLayout(vbox)
@@ -100,15 +100,15 @@ class PreWidget(QtGui.QWidget):
         self.load.setFixedWidth(300)
         self.load.setFixedHeight(250)
 
-        actions_container = QtGui.QWidget()
-        hbox = QtGui.QHBoxLayout()
+        actions_container = QtWidgets.QWidget()
+        hbox = QtWidgets.QHBoxLayout()
         actions_container.setLayout(hbox)
 
-        hbox.addWidget(QtGui.QWidget(), 1)
+        hbox.addWidget(QtWidgets.QWidget(), 1)
         hbox.addWidget(self.open)
-        hbox.addWidget(QtGui.QWidget(), 1)
+        hbox.addWidget(QtWidgets.QWidget(), 1)
         hbox.addWidget(self.load)
-        hbox.addWidget(QtGui.QWidget(), 1)
+        hbox.addWidget(QtWidgets.QWidget(), 1)
 
         vbox.addWidget(actions_container)
-        vbox.addWidget(QtGui.QWidget(), 1)
+        vbox.addWidget(QtWidgets.QWidget(), 1)

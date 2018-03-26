@@ -1,6 +1,5 @@
-
 import numpy as np
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 import logging as log
 from collections import defaultdict
@@ -19,14 +18,14 @@ from ..core import DataModel, LayerManager, LabelManager
 from .. import actions as ac
 
 
-class EnsembleWidget(QtGui.QWidget):
+class EnsembleWidget(QtWidgets.QWidget):
 
     predict = QtCore.pyqtSignal(dict)
 
     def __init__(self, parent=None):
         super(EnsembleWidget, self).__init__(parent=parent)
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         vbox.setContentsMargins(0,0,0,0)
         self.setLayout(vbox)
 
@@ -44,15 +43,15 @@ class EnsembleWidget(QtGui.QWidget):
         self.lrate = PLineEdit(1., parse=float)
         self.subsample = PLineEdit(1., parse=float)
 
-        vbox.addWidget(HWidgets(QtGui.QLabel('# Trees:'),
+        vbox.addWidget(HWidgets(QtWidgets.QLabel('# Trees:'),
                                 self.ntrees,
-                                QtGui.QLabel('Max Depth:'),
+                                QtWidgets.QLabel('Max Depth:'),
                                 self.depth,
                                 stretch=[0,1,0,1]))
 
-        vbox.addWidget(HWidgets(QtGui.QLabel('Learn Rate:'),
+        vbox.addWidget(HWidgets(QtWidgets.QLabel('Learn Rate:'),
                                 self.lrate,
-                                QtGui.QLabel('Subsample:'),
+                                QtWidgets.QLabel('Subsample:'),
                                 self.subsample,
                                 stretch=[0,1,0,1]))
 
@@ -89,14 +88,14 @@ class EnsembleWidget(QtGui.QWidget):
         self.predict.emit(params)
 
 
-class SVMWidget(QtGui.QWidget):
+class SVMWidget(QtWidgets.QWidget):
 
     predict = QtCore.pyqtSignal(dict)
 
     def __init__(self, parent=None):
         super(SVMWidget, self).__init__(parent=parent)
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         vbox.setContentsMargins(0,0,0,0)
         self.setLayout(vbox)
 
@@ -111,9 +110,9 @@ class SVMWidget(QtGui.QWidget):
         self.penaltyc = PLineEdit(1.0, parse=float)
         self.gamma = PLineEdit('auto', parse=float)
 
-        vbox.addWidget(HWidgets(QtGui.QLabel('Penalty C:'),
+        vbox.addWidget(HWidgets(QtWidgets.QLabel('Penalty C:'),
                                 self.penaltyc,
-                                QtGui.QLabel('Gamma:'),
+                                QtWidgets.QLabel('Gamma:'),
                                 self.gamma,
                                 stretch=[0,1,0,1]))
 
@@ -132,14 +131,14 @@ class SVMWidget(QtGui.QWidget):
         self.predict.emit(params)
 
 
-class OnlineWidget(QtGui.QWidget):
+class OnlineWidget(QtWidgets.QWidget):
 
     predict = QtCore.pyqtSignal(dict)
 
     def __init__(self, parent=None):
         super(OnlineWidget, self).__init__(parent=parent)
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         vbox.setContentsMargins(0,0,0,0)
         self.setLayout(vbox)
 
@@ -163,9 +162,9 @@ class OnlineWidget(QtGui.QWidget):
         self.alpha = PLineEdit(0.0001, parse=float)
         self.n_iter = PLineEdit(5, parse=int)
 
-        vbox.addWidget(HWidgets(QtGui.QLabel('alpha:'),
+        vbox.addWidget(HWidgets(QtWidgets.QLabel('alpha:'),
                                 self.alpha,
-                                QtGui.QLabel('Num Iter:'),
+                                QtWidgets.QLabel('Num Iter:'),
                                 self.n_iter,
                                 stretch=[0,1,0,1]))
 
@@ -173,7 +172,7 @@ class OnlineWidget(QtGui.QWidget):
 
         self.btn_predict = ActionButton('Predict')
         self.btn_predict.clicked.connect(self.on_predict_clicked)
-        vbox.addWidget(HWidgets(QtGui.QLabel('Chunks:'),
+        vbox.addWidget(HWidgets(QtWidgets.QLabel('Chunks:'),
                                 self.chunks,
                                 None, self.btn_predict,
                                 stretch=[0,0,1,0]))
@@ -191,7 +190,7 @@ class OnlineWidget(QtGui.QWidget):
         self.predict.emit(params)
 
 
-class TrainPredict(QtGui.QWidget):
+class TrainPredict(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(TrainPredict, self).__init__(parent=None)
@@ -205,7 +204,7 @@ class TrainPredict(QtGui.QWidget):
         self.parent_level = None
         self.parent_label = -1
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
 
         vbox.addWidget(SubHeaderLabel('Descriptor'))
@@ -248,8 +247,8 @@ class TrainPredict(QtGui.QWidget):
         self.train_alg.currentIndexChanged.connect(self.on_classifier_changed)
         vbox.addWidget(self.train_alg)
 
-        self.clf_container = QtGui.QWidget()
-        vbox2 = QtGui.QVBoxLayout()
+        self.clf_container = QtWidgets.QWidget()
+        vbox2 = QtWidgets.QVBoxLayout()
         vbox2.setContentsMargins(0,0,0,0)
         self.clf_container.setLayout(vbox2)
 
@@ -316,7 +315,7 @@ class TrainPredict(QtGui.QWidget):
         level = self.selected_level
 
         if level < 0 or level is None:
-            QtGui.QMessageBox.critical(self, "Error", "No level selected")
+            QtWidgets.QMessageBox.critical(self, "Error", "No level selected")
             return
 
         parent_level = self.parent_level
@@ -399,7 +398,7 @@ class TrainPredict(QtGui.QWidget):
         self.DM.level_predicted.emit(self.selected_level)
 
 
-class UncertainLabelWidget(QtGui.QWidget):
+class UncertainLabelWidget(QtWidgets.QWidget):
 
     save = QtCore.pyqtSignal(int)
 
@@ -408,7 +407,7 @@ class UncertainLabelWidget(QtGui.QWidget):
 
         self.idx = idx
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
         self.setLayout(hbox)
 
@@ -428,7 +427,7 @@ class UncertainLabelWidget(QtGui.QWidget):
         self.save.emit(self.idx)
 
 
-class Uncertainty(QtGui.QWidget):
+class Uncertainty(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(Uncertainty, self).__init__(parent=parent)
@@ -441,7 +440,7 @@ class Uncertainty(QtGui.QWidget):
         self.parent_level = None
         self.parent_label = -1
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
 
         self.level_header = SubHeaderLabel('No Level Predicted Yet')
@@ -527,7 +526,7 @@ class Uncertainty(QtGui.QWidget):
 
     def on_save_label(self, idx):
         if not self.LM.isin('Predictions', 'Predictions'):
-            QtGui.QMessageBox.critical(self, 'Error', 'No label predicted')
+            QtWidgets.QMessageBox.critical(self, 'Error', 'No label predicted')
             return
 
         f = self.txt_from.value()
@@ -574,8 +573,8 @@ class Training(Plugin):
         self.launcher = Launcher.instance()
 
         # Levels
-        dummy = QtGui.QWidget()
-        vbox = QtGui.QVBoxLayout()
+        dummy = QtWidgets.QWidget()
+        vbox = QtWidgets.QVBoxLayout()
         dummy.setLayout(vbox)
         self.use_level = TComboBox('Predict Level:', ['Level {}'.format(i) for i in self.LBLM.levels()])
         self.use_parent = TComboBox('Constrain Region:', ['None'])
@@ -611,12 +610,10 @@ class Training(Plugin):
         if idx < 0:
             self.train_widget.select_level(None, None, -1)
             return
-
-        self.train_widget.select_level(self.levels[idx], None, -1)
+        self.train_widget.select_level(list(self.levels)[idx], None, -1)
 
         self.parent_labels = [(None, None)]
         self.use_parent.clear()
-
         self.use_parent.addItem('None')
         for i in range(len(self.levels)):
             if i == idx:
@@ -641,12 +638,12 @@ class Training(Plugin):
 
     def on_label_added(self, level, dataset, label):
         current = self.use_level.currentIndex()
-        if current >= 0 and self.levels[current] != level:
+        if current >= 0 and list(self.levels)[current] != level:
             self.use_level.setCurrentIndex(self.levels.index(level))
 
     def on_label_name_changed(self, level, ds, label, name):
         current = self.use_level.currentIndex()
-        if current >= 0 and self.levels[current] != level:
+        if current >= 0 and list(self.levels)[current] != level:
             idx = -1
             for n, (lvl, lbl) in enumerate(self.parent_labels):
                 if lvl == level and lbl.idx == label:
@@ -658,7 +655,7 @@ class Training(Plugin):
 
     def on_label_removed(self, level, ds, label):
         current = self.use_level.currentIndex()
-        if current >= 0 and self.levels[current] != level:
+        if current >= 0 and list(self.levels)[current] != level:
             idx = -1
             for n, (lvl, lbl) in enumerate(self.parent_labels):
                 if lvl == level and lbl.idx == label:

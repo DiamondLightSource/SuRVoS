@@ -1,9 +1,9 @@
 
 
 import numpy as np
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
-from Queue import Queue
+from queue import Queue
 
 from .base import Plugin
 from ..widgets import HWidgets, LCheckBox, RCheckBox, PLineEdit, \
@@ -186,32 +186,32 @@ class FeatureRow(RoundedWidget):
                                          dtype=np.float32, params=params,
                                          fillvalue=np.nan)
 
-        self.chk_compute = QtGui.QCheckBox()
-        self.btn_delete = QtGui.QPushButton('X')
+        self.chk_compute = QtWidgets.QCheckBox()
+        self.btn_delete = QtWidgets.QPushButton('X')
         self.btn_delete.setMaximumWidth(25)
         self.btn_delete.setMaximumHeight(30)
         self.btn_delete.setMinimumHeight(30)
         self.btn_delete.setMinimumWidth(25)
 
-        self.txt_name = QtGui.QLabel('[{}] {}'.format(self.idx, self.feature[0]))
+        self.txt_name = QtWidgets.QLabel('[{}] {}'.format(self.idx, self.feature[0]))
         self.txt_name.setStyleSheet('background-color: #6DC7C7; color: #006161;'
                                     'padding-left: 10px;')
 
-        self.btn_compute = QtGui.QPushButton(u'\u2713')
+        self.btn_compute = QtWidgets.QPushButton(u'\u2713')
         self.btn_compute.setContentsMargins(0,0,0,0)
         self.btn_compute.setMaximumWidth(25)
         self.btn_compute.setCheckable(True)
         if active == True:
             self.btn_compute.setChecked(True)
 
-        self.btn_show = QtGui.QPushButton(u'\u25B2')
+        self.btn_show = QtWidgets.QPushButton(u'\u25B2')
         self.btn_show.setMaximumWidth(25)
         self.btn_show.setMaximumHeight(30)
         self.btn_show.setMinimumHeight(30)
         self.btn_show.setMinimumWidth(25)
         self.visible = True
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
         vbox.addWidget(HWidgets(self.chk_compute, self.btn_delete,
                                 self.txt_name,
@@ -223,10 +223,10 @@ class FeatureRow(RoundedWidget):
         self.btn_delete.clicked.connect(self.on_delete)
         self.btn_compute.clicked.connect(self.on_compute)
 
-        self.param_container = QtGui.QWidget()
+        self.param_container = QtWidgets.QWidget()
         vbox.addWidget(self.param_container)
 
-        vbox = QtGui.QVBoxLayout(self.param_container)
+        vbox = QtWidgets.QVBoxLayout(self.param_container)
         vbox.setContentsMargins(0,0,0,0)
 
         self.source_combo = SourceCombo(ignore=self.fname) # ignore self
@@ -253,7 +253,7 @@ class FeatureRow(RoundedWidget):
     def init_params(self, vbox, load_params):
         for param in self.feature[2]:
             if param[1] == bool:
-                curr = QtGui.QCheckBox()
+                curr = QtWidgets.QCheckBox()
                 curr.setChecked(param[2])
                 curr.value = curr.isChecked
                 if param[0] in load_params:
@@ -323,7 +323,7 @@ class FeatureChannels(Plugin):
         self.launcher = Launcher.instance()
 
         self.addWidget(HeaderLabel('Feature Channels'))
-        #self.cmb_features = QtGui.QComboBox(self)
+        #self.cmb_features = QtWidgets.QComboBox(self)
         self.cmb_features = SectionCombo('Select Feature', parent=self)
         self.cmb_features.setMinimumWidth(280)
         for i, feature in enumerate(available_features):
@@ -331,30 +331,30 @@ class FeatureChannels(Plugin):
 
         self.btn_add = ActionButton('Add')
 
-        dummy = QtGui.QWidget(self)
-        vbox = QtGui.QVBoxLayout(dummy)
+        dummy = QtWidgets.QWidget(self)
+        vbox = QtWidgets.QVBoxLayout(dummy)
         dummy.setLayout(vbox)
         vbox.addWidget(HWidgets(self.cmb_features, self.btn_add, stretch=[1,0],
                                 parent=self))
 
-        self.chk_all = QtGui.QCheckBox("Select all features")
+        self.chk_all = QtWidgets.QCheckBox("Select all features")
         self.chk_all.stateChanged.connect(self.on_check_all)
-        self.cmp_all = QtGui.QPushButton("Compute features")
+        self.cmp_all = QtWidgets.QPushButton("Compute features")
         self.cmp_all.setMinimumWidth(150)
         self.cmp_all.clicked.connect(self.on_compute_all)
         vbox.addWidget(HWidgets(self.chk_all, None, self.cmp_all, stretch=[0,1,0]))
 
         self.addWidget(dummy)
 
-        spacer = QtGui.QWidget()
+        spacer = QtWidgets.QWidget()
         spacer.setMinimumHeight(10)
         spacer.setMaximumHeight(10)
         vbox.addWidget(spacer)
 
         vbox.addWidget(SubHeaderLabel('Available Channels'))
 
-        dummy = QtGui.QWidget()
-        self.feature_container = QtGui.QVBoxLayout()
+        dummy = QtWidgets.QWidget()
+        self.feature_container = QtWidgets.QVBoxLayout()
         dummy.setLayout(self.feature_container)
         self.addWidget(dummy)
 
@@ -477,7 +477,7 @@ class FeatureChannels(Plugin):
 
     def on_features_computed(self, result):
         if result is None:
-            QtGui.QMessageBox.critical(self, 'Error', 'Feature not available')
+            QtWidgets.QMessageBox.critical(self, 'Error', 'Feature not available')
         else:
             out, idx, params = result
             self.DM.channel_computed.emit(out, params)

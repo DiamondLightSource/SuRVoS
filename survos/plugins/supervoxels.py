@@ -1,6 +1,6 @@
 
 import numpy as np
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 import logging as log
 
@@ -14,7 +14,7 @@ from .. import actions as ac
 
 from ..lib._features import find_boundaries
 
-class SuperVoxels(QtGui.QWidget):
+class SuperVoxels(QtWidgets.QWidget):
 
     name = 'SuperVoxels'
 
@@ -23,7 +23,7 @@ class SuperVoxels(QtGui.QWidget):
 
         self.DM = DataModel.instance()
         self.LM = LayerManager.instance()
-        self.setLayout(QtGui.QVBoxLayout())
+        self.setLayout(QtWidgets.QVBoxLayout())
 
         self.source_combo = SourceCombo()
         self.layout().addWidget(HWidgets(None, 'Source:', self.source_combo, stretch=[1]))
@@ -42,7 +42,7 @@ class SuperVoxels(QtGui.QWidget):
 
 
         self.btn_apply = ActionButton('Apply')
-        dummy = HWidgets(QtGui.QWidget(), self.btn_apply,\
+        dummy = HWidgets(QtWidgets.QWidget(), self.btn_apply,\
                          stretch=[1,0])
 
         self.layout().addWidget(dummy)

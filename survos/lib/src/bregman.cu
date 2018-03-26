@@ -221,7 +221,7 @@ update_v_poisson(const float* f, const float* u, float* v, float* b2,
 
 
 // Main function
-void tvbregman(const float* src, float* dst, float lambda, float mu,
+void tvbregman_gpu(const float* src, float* dst, float lambda, float mu,
                int3 shape, int maxIter, float eps, bool isotropic, int method,
                int gpu)
 {

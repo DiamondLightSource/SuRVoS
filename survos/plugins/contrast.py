@@ -1,6 +1,6 @@
 
 import numpy as np
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 from ..widgets import HSlider, HWidgets, ActionButton, TComboBox
 from ..widgets.mpl_widgets import MplCanvas
@@ -12,14 +12,14 @@ import logging as log
 import seaborn as sns
 from matplotlib import pyplot as plt
 
-class Contrast(QtGui.QWidget):
+class Contrast(QtWidgets.QWidget):
 
     name = 'Contrast'
 
     def __init__(self, parent=None):
         super(Contrast, self).__init__(parent=parent)
 
-        vbox = QtGui.QVBoxLayout(self)
+        vbox = QtWidgets.QVBoxLayout(self)
         self.setLayout(vbox)
 
         self.DM = DataModel.instance()
@@ -33,7 +33,7 @@ class Contrast(QtGui.QWidget):
         vbox.addWidget(self.sld_vmin)
         vbox.addWidget(self.sld_vmax)
 
-        visualize = QtGui.QCheckBox('View Histogram')
+        visualize = QtWidgets.QCheckBox('View Histogram')
         default = ActionButton('Default')
         default.clicked.connect(self.restore_default)
         vbox.addWidget(HWidgets(visualize, None, default, stretch=[0,1,0]))
@@ -62,9 +62,9 @@ class Contrast(QtGui.QWidget):
         self.vmin = self.vmax = self.evmin = self.evmax = 0
         self.update_contrast(self.current_channel)
 
-        self.threshold = QtGui.QCheckBox('Threshold')
+        self.threshold = QtWidgets.QCheckBox('Threshold')
         self.cmb_save_to = TComboBox('Save to:', [])
-        self.btn_save_to = QtGui.QPushButton('Save')
+        self.btn_save_to = QtWidgets.QPushButton('Save')
         vbox.addWidget(HWidgets(self.threshold, self.cmb_save_to, self.btn_save_to,
                                 stretch=[1]))
 

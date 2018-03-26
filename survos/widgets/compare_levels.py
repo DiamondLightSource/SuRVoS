@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 from .. import actions as ac
 from ..plugins import Plugin
@@ -15,14 +15,14 @@ from .base import HeaderLabel, SComboBox, RoundedWidget, \
     TComboBox, HWidgets, SubHeaderLabel, ColorButton, RCheckBox
 
 
-class CompareLevel(QtGui.QWidget):
+class CompareLevel(QtWidgets.QWidget):
 
     def __init__(self, name, parent=None):
         super(CompareLevel, self).__init__(parent=parent)
 
         self.LBLM = LabelManager.instance()
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         vbox.setAlignment(QtCore.Qt.AlignTop)
         self.setLayout(vbox)
         vbox.addWidget(HeaderLabel('Level {}'.format(name)))
@@ -32,8 +32,8 @@ class CompareLevel(QtGui.QWidget):
         self.level_combo.setMinimumWidth(200)
         vbox.addWidget(self.level_combo)
 
-        self.container = QtGui.QWidget()
-        vbox2 = QtGui.QVBoxLayout(self.container)
+        self.container = QtWidgets.QWidget()
+        vbox2 = QtWidgets.QVBoxLayout(self.container)
         vbox2.setAlignment(QtCore.Qt.AlignTop)
         vbox.addWidget(self.container, 1)
 
@@ -69,11 +69,13 @@ class CompareLevel(QtGui.QWidget):
         self.labels.clear()
 
         self.level_selected = self.levels[level]
-
-        for label in self.LBLM.labels(self.levels[level]):
-            widget = CompareLabel(label.idx, label.name, label.color)
-            self.labels[label.idx] = widget
-            self.container.layout().addWidget(widget)
+        try:
+            for label in self.LBLM.labels(self.levels[level]):
+                widget = CompareLabel(label.idx, label.name, label.color)
+                self.labels[label.idx] = widget
+                self.container.layout().addWidget(widget)
+        except:
+            pass
 
     def on_label_added(self, level, level_name, label, label_name):
         if level != self.level_selected or label in self.labels:
@@ -117,13 +119,13 @@ class CompareLabel(RoundedWidget):
         self.idx = idx
         self.name = name
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         self.setLayout(hbox)
 
         self.color = ColorButton(color=color, clickable=False)
         hbox.addWidget(self.color)
 
-        self.label = QtGui.QLabel(name)
+        self.label = QtWidgets.QLabel(name)
         hbox.addWidget(self.label, 1)
 
         self.combo = TComboBox('Target ID', ['Ignore'] + list(range(25)),
@@ -150,30 +152,30 @@ class ScoreWidget(RoundedWidget):
     def __init__(self, name, score, parent=None):
         super(ScoreWidget, self).__init__(
             parent=parent, color=None, bg='#cde5e5', width=0)
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         self.setLayout(hbox)
-        slabel = QtGui.QLabel('{0:.4f}'.format(score))
+        slabel = QtWidgets.QLabel('{0:.4f}'.format(score))
         slabel.setFixedWidth(80)
         slabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         hbox.addWidget(HWidgets(name, None, slabel,
                                 sctretch=[False, True, False]))
 
 
-class ComparisonResult(QtGui.QWidget):
+class ComparisonResult(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(ComparisonResult, self).__init__(parent=parent)
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
         self.setMaximumHeight(400)
         vbox.addWidget(HeaderLabel('Results'))
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         vbox.addLayout(hbox)
 
-        self.scores = QtGui.QWidget()
+        self.scores = QtWidgets.QWidget()
         self.scores.setMinimumWidth(300)
-        vbox2 = QtGui.QVBoxLayout()
+        vbox2 = QtWidgets.QVBoxLayout()
         vbox2.setAlignment(QtCore.Qt.AlignTop)
         self.scores.setLayout(vbox2)
 
@@ -241,18 +243,18 @@ class QuantitativeAnalysis(Plugin):
         self.LBLM = LabelManager.instance()
 
         self.layout.parent = None
-        vbox = QtGui.QVBoxLayout(self)
+        vbox = QtWidgets.QVBoxLayout(self)
         self.layout = vbox
-        splitter = QtGui.QSplitter()
+        splitter = QtWidgets.QSplitter()
 
         self.level_widget1 = CompareLevel('A')
-        scroll = QtGui.QScrollArea()
+        scroll = QtWidgets.QScrollArea()
         scroll.setWidget(self.level_widget1)
         scroll.setWidgetResizable(True)
         splitter.addWidget(scroll)
 
         self.level_widget2 = CompareLevel('B')
-        scroll = QtGui.QScrollArea()
+        scroll = QtWidgets.QScrollArea()
         scroll.setWidget(self.level_widget2)
         scroll.setWidgetResizable(True)
         splitter.addWidget(scroll)
@@ -265,7 +267,7 @@ class QuantitativeAnalysis(Plugin):
         self.jacc.setChecked(False)
         self.cohen = RCheckBox('Cohen\'s Kappa')
         self.cohen.setChecked(False)
-        button = QtGui.QPushButton('Calculate Segmentation Coefficients')
+        button = QtWidgets.QPushButton('Calculate Segmentation Coefficients')
         vbox.addWidget(HWidgets(None, self.dice, self.jacc,
                                 self.cohen, button, None,
                                 stretch=[True, False, False, False, False, False, True]))

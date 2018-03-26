@@ -1,6 +1,6 @@
 
 
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 import time
 
@@ -25,7 +25,7 @@ from .mpl_widgets import PerspectiveCanvas
 from .base import TComboBox, PLineEdit, HWidgets, HSize3D, ULabel, OddSlider, \
                   SourceCombo
 
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from skimage.draw import line, bezier_curve
 
 
@@ -93,24 +93,24 @@ class NavigationToolbar(NavigationToolbar2QT):
 
     def _init_toolbar(self):
 
-        con_button = QtGui.QToolButton()
-        con_action = QtGui.QAction(self._icon('contrast'), '', con_button)
+        con_button = QtWidgets.QToolButton()
+        con_action = QtWidgets.QAction(self._icon('contrast'), '', con_button)
         con_button.setDefaultAction(con_action)
         con_menu = ContrastMenu(self)
         con_button.setMenu(con_menu)
-        con_button.setPopupMode(QtGui.QToolButton.InstantPopup)
+        con_button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         con_button.setStyleSheet('QToolButton {margin-left: 0px; width: 24px;}'
                                  'QToolButton::menu-indicator {'
                                  '  width: 0px; border: none; image: none;'
                                  '}')
         self.addWidget(con_button)
 
-        viz_button = QtGui.QToolButton()
-        viz_action = QtGui.QAction(self._icon('layers'), '', viz_button)
+        viz_button = QtWidgets.QToolButton()
+        viz_action = QtWidgets.QAction(self._icon('layers'), '', viz_button)
         viz_button.setDefaultAction(viz_action)
         viz_menu = LayersMenu(self)
         viz_button.setMenu(viz_menu)
-        viz_button.setPopupMode(QtGui.QToolButton.InstantPopup)
+        viz_button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         viz_button.setStyleSheet('QToolButton {margin-left: 0px; width: 24px;}'
                                  'QToolButton::menu-indicator {'
                                  '  width: 0px; border: none; image: none;'
@@ -159,17 +159,17 @@ class SliceViewer(Plugin):
         self.DM = DataModel.instance()
         self.layered_canvas = LayeredCanvas()
 
-        self.tool_options = QtGui.QWidget()
-        hbox = QtGui.QHBoxLayout()
+        self.tool_options = QtWidgets.QWidget()
+        hbox = QtWidgets.QHBoxLayout()
         self.tool_options.setLayout(hbox)
         hbox.setContentsMargins(0, 0, 0, 0)
 
-        self.locLabel = QtGui.QLabel("", self)
+        self.locLabel = QtWidgets.QLabel("", self)
         self.locLabel.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         self.locLabel.setSizePolicy(
-            QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
-                              QtGui.QSizePolicy.Ignored))
+            QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                              QtWidgets.QSizePolicy.Ignored))
 
         self.toolbar = NavigationToolbar(
             self.layered_canvas.canvas, self, self.locLabel)
@@ -387,7 +387,7 @@ class LayeredCanvas(PerspectiveCanvas):
         pos = (self.idx, y, x)
         source, lamda, bbox, region = self.DM.growing_bbox
         if self.DM.attrs('data/{}'.format(source), 'active') != 1:
-            QtGui.QMessageBox.critical(self, 'Error',
+            QtWidgets.QMessageBox.critical(self, 'Error',
                                        '{} dataset not valid'.format(source))
             return
 
@@ -399,7 +399,7 @@ class LayeredCanvas(PerspectiveCanvas):
                               lamda=lamda, annotations=ldata, label=label,
                               caption='Growing region..', cb=self.on_region_grow)
         else:
-            QtGui.QMessageBox.critical(self, "Error", "Not supported yet.")
+            QtWidgets.QMessageBox.critical(self, "Error", "Not supported yet.")
 
     def on_region_grow(self, params):
         indexes, values = params
@@ -446,7 +446,7 @@ class LayeredCanvas(PerspectiveCanvas):
         if pos.shape[0] == 0:
             pos = np.c_[cr, cc]
 
-        print "Time Smooth:", time.time() - t0
+        print("Time Smooth:", time.time() - t0)
         t0 = time.time()
 
         _, region_maxy, region_maxx = self.DM.region_shape()
@@ -473,7 +473,7 @@ class LayeredCanvas(PerspectiveCanvas):
 
         pos = np.column_stack(np.where(mask2d))
 
-        print "Time Dilate:", time.time() - t0
+        print("Time Dilate:", time.time() - t0)
 
         t0 = time.time()
 
@@ -567,7 +567,7 @@ class LayeredCanvas(PerspectiveCanvas):
             indexes[:, 1:] = pos
             apply_roi = True
 
-        print "Time Get Index:", time.time() - t0
+        print("Time Get Index:", time.time() - t0)
 
         t0 = time.time()
 
@@ -589,7 +589,7 @@ class LayeredCanvas(PerspectiveCanvas):
         self.DM.last_changes = (level, (slice_z, slice_y, slice_x),
                                 indexes, values, apply_roi)
 
-        print "Time Replace Data:", time.time() - t0
+        print("Time Replace Data:", time.time() - t0)
 
         log.debug('* Done')
         self.update_volume(self.idx)
@@ -691,7 +691,7 @@ class GrowTool(HWidgets):
         if not self.DM.has_ds('data/{}'.format(source)):
             self.bbox_source.setCurrentIndex(0)
             errmsg = 'Dataset {} has to be created first'.format(source)
-            QtGui.QMessageBox.critical(self, 'Error', errmsg)
+            QtWidgets.QMessageBox.critical(self, 'Error', errmsg)
             return
 
         self.DM.growing_bbox = [source, lamda, bbox, level]

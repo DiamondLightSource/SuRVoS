@@ -2,7 +2,7 @@
 
 import h5py as h5
 import numpy as np
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 import os
 import logging as log
@@ -32,13 +32,13 @@ class CheckableLevel(RoundedWidget):
         self.idx = level_id
         self.name = level_name
 
-        hbox = QtGui.QHBoxLayout()
+        hbox = QtWidgets.QHBoxLayout()
         self.setLayout(hbox)
 
-        self.select = QtGui.QCheckBox()
+        self.select = QtWidgets.QCheckBox()
         hbox.addWidget(self.select)
 
-        self.name = QtGui.QLabel(level_name)
+        self.name = QtWidgets.QLabel(level_name)
         self.name.setStyleSheet('font-size: 12pt; color: #009999;'
                                 'font-weight: bold;')
         hbox.addWidget(self.name, 1)
@@ -65,15 +65,15 @@ class Export(Plugin):
         self.launcher = Launcher.instance()
 
         self.addWidget(HeaderLabel('Export Segmentations'))
-        dummy = QtGui.QWidget()
-        vbox = QtGui.QVBoxLayout()
+        dummy = QtWidgets.QWidget()
+        vbox = QtWidgets.QVBoxLayout()
         dummy.setLayout(vbox)
         self.addWidget(dummy)
 
         vbox.addWidget(SubHeaderLabel('Available Annotation Levels'))
         self.levels = {}
-        self.container = QtGui.QWidget()
-        self.container.setLayout(QtGui.QVBoxLayout())
+        self.container = QtWidgets.QWidget()
+        self.container.setLayout(QtWidgets.QVBoxLayout())
         vbox.addWidget(self.container)
 
         vbox.addWidget(SubHeaderLabel('Export Levels'))
@@ -86,16 +86,16 @@ class Export(Plugin):
         vbox.addWidget(HWidgets(self.combo, None, stretch=[0,1]))
 
         self.source = SourceCombo()
-        self.scale = QtGui.QCheckBox('Normalize')
+        self.scale = QtWidgets.QCheckBox('Normalize')
         self.scale.setChecked(True)
-        self.invert = QtGui.QCheckBox('Invert')
+        self.invert = QtWidgets.QCheckBox('Invert')
         self.scont = HWidgets(self.source, self.scale, self.invert, stretch=[1,0,0])
         self.scont.setVisible(False)
         vbox.addWidget(self.scont)
 
         formats = ['HDF5 (.h5)', 'MRC (.mrc)', 'Tiff Stack (.tiff)']
         self.format = TComboBox('Format:', formats, selected=0)
-        self.overwrite = QtGui.QCheckBox('Overwrite')
+        self.overwrite = QtWidgets.QCheckBox('Overwrite')
         self.overwrite.setChecked(True)
         self.export = ActionButton('Export')
         vbox.addWidget(HWidgets(self.format, self.overwrite, self.export,
@@ -239,10 +239,10 @@ class Export(Plugin):
         if os.path.isfile(path):
             err_msg = 'Destination dataset [{}] already exists, '\
                       'do you want to overwrite it?'.format(path)
-            ans = QtGui.QMessageBox.question(self, "Error", err_msg,
-                                             QtGui.QMessageBox.Yes,
-                                             QtGui.QMessageBox.No)
-            if ans == QtGui.QMessageBox.No:
+            ans = QtWidgets.QMessageBox.question(self, "Error", err_msg,
+                                             QtWidgets.QMessageBox.Yes,
+                                             QtWidgets.QMessageBox.No)
+            if ans == QtWidgets.QMessageBox.No:
                 log.info('  -- Skipping')
                 return False
         return True

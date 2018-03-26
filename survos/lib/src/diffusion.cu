@@ -69,7 +69,7 @@ void anisodiff3d(const float* data, float* result, int type,
 
 
 // Main function
-void anidiffusion(const float* src, float* dst, const float lambda,
+void anidiffusion_gpu(const float* src, float* dst, const float lambda,
                   const int3 shape, const float gamma, const int mode,
                   const int maxIter, const float eps, int gpu)
 {

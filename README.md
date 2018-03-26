@@ -28,3 +28,13 @@ If you use SuRVoS for your academic publication, please consider citing the foll
     }
 
 [Read the article online (Open Access)](http://www.sciencedirect.com/science/article/pii/S1047847717300308).
+
+# Installation on Windows and Linux
+Install the latest version of NVIDIA drivers
+```
+>>conda create -n ccpi python=3.6
+>>activate ccpi [Windows] or source activate ccpi [Linux]
+>>conda install -c ccpi -c conda-forge -c numba survos
+>>SuRVos
+```
+

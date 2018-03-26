@@ -7,6 +7,7 @@ from .model import DataModel
 from .singleton import Singleton
 
 from matplotlib import cm
+import six
 
 Axial = DataModel.instance().Axial
 Sagittal = DataModel.instance().Sagittal
@@ -78,7 +79,7 @@ class Layer(object):
         return shape
 
     def get_slice(self, data, idx):
-        if type(data) in [str, unicode]:
+        if isinstance(data, six.string_types):
             return self.DM.load_slices(data, idx)[0]
         else:
             raise Exception('This shouldnt happen')
@@ -102,7 +103,7 @@ class LayerManager(QtCore.QObject):
         return len(self._layers)
 
     def levels(self):
-        return self._levels.keys()
+        return list(self._levels.copy().keys())
 
     def layers(self, level=None):
         if level is None:

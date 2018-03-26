@@ -3,9 +3,9 @@
 import numpy as np
 
 # 2D Dosition
-from scipy.linalg import svd
+#from scipy.linalg import svd
 # 3D Dosition
-from sktensor import dtensor, cp_als
+#from sktensor import dtensor, cp_als
 
 from ._convolutions import gconv, gconvs, gconvssh, ngconvssh
 
@@ -33,7 +33,7 @@ def make_rotated_grid(shape, orient):
 
 
 def make_gaussian_1d(sigma=1., size=None, order=0, trunc=3):
-    if size == None:
+    if size is None:
         size = sigma * trunc * 2 + 1
     x = np.arange(-(size//2), (size//2)+1)
     if order > 2:
@@ -50,7 +50,7 @@ def make_gaussian_1d(sigma=1., size=None, order=0, trunc=3):
 
 
 def make_3d_gaussian(shape, sigma, orders=(0, 1, 0), orient=(0,0)):
-    if type(sigma) == tuple or type(sigma) == list:
+    if isinstance(sigma, tuple) or isinstance(sigma, list):
         sz, sy, sx = sigma
     else:
         sz, sy, sx = (sigma * (1. + 2. * o) for o in orders)
@@ -67,6 +67,7 @@ def make_3d_gaussian(shape, sigma, orders=(0, 1, 0), orient=(0,0)):
             g *= (x**2 - s**2)
 
     return g
+
 
 def make_3d_gabor(shape, sigmas, frequency, offset=0, orient=(0,0), return_real=True):
     sz, sy, sx = sigmas
@@ -87,17 +88,20 @@ def rec_2d(D, weights=None):
     if weights is None:
         weights = np.ones(len(D), D[0][0].dtype)
     R = np.zeros((D[0][0].shape[0], D[0][1].shape[0]))
-    for i in range(len(D)):
-        R += D[i][0][:, None] * D[i][1][None, :] * weights[i]
+    for i, d in enumerate(D):
+        R += d[0][:, None] * d[1][None, :] * weights[i]
     return R
+
 
 def rec_3d(D, weights=None):
     if weights is None:
         weights = np.ones(len(D), D[0][0].dtype)
     R = np.zeros((D[0][0].shape[0], D[0][1].shape[0], D[0][2].shape[0]))
-    for i in range(len(D)):
-        R += D[i][0][:, None, None] * D[i][1][None, :, None] * D[i][2][None, None, :] * weights[i]
+    for i, d in enumerate(D):
+        R += d[0][:, None, None] * d[1][None, :, None] * d[2][None, None, :] \
+             * weights[i]
     return R
+
 
 def rec_error(X, R, mean=True):
     if mean:
@@ -105,7 +109,7 @@ def rec_error(X, R, mean=True):
     else:
         return np.sum((X - R)**2)
 
-def separate_kernel(kernel, max_rank=1, return_error=False, return_weights=False):
+"""def separate_kernel(kernel, max_rank=1, return_error=False, return_weights=False):
     if kernel.ndim == 1:
         return kernel
     elif kernel.ndim == 2:
@@ -149,4 +153,4 @@ def separate_kernel(kernel, max_rank=1, return_error=False, return_weights=False
             else:
                 return D
     else:
-        raise Exception("Kernel dimensions not supported")
+        raise Exception("Kernel dimensions not supported")"""

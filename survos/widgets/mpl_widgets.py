@@ -1,8 +1,7 @@
-
-from ..qt_compat import QtGui, QtCore
-
 import matplotlib as mpl
-mpl.use("Qt4Agg")
+mpl.use("Qt5Agg", force=True)
+
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 import matplotlib.pyplot as plt
 
@@ -14,8 +13,8 @@ from ..core import DataModel, LayerManager, LabelManager, Launcher
 from ..plugins.base import Plugin
 
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4 import FigureManagerQT
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt5 import FigureManagerQT
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
 
 Axial = DataModel.instance().Axial
@@ -36,13 +35,13 @@ class OrthogonalViewer(Plugin):
             mc = MplCanvas(orient=orient)
             self.layout.addWidget(mc, i%2, i//2)
 
-class MplCanvas(QtGui.QWidget):
+class MplCanvas(QtWidgets.QWidget):
 
     def __init__(self, orient=Axial, axisoff=True, autoscale=False, **kwargs):
         super(MplCanvas, self).__init__()
 
         self.orient = orient
-        self.setLayout(QtGui.QVBoxLayout())
+        self.setLayout(QtWidgets.QVBoxLayout())
 
         # Figure
         self.fig, self.ax, self.canvas = self.figimage(axisoff=axisoff)
@@ -86,7 +85,7 @@ class PerspectiveCanvas(MplCanvas):
 
         self.idx = self.DM.data_shape[orient] // 2
 
-        topbox = QtGui.QHBoxLayout()
+        topbox = QtWidgets.QHBoxLayout()
         self.layout().insertLayout(0, topbox)
 
         # Slider
@@ -169,8 +168,8 @@ class FigureCanvas(FigureCanvasQTAgg):
     def __init__(self, figure, **kwargs):
         self.fig = figure
         super(FigureCanvas, self).__init__(self.fig)
-        self.setSizePolicy(QtGui.QSizePolicy.Expanding,
-                            QtGui.QSizePolicy.Expanding)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding,
+                            QtWidgets.QSizePolicy.Expanding)
         self.updateGeometry()
         self.mouse_lines = None
         self.mouse_color = QtCore.Qt.black

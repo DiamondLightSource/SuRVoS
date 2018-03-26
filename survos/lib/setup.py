@@ -2,6 +2,7 @@
 
 
 import os
+from sys import platform
 from numpy.distutils.core import setup
 from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
 
@@ -44,7 +45,14 @@ def get_qpbo():
     os.remove(qpbo_file)
 
 def cuda_extension(config, name, sources, CUDA, gcc_args=[], gpp_args=[]):
-    config.add_extension(name, sources=sources,
+    if platform == "win32":
+        config.add_extension(name, sources=sources,
+                         library_dirs=[CUDA['lib64']],
+                         libraries=['cudart'], language='c++',
+                         include_dirs = [get_numpy_include_dirs()[0],
+                                         CUDA['include'], 'src'])
+    else:
+        config.add_extension(name, sources=sources,
                          library_dirs=[CUDA['lib64']],
                          libraries=['cudart', 'stdc++'], language='c++',
                          runtime_library_dirs=[CUDA['lib64']],
@@ -73,10 +81,12 @@ def configuration(parent_package='', top_path=None):
                            cmdclass={'build_ext': custom_build_ext})
 
     CUDA = locate_cuda()
-
+    extra_libraries = []
+    if platform != "win32":
+        extra_libraries = ["stdc++"]
     files = ['_supersegments.pyx']
     config.add_extension('_supersegments', sources=files,
-                         language='c++', libraries=["stdc++"],
+                         language='c++', libraries=extra_libraries,
                          include_dirs=[get_numpy_include_dirs()])
 
     sources = ['src/cuda.cu', 'src/tv.cu', 'src/diffusion.cu',
@@ -113,7 +123,7 @@ def configuration(parent_package='', top_path=None):
     files = [os.path.join(qpbo_directory, f) for f in files]
     files = ['_qpbo.pyx'] + files
     config.add_extension('_qpbo', sources=files, language='c++',
-                         libraries=["stdc++"],
+                         libraries=extra_libraries,
                          include_dirs=[qpbo_directory, get_numpy_include_dirs()],
                          library_dirs=[qpbo_directory],
                          extra_compile_args=[],

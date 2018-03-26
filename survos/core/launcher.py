@@ -1,12 +1,12 @@
-
-from ..qt_compat import QtGui, QtCore
+import six
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 from .singleton import Singleton
 from .model import DataModel
 
 import logging as log
 
-from Queue import Queue
+from queue import Queue
 
 import sys
 import traceback
@@ -43,11 +43,11 @@ class Launcher(QtCore.QObject):
     def setup(self, caption):
         log.info('\n### {} ###'.format(caption))
         self.pre.emit(caption)
-        QtGui.qApp.processEvents()
+        QtWidgets.qApp.processEvents()
 
     def cleanup(self):
         self.post.emit()
-        QtGui.qApp.processEvents()
+        QtWidgets.qApp.processEvents()
 
     def on_result(self, res=None):
         if self.cb is not None:

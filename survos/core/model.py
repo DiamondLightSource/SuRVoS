@@ -211,6 +211,10 @@ class DataModel(QtCore.QObject):
         ds_file = self.ds_path(dataset)
         with h5.File(ds_file, 'a') as f:
             for k, v in attrs.items():
+                if isinstance(v, list): #this helps with python 3 compatibility
+                    if len(v)!=0:
+                        if isinstance(v[0], str):
+                            v = [np.string_(x) for x in v]
                 f['data'].attrs[k] = v
 
     def attrs(self, dataset):
@@ -264,7 +268,7 @@ class DataModel(QtCore.QObject):
 
     def scan_datasets_group(self, group, shape=None, dtype=None, path=''):
         datasets = []
-        for name, ds in group.iteritems():
+        for name, ds in group.items():
             curr_path = '{}/{}'.format(path, name)
             if hasattr(ds, 'shape'):
                 if len(ds.shape) == 3 \

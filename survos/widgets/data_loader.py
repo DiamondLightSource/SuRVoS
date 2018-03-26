@@ -1,6 +1,6 @@
 
 
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 from .base import HWidgets, HeaderLabel, FileWidget, CheckableCombo, \
                   ComboDialog
@@ -14,7 +14,7 @@ from ..actions import volread
 import numpy as np
 import os
 
-class LoadWidget(QtGui.QWidget):
+class LoadWidget(QtWidgets.QWidget):
 
     data_loaded = QtCore.pyqtSignal(str)
 
@@ -25,12 +25,12 @@ class LoadWidget(QtGui.QWidget):
         self.launcher = Launcher.instance()
         self.data = None
 
-        main_layout = QtGui.QVBoxLayout()
+        main_layout = QtWidgets.QVBoxLayout()
         main_layout.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         self.setLayout(main_layout)
 
-        container = QtGui.QWidget(self)
-        hbox = QtGui.QHBoxLayout(container)
+        container = QtWidgets.QWidget(self)
+        hbox = QtWidgets.QHBoxLayout(container)
         container.setMaximumWidth(950)
         container.setMaximumHeight(530)
         container.setLayout(hbox)
@@ -39,8 +39,8 @@ class LoadWidget(QtGui.QWidget):
                                 '  background-color: #fefefe; '
                                 '  border-radius: 10px;'
                                 '}')
-        lvbox = QtGui.QVBoxLayout()
-        rvbox = QtGui.QVBoxLayout()
+        lvbox = QtWidgets.QVBoxLayout()
+        rvbox = QtWidgets.QVBoxLayout()
         lvbox.setAlignment(QtCore.Qt.AlignTop)
         rvbox.setAlignment(QtCore.Qt.AlignTop)
         hbox.addLayout(lvbox, 1)
@@ -53,7 +53,7 @@ class LoadWidget(QtGui.QWidget):
         ################################################
         lvbox.addWidget(HeaderLabel('Preview Dataset'))
 
-        self.wperspective = QtGui.QComboBox()
+        self.wperspective = QtWidgets.QComboBox()
         self.wperspective.addItem('Axial')
         self.wperspective.addItem('Coronal')
         self.wperspective.addItem('Sagittal')
@@ -64,7 +64,7 @@ class LoadWidget(QtGui.QWidget):
         self.winvert.addItem('Invert X')
         self.winvert.addItem('Transpose X <-> Y')
 
-        self.slider = QtGui.QSlider(1)
+        self.slider = QtWidgets.QSlider(1)
         lvbox.addWidget(self.slider)
 
         lvbox.addWidget(HWidgets('3D Perspective:', self.wperspective,
@@ -89,13 +89,13 @@ class LoadWidget(QtGui.QWidget):
         self.woutput = FileWidget(folder=True)
 
         rvbox.addWidget(HWidgets('Select Folder:', self.woutput, stretch=[0,1]))
-        rvbox.addWidget(QtGui.QWidget(), 1)
+        rvbox.addWidget(QtWidgets.QWidget(), 1)
 
         # Save | Cancel
-        self.cancel = QtGui.QPushButton('Cancel')
+        self.cancel = QtWidgets.QPushButton('Cancel')
         self.cancel.setMinimumWidth(100)
         self.cancel.setMinimumHeight(70)
-        self.load = QtGui.QPushButton('Load')
+        self.load = QtWidgets.QPushButton('Load')
         self.load.setMinimumWidth(100)
         self.load.setMinimumHeight(70)
         rvbox.addWidget(HWidgets(None, self.cancel, self.load, stretch=[1,0,0]))
@@ -114,7 +114,7 @@ class LoadWidget(QtGui.QWidget):
             if path.endswith('.h5') or path.endswith('.hdf5'):
                 available_hdf5 = self.DM.available_hdf5_datasets(path)
                 selected, accepted = ComboDialog.getOption(available_hdf5, parent=self)
-                if accepted == QtGui.QDialog.Rejected:
+                if accepted == QtWidgets.QDialog.Rejected:
                     return
                 dataset = selected
 
@@ -170,7 +170,7 @@ class LoadWidget(QtGui.QWidget):
             idx = self.data.shape[0]//2
             self.slider.blockSignals(True)
             self.slider.setMinimum(0)
-            self.slider.setMaximum(self.data.shape[0])
+            self.slider.setMaximum(self.data.shape[0] - 1)
             self.slider.setValue(idx)
             self.slider.blockSignals(False)
             self.canvas.ax.set_ylim([self.data.shape[1] + 1, -1])
@@ -188,17 +188,17 @@ class LoadWidget(QtGui.QWidget):
         if self.data is not None and wspath is not None:
             if not os.path.isdir(wspath):
                 errmsg = 'Workspace Path not valid: {}'.format(wspath)
-                QtGui.QMessageBox.critical(self, 'Error', errmsg)
+                QtWidgets.QMessageBox.critical(self, 'Error', errmsg)
                 return
 
             do_continue = True
             if len(os.listdir(wspath)) > 0:
                 errmsg = 'Workspace folder is not empty, do you still want to continue? It might overwrite and remove previous files.'
-                ans = QtGui.QMessageBox.question(self, "Workspace Folder not empty",
+                ans = QtWidgets.QMessageBox.question(self, "Workspace Folder not empty",
                                                  errmsg,
-                                                 QtGui.QMessageBox.Yes,
-                                                 QtGui.QMessageBox.No)
-                if ans == QtGui.QMessageBox.No:
+                                                 QtWidgets.QMessageBox.Yes,
+                                                 QtWidgets.QMessageBox.No)
+                if ans == QtWidgets.QMessageBox.No:
                     do_continue = False
 
             if do_continue:
@@ -208,9 +208,9 @@ class LoadWidget(QtGui.QWidget):
         else:
             if self.data is None:
                 errmsg = 'Data has to be loaded first'
-                QtGui.QMessageBox.critical(self, 'Error', errmsg)
+                QtWidgets.QMessageBox.critical(self, 'Error', errmsg)
                 return
             if wspath is None:
                 errmsg = 'Workspace path has to be set first'
-                QtGui.QMessageBox.critical(self, 'Error', errmsg)
+                QtWidgets.QMessageBox.critical(self, 'Error', errmsg)
                 return

@@ -2,7 +2,7 @@
 
 import numpy as np
 import pandas as pd
-from ..qt_compat import QtGui, QtCore
+from ..qt_compat import QtGui, QtCore, QtWidgets
 
 from .mpl_widgets import PerspectiveCanvas, MplCanvas
 from .base import HWidgets, TComboBox, RoundedWidget, ColorButton, PLineEdit, \
@@ -184,7 +184,7 @@ class LabelCanvas(PerspectiveCanvas):
         self.replot()
 
 
-class LabelExplorer(QtGui.QWidget):
+class LabelExplorer(QtWidgets.QWidget):
 
     def __init__(self, label_canvas):
         super(LabelExplorer, self).__init__()
@@ -193,7 +193,7 @@ class LabelExplorer(QtGui.QWidget):
         self.DM = DataModel.instance()
         self.LBLM = LabelManager.instance()
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
 
         self.level_combo = SComboBox()
@@ -202,7 +202,7 @@ class LabelExplorer(QtGui.QWidget):
         self.label_combo.setMinimumWidth(200)
         self.source_combo = SourceCombo()
         self.source_combo.setMinimumWidth(200)
-        self.label_btn = QtGui.QPushButton('Label')
+        self.label_btn = QtWidgets.QPushButton('Label')
         vbox.addWidget(HWidgets(self.level_combo, self.label_combo,
                                 self.source_combo, self.label_btn,
                                 stretch=[1, 1, 1, 0]))
@@ -214,13 +214,13 @@ class LabelExplorer(QtGui.QWidget):
         self.kernels = TComboBox('Fit kernel:', ['gau', 'cos', 'biw', 'epa',
                                                 'tri', 'triw'],
                                  selected=2)
-        self.export_plot = QtGui.QPushButton('Export plot')
-        self.export_stats = QtGui.QPushButton('Export Stats')
+        self.export_plot = QtWidgets.QPushButton('Export plot')
+        self.export_stats = QtWidgets.QPushButton('Export Stats')
         vbox.addWidget(HWidgets(self.feature_combo, None,
                                 self.kernels, self.export_plot, self.export_stats,
                                 stretch=[0, 1, 0, 0, 0]))
 
-        splitter = QtGui.QSplitter(0)
+        splitter = QtWidgets.QSplitter(0)
         vbox.addWidget(splitter)
 
         splitter.addWidget(self.mplcanvas)
@@ -370,7 +370,7 @@ class LabelExplorer(QtGui.QWidget):
         self.replot()
 
     def on_export_plot(self):
-        full_path = QtGui.QFileDialog.getSaveFileName(self, "Select output filename",
+        full_path = QtWidgets.QFileDialog.getSaveFileName(self, "Select output filename",
                                                       filter='*.png')
         if full_path is not None and len(full_path) > 0:
             if not full_path.endswith('.png'):
@@ -395,7 +395,7 @@ class LabelExplorer(QtGui.QWidget):
             features += ['class']
             data[:, -1] = self.labels
 
-        full_path = QtGui.QFileDialog.getSaveFileName(self, "Select output filename",
+        full_path = QtWidgets.QFileDialog.getSaveFileName(self, "Select output filename",
                                                       filter='*.csv')
         if full_path is not None and len(full_path) > 0:
             if not full_path.endswith('.csv'):
@@ -446,7 +446,7 @@ class LabelExplorer(QtGui.QWidget):
         self.mplcanvas.redraw()
 
 
-class LabelRule(QtGui.QWidget):
+class LabelRule(QtWidgets.QWidget):
 
     deleted = QtCore.pyqtSignal(int)
 
@@ -454,12 +454,12 @@ class LabelRule(QtGui.QWidget):
         super(LabelRule, self).__init__(parent=parent)
 
         self.idx = idx
-        vbox = vbox = QtGui.QVBoxLayout()
+        vbox = vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
 
-        delbutton = QtGui.QPushButton('X')
+        delbutton = QtWidgets.QPushButton('X')
         delbutton.setMaximumWidth(30)
-        label = QtGui.QLabel('Rule {}'.format(idx+1))
+        label = QtWidgets.QLabel('Rule {}'.format(idx+1))
         self.fcombo = TComboBox('Feature:', FEATURE_OPTIONS)
         self.opcombo = TComboBox('', ['>', '<'])
         self.threshold = PLineEdit(0.5, parse=float)
@@ -484,17 +484,17 @@ class LabelOption(RoundedWidget):
         super(LabelOption, self).__init__(parent=parent)
 
         self.idx = idx
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
 
-        delbutton = QtGui.QPushButton('X')
+        delbutton = QtWidgets.QPushButton('X')
         delbutton.setMaximumWidth(30)
         self.colorbutton = ColorButton()
         self.label = PLineEdit('Label {}'.format(idx+1), parse=str)
         self.label.setText('Label {}'.format(idx+1))
-        rulebutton = QtGui.QPushButton('Add new rule')
-        bapply = QtGui.QPushButton('Apply')
-        othersbutton = QtGui.QPushButton('Select Others')
+        rulebutton = QtWidgets.QPushButton('Add new rule')
+        bapply = QtWidgets.QPushButton('Apply')
+        othersbutton = QtWidgets.QPushButton('Select Others')
         vbox.addWidget(HWidgets(delbutton, self.colorbutton, self.label, None,
                                 rulebutton, bapply, othersbutton,
                                 stretch=[0, 0, 0, 1, 0]))
@@ -538,7 +538,7 @@ class LabelOption(RoundedWidget):
         self.compute_others.emit(self.idx)
 
 
-class LabelRules(QtGui.QWidget):
+class LabelRules(QtWidgets.QWidget):
 
     computed = QtCore.pyqtSignal()
     compute_others = QtCore.pyqtSignal(int)
@@ -549,20 +549,20 @@ class LabelRules(QtGui.QWidget):
         self.DM = DataModel.instance()
         self.setMinimumHeight(300)
 
-        vbox = QtGui.QVBoxLayout()
+        vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
 
-        self.save_labels = QtGui.QPushButton('Save labels')
+        self.save_labels = QtWidgets.QPushButton('Save labels')
         self.level_combo = SComboBox()
-        self.add_label = QtGui.QPushButton('Add new label')
+        self.add_label = QtWidgets.QPushButton('Add new label')
         vbox.addWidget(HWidgets(self.level_combo, self.save_labels,
                                 None, self.add_label, stretch=[0, 0, 1, 0]))
 
-        groupbox = QtGui.QWidget()
-        self.form = QtGui.QFormLayout()
+        groupbox = QtWidgets.QWidget()
+        self.form = QtWidgets.QFormLayout()
         groupbox.setLayout(self.form)
 
-        scroll = QtGui.QScrollArea()
+        scroll = QtWidgets.QScrollArea()
         scroll.setWidget(groupbox)
         scroll.setWidgetResizable(True)
         vbox.addWidget(scroll)
@@ -645,11 +645,11 @@ class LabelRules(QtGui.QWidget):
             return
         level = self.levels[self.level_combo.currentIndex()]
         quit_msg = "Are you sure you want to save new labels in [Level {}]?".format(level)
-        reply = QtGui.QMessageBox.question(self, 'Message', quit_msg,
-                                           QtGui.QMessageBox.Yes,
-                                           QtGui.QMessageBox.No)
+        reply = QtWidgets.QMessageBox.question(self, 'Message', quit_msg,
+                                           QtWidgets.QMessageBox.Yes,
+                                           QtWidgets.QMessageBox.No)
 
-        if reply != QtGui.QMessageBox.Yes:
+        if reply != QtWidgets.QMessageBox.Yes:
             return
 
         launcher = Launcher.instance()
@@ -699,7 +699,7 @@ class LabelSplitter(Plugin):
     def __init__(self, data=None, ptype=Plugin.Widget):
         super(LabelSplitter, self).__init__(ptype=ptype)
 
-        splitter = QtGui.QSplitter()
+        splitter = QtWidgets.QSplitter()
         self.addWidget(splitter)
 
         self.label_canvas = LabelCanvas()
