@@ -6,7 +6,7 @@ from .model import DataModel
 
 import logging as log
 
-from queue import Queue
+from six.moves.queue import Queue
 
 import sys
 import traceback

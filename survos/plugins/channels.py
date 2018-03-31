@@ -3,7 +3,7 @@
 import numpy as np
 from ..qt_compat import QtGui, QtCore, QtWidgets
 
-from queue import Queue
+from six.moves.queue import Queue
 
 from .base import Plugin
 from ..widgets import HWidgets, LCheckBox, RCheckBox, PLineEdit, \
