@@ -10,7 +10,10 @@ import numpy
 import platform	
 import sys
 import urllib
-import urllib.request
+try:
+    from urllib.request import urlretrieve
+except ImportError:
+    from urllib import urlretrieve
 import zipfile
 import glob
 import shutil
@@ -36,10 +39,6 @@ def get_qpbo():
     else:
         os.mkdir(source_path)
 
-    if hasattr(urllib, "urlretrieve"):
-        urlretrieve = urllib.urlretrieve
-    else:
-        urlretrieve = urllib.request.urlretrieve
 
     qpbo_version = 'QPBO-v1.4.src'
     qpbo_file = '{}.zip'.format(qpbo_version)
