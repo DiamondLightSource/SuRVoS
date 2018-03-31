@@ -28,6 +28,7 @@ if platform.system() == 'Windows':
     extra_compile_args += ['/DWIN32']
 else:
     extra_compile_args += [ '-O2', '-Wall', '-std=c99']
+    extra_library_dirs += ['.']
     extra_libraries += ['m']  
     
 base_path = os.path.abspath(os.path.dirname(__file__))
@@ -162,7 +163,7 @@ setup(
                   },
 	 entry_points={
 					'console_scripts': [
-										'SurVos=survos.launcher.survos_launcher:main'
+										'SuRVos=survos.launcher.survos_launcher:main'
 									   ],
 				  },
      
