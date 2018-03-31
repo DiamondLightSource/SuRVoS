@@ -6,16 +6,21 @@ toc-section: 1
 
 ## Requirements
 
-- Python Distribution (Python 2.7)
+- Python Distribution (Python 2.7 or 3.6)/ Anaconda (recommended)
 
 - NVIDIA GPU with at least 1024 threads
 
-- CUDA SDK already installed and configured.
+- CUDA SDK 9.0+ already installed and configured.
 
   If CUDA is not yet installed in the system, follow instructions in:
 
   [https://developer.nvidia.com/cuda-downloads](https://developer.nvidia.com/cuda-downloads)
 
+::: warning
+NOTE: SuRVoS is not supported on Windows Python 2.7
+:::
+   
+ 
 ## 1. Installing a Python distribution
 
 If there is no Python distribution installed on your system, we recommend installing [Anaconda](https://docs.continuum.io/anaconda/). Otherwise, skip to **step 2**.
@@ -24,7 +29,7 @@ If there is no Python distribution installed on your system, we recommend instal
 
 [https://www.continuum.io/downloads](https://www.continuum.io/downloads)
 
-### 1.2 Install Anaconda (Python 2.7):
+### 1.2 Install Anaconda :
 
 **(Windows)** Just double click on the installer and follow instructions.
 
@@ -44,24 +49,14 @@ $> source ~/.bashrc
 
 **NOTE:** Replace **2-4.0.0** with your version of Anaconda.
 
-## 2. Installing Dependencies
-
-With Anaconda:
+## 2. Install SuRVoS from conda channel
 
 ```bash
-$> conda update conda pip
-$> conda install numpy scipy matplotlib scikit-learn scikit-image cython seaborn networkx libgcc pyqt=4.11.4
-$> pip install scikit-tensor tifffile
+$> conda install -c conda-forge -c numba -c ccpi survos
 ```
 
-With another python distribution:
 
-```bash
-$> pip install --upgrade pip
-$> pip install --upgrade numpy scipy matplotlib scikit-learn scikit-image cython seaborn networkx scikit-tensor tifffile
-```
-
-## 3. Install SuRVoS
+## 3. Install SuRVoS from source
 
 ### 3.1 Download SuRVoS
 
@@ -72,18 +67,43 @@ $> git clone https://github.com/DiamondLightSource/SuRVoS.git
 $> cd SuRVoS
 ```
 
-### 3.2 Compile SuRVoS features
+### 3.2 Using Anaconda
 
-This step requires CUDA already installed and NVCC compiler in the path (type `which nvcc` to verify it).
+#### 3.2.1 Windows
 
 ```bash
-$> python setup.py build_ext -i
+$> conda create -n ccpi python=3.6
+$> activate ccpi
+$[ccpi]> conda build conda-recipe -c conda-forge -c numba --python=3.6
 ```
+
+#### 3.2.2 Linux
+Replace the <CUDA_HOME> with the path to the CUDA install directory. Generally CUDA SDK 9.0 is installed in /usr/local/cuda-9.0.
+
+```bash
+$> conda create -n ccpi python=3.6
+$> activate ccpi
+$> export PATH=<CUDA_HOME>/bin:$PATH
+$> export LD_LIBRARY_PATH=<CUDA_HOME>/lib64:$LD_LIBRARY_PATH
+$> conda build conda-recipe -c conda-forge -c numba --python=3.6
+$> conda install --use-local survos -c conda-forge -c numba --python=3.6
+```
+**NOTE:** Replace **3.6** with 2.7 for building using python 2.7.
+
+### 3.3 Using standard python
+
+#### 3.3.1 Windows
+**NOTE** Not yet supported.
+
+#### 3.3.2 Linux
+This step requires CUDA already installed and NVCC compiler in the path (type `which nvcc` to verify it).
+
+**NOTE** Not yet supported.
 
 ## 4. Run SuRVoS
 
 From the SuRVoS folder:
 
 ```bash
-$> ./SuRVoS
+$> SuRVoS
 ```
