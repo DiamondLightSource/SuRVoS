@@ -75,6 +75,7 @@ $> cd SuRVoS
 $> conda create -n ccpi python=3.6
 $> activate ccpi
 $[ccpi]> conda build conda-recipe -c conda-forge -c numba --python=3.6
+$[ccpi]> conda install --use-local survos -c conda-forge -c numba --python=3.6
 ```
 
 #### 3.2.2 Linux
@@ -83,10 +84,10 @@ Replace the <CUDA_HOME> with the path to the CUDA install directory. Generally C
 ```bash
 $> conda create -n ccpi python=3.6
 $> activate ccpi
-$> export PATH=<CUDA_HOME>/bin:$PATH
-$> export LD_LIBRARY_PATH=<CUDA_HOME>/lib64:$LD_LIBRARY_PATH
-$> conda build conda-recipe -c conda-forge -c numba --python=3.6
-$> conda install --use-local survos -c conda-forge -c numba --python=3.6
+$[ccpi]> export PATH=<CUDA_HOME>/bin:$PATH
+$[ccpi]> export LD_LIBRARY_PATH=<CUDA_HOME>/lib64:$LD_LIBRARY_PATH
+$[ccpi]> conda build conda-recipe -c conda-forge -c numba --python=3.6
+$[ccpi]> conda install --use-local survos -c conda-forge -c numba --python=3.6
 ```
 **NOTE:** Replace **3.6** with 2.7 for building using python 2.7.
 
@@ -98,8 +99,20 @@ $> conda install --use-local survos -c conda-forge -c numba --python=3.6
 #### 3.3.2 Linux
 This step requires CUDA already installed and NVCC compiler in the path (type `which nvcc` to verify it).
 
-**NOTE** Not yet supported.
-
+```bash
+$> export PATH=<CUDA_HOME>/bin:$PATH
+$> export LD_LIBRARY_PATH=<CUDA_HOME>/lib64:$LD_LIBRARY_PATH
+$> python -m venv ccpi
+$> . ccpi/bin/activate
+$(ccpi)> pip install cmake cython numpy scipy matplotlib h5py pyqt5==5.8.2 tifffile networkx scikit-image scikit-learn seaborn 
+$(ccpi)> cmake -G "Unix Makefiles" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="${VIRTUAL_ENV}" -DINSTALL_BIN_DIR="${VIRTUAL_ENV}/bin" -DINSTALL_LIB_DIR="${VIRTUAL_ENV}/lib64" survos/lib/src
+$(ccpi)> make
+$(ccpi)> make install
+$(ccpi)> python setup.py build
+$(ccpi)> python setup.py install
+$(ccpi)> export LD_LIBRARY_PATH=${VIRTUAL_ENV}/lib64:$LD_LIBRARY_PATH
+$(ccpi)> SuRVoS
+```
 ## 4. Run SuRVoS
 
 From the SuRVoS folder:
