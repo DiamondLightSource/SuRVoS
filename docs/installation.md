@@ -16,9 +16,9 @@ toc-section: 1
 
   [https://developer.nvidia.com/cuda-downloads](https://developer.nvidia.com/cuda-downloads)
 
-::: warning
-NOTE: SuRVoS is not supported on Windows Python 2.7
-:::
+
+> NOTE: SuRVoS is not supported on Windows Python 2.7
+
    
  
 ## 1. Installing a Python distribution
