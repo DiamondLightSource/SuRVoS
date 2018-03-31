@@ -79,7 +79,7 @@ $[ccpi]> conda install --use-local survos -c conda-forge -c numba --python=3.6
 ```
 
 #### 3.2.2 Linux
-Replace the <CUDA_HOME> with the path to the CUDA install directory. Generally CUDA SDK 9.0 is installed in /usr/local/cuda-9.0.
+Replace the &lt;CUDA_HOME&gt; with the path to the CUDA install directory. Generally CUDA SDK 9.0 is installed in /usr/local/cuda-9.0.
 
 ```bash
 $> conda create -n ccpi python=3.6
