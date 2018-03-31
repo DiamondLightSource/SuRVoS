@@ -30,6 +30,7 @@ requirements:
     - decorator
     - sip
     - seaborn
+    - pyqt >=5.6
 	
 about:
   home: https://github.com/DiamondLightSource/SuRVoS
