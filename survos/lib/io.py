@@ -1,7 +1,7 @@
 
 import os
 import numpy as np
-
+import six
 
 rec_header_dtd = \
 [
@@ -105,7 +105,7 @@ class MRC(object):
         self.header = self.header_dict = self.data = None
         self.yz_swapped = False
 
-        if type(X) in [str, unicode]:
+        if isinstance(X, six.string_types):
             self.read(X)
         else:
             # assuming X to be a numpy array
@@ -277,7 +277,7 @@ class MRC(object):
         if header['next'] > 0:
             fd.seek(header['next']) # ignore extended header
 
-        mode = header['mode']
+        mode = int(header['mode'])
         bo = "<" if header['stamp'][0, 0] == 68 and header['stamp'][0, 1] == 65 else "<" # BitOrder: little or big endian
         sign = "i1" if header['imodFlags'] == 1 else "u1" # signed or unsigned
                 # 0     1     2     3     4     5     6     7     8     9     10    11    12    13    14    15    16
@@ -285,7 +285,7 @@ class MRC(object):
         dsize = [ 1,    2,    4,    4,    8,    0,    2,    0,    0,    0,    0,    0,    0,    0,    0,    0,    3][mode]
 
         # data dimensions
-        nx, ny, nz = header['nx'], header['ny'], header['nz']
+        nx, ny, nz = int(header['nx']), int(header['ny']), int(header['nz'])
         img_size = nx * ny * nz * dsize
         img_str = fd.read(img_size)
         dtype = bo + dtype
