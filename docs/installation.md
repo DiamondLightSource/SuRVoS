@@ -83,7 +83,7 @@ Replace the &lt;CUDA_HOME&gt; with the path to the CUDA install directory. Gener
 
 ```bash
 $> conda create -n ccpi python=3.6
-$> activate ccpi
+$> source activate ccpi
 $[ccpi]> export PATH=<CUDA_HOME>/bin:$PATH
 $[ccpi]> export LD_LIBRARY_PATH=<CUDA_HOME>/lib64:$LD_LIBRARY_PATH
 $[ccpi]> conda build conda-recipe -c conda-forge -c numba --python=3.6
