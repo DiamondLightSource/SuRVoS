@@ -26,6 +26,10 @@ extra_libraries    = ['survos_cuda']
 
 if platform.system() == 'Windows':
     extra_compile_args += ['/DWIN32']
+elif platform.system() == 'Darwin':
+    extra_compile_args += [ '-O2', '-Wall']
+    extra_library_dirs += ['.']
+    extra_libraries += ['m']    
 else:
     extra_compile_args += [ '-O2', '-Wall', '-std=c99']
     extra_library_dirs += ['.']
@@ -33,6 +37,19 @@ else:
     
 base_path = os.path.abspath(os.path.dirname(__file__))
 source_path = os.path.join(base_path, 'survos', 'lib', 'qpbo_src')
+
+def apply_QPBO_fix(qpbo_dir):
+    content = []
+    with open(os.path.join(qpbo_dir,'instances.inc'),"r") as f:
+        content = f.readlines()
+    content.insert(8, "template <>") 
+    content.insert(9, "inline void QPBO<int>::get_type_information(const char*& type_name, const char*& type_format);")
+    content.insert(10, "template <>")
+    content.insert(11, "inline void QPBO<float>::get_type_information(const char*& type_name, const char*& type_format);")
+    content.insert(12, "template <>") 
+    content.insert(13, "inline void QPBO<double>::get_type_information(const char*& type_name, const char*& type_format);")
+    with open(os.path.join(qpbo_dir,'instances.inc'),"w") as f:
+       f .writelines(content)
 
 def get_qpbo():
     if os.path.isdir(source_path):
@@ -53,6 +70,10 @@ def get_qpbo():
 
     os.rmdir(os.path.join(source_path, qpbo_version))
     os.remove(qpbo_file)
+    #Apply patch for Mac
+    if platform.system() == 'Darwin':
+        apply_QPBO_fix(source_path)
+
 get_qpbo()
 qpbo_directory = source_path
 files = ["QPBO.cpp", "QPBO_extra.cpp", "QPBO_maxflow.cpp",
