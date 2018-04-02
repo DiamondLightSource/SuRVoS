@@ -10,4 +10,4 @@ nmake install
 if errorlevel 1 exit 1
 
 python setup.py build_ext
-python setup.py install
+python setup.py install --single-version-externally-managed --record=record.txt
