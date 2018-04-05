@@ -114,6 +114,9 @@ class FileWidget(QtWidgets.QWidget):
     def find_path(self, ev):
         if ev.button() != 1:
             return
+        self.open_dialog()
+
+    def open_dialog(self):
         selected = False
         path = None
         if self.folder:

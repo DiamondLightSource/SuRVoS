@@ -149,6 +149,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def load_data_view(self):
         self.main_container.setCurrentIndex(1)
+        self.load_widget.winput.open_dialog()        
 
     def load_data(self, wdir):
         self.main_widget.prepare_data(wdir)
