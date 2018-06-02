@@ -63,7 +63,8 @@ void initSupervoxels(const float *data,
             }
         }
     }
-
+	if (cx > shape.x || cy > shape.y || cz > shape.z)
+		return;
     centers[lidx].f = data[i(cx, cy, cz)];
     centers[lidx].x = cx;
     centers[lidx].y = cy;
