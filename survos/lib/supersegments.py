@@ -12,7 +12,7 @@ from skimage.segmentation._slic import _enforce_label_connectivity_cython
 from .rag import rag_from_neighbors
 from .spencoding import spmeans
 from ._qpbo import solve_binary, solve_aexpansion
-#from ._supersegments import _neighbors, _postprocess_labels
+from ._supersegments import _neighbors, _postprocess_labels
 
 class Timer(object):
     def __init__(self, name='Timer'):
