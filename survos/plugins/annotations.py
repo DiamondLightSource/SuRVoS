@@ -1,3 +1,4 @@
+from __future__ import unicode_literals    # at top of module
 
 import numpy as np
 import h5py as h5
@@ -16,6 +17,7 @@ from ..widgets import HWidgets, HEditLabel, HeaderLabel, PLineEdit, \
 from ..core import DataModel, LabelManager, LayerManager, Launcher
 from .. import actions as ac
 from six import iteritems
+
 
 class AnnotationLayerLabel(QtWidgets.QWidget):
 
@@ -650,9 +652,9 @@ class Annotations(Plugin):
         if level == 0:
             return
 
-        current_index = self.levels.keys().index(level)
+        current_index = list(self.levels.keys()).index(level)
         if current_index > 0:
-            parent_level = self.levels.keys()[current_index-1]
+            parent_level = list(self.levels.keys())[current_index-1]
             dataset = self.LBLM.dataset(level)
             parent_dataset = self.LBLM.dataset(parent_level)
         else:
@@ -661,7 +663,7 @@ class Annotations(Plugin):
         labels = self.LBLM.labels(parent_level)
         if len(labels) == 0:
             return
-
+        
         options = ['None'] + [u'Level {}/{}'.format(parent_level, l.name) for l in labels]
         option, result = ComboDialog.getOptionIdx(options)
 
@@ -685,8 +687,8 @@ class Annotations(Plugin):
             self.save_labels(level)
             return
 
-        self.launcher.setup('Assigning parent to [] of [Level {}]'
-                            .format(l.name, level))
+        self.launcher.setup('Assigning parent to [{}] of [Level {}]'
+                            .format(str(self.LBLM.labels(level)[label].name,'utf-8'), level))
 
         dparent = self.DM.load_ds(parent_dataset)
         dcurrent = self.DM.load_ds(dataset)

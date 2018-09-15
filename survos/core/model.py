@@ -213,7 +213,7 @@ class DataModel(QtCore.QObject):
             for k, v in attrs.items():
                 if isinstance(v, list): #this helps with python 3 compatibility
                     if len(v)!=0:
-                        if isinstance(v[0], str):
+                        if isinstance(v[0], str) or isinstance(v[0], bytes):
                             v = [np.string_(x) for x in v]
                 f['data'].attrs[k] = v
 

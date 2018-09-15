@@ -42,7 +42,7 @@ class CompareLevel(QtWidgets.QWidget):
         self.LBLM.levelRemoved.connect(self.on_level_removed)
 
         self.LBLM.labelAdded.connect(self.on_label_added)
-        self.LBLM.labelRemoved.connect(self.on_level_removed)
+        self.LBLM.labelRemoved.connect(self.on_label_removed)
         self.LBLM.labelNameChanged.connect(self.on_label_name)
         self.LBLM.labelColorChanged.connect(self.on_label_color)
 
