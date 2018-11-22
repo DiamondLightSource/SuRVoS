@@ -29,4 +29,4 @@ If you use SuRVoS for your academic publication, please consider citing the foll
 
 [Read the article online (Open Access)](http://www.sciencedirect.com/science/article/pii/S1047847717300308).
 
-
+[![](https://codescene.io/projects/3731/status.svg) Get more details at **codescene.io**.](https://codescene.io/projects/3731/jobs/latest-successful/results)
