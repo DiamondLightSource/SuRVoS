@@ -4,7 +4,7 @@ import numpy as np
 import logging as log
 
 import networkx as nx
-from sklearn.decomposition import PCA, RandomizedPCA, IncrementalPCA
+from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.random_projection import SparseRandomProjection
 from sklearn.ensemble import ExtraTreesClassifier, \
@@ -38,7 +38,7 @@ def project_features(X, mode='random_projection'):
     elif mode == 'pca':
         transformer = PCA(n_components='mle', whiten=True)
     elif mode == 'random_pca':
-        transformer = RandomizedPCA(whiten=True)
+        transformer = PCA(svd_solver='randomized', whiten=True)
     else:
         raise Error('Projection {} not available'.format(mode))
 
