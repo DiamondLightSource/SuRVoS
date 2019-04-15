@@ -55,7 +55,7 @@ class EnsembleWidget(QtWidgets.QWidget):
                                 self.subsample,
                                 stretch=[0,1,0,1]))
 
-        self.btn_predict = ActionButton('Predict')
+        self.btn_predict = ActionButton('Train && Predict')
         self.btn_predict.clicked.connect(self.on_predict_clicked)
         self.n_jobs = PLineEdit(1, parse=int)
         vbox.addWidget(HWidgets('Num Jobs', self.n_jobs, None, self.btn_predict,
@@ -595,7 +595,7 @@ class Training(Plugin):
         self.LBLM.labelRemoved.connect(self.on_label_removed)
 
         self.addWidget(dummy)
-        self.addWidget(HeaderLabel('Predict labels'))
+        self.addWidget(HeaderLabel('Train Classifier'))
         self.train_widget = TrainPredict()
         self.addWidget(self.train_widget)
 

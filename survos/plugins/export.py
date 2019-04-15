@@ -101,6 +101,10 @@ class Export(Plugin):
         vbox.addWidget(HWidgets(self.format, self.overwrite, self.export,
                                 stretch=[1,0,0]))
 
+        vbox.addWidget(HeaderLabel('Export Trained Classifier'))
+        self.classifier_export = ActionButton('Export Classifier')
+        vbox.addWidget(self.classifier_export)
+
         self.LBLM.levelAdded.connect(self.on_level_added)
         self.LBLM.levelLoaded.connect(self.on_level_added)
         self.LBLM.levelRemoved.connect(self.on_level_removed)

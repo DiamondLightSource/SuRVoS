@@ -2,6 +2,7 @@
 import h5py as h5
 import numpy as np
 import logging as log
+import ast
 
 import networkx as nx
 from sklearn.decomposition import PCA, IncrementalPCA
@@ -28,21 +29,6 @@ from ..core import DataModel
 
 
 DM = DataModel.instance()
-
-
-def project_features(X, mode='random_projection'):
-    if mode == 'random_projection':
-        transformer = SparseRandomProjection(n_components=X.shape[1])
-    elif mode == 'standard':
-        transformer = StandardScaler()
-    elif mode == 'pca':
-        transformer = PCA(n_components='mle', whiten=True)
-    elif mode == 'random_pca':
-        transformer = PCA(svd_solver='randomized', whiten=True)
-    else:
-        raise Error('Projection {} not available'.format(mode))
-
-    return transformer.fit(X)
 
 
 def obtain_classifier(clf_p):
@@ -153,8 +139,15 @@ def predict_proba(y_data=None, p_data=None,
     X, supervoxels, svmask = extract_descriptors(**desc_params)
     full_svmask = svmask.copy()
 
-    log.info("+ Creating classifier: {}".format(clf_params))
-    clf, mode = obtain_classifier(clf_params)
+    old_classifier = False
+    if DM.has_classifier():
+        log.info("+ Getting existing classifier")
+        clf = DM.get_classifier_from_model()
+        mode = "ensemble"
+        old_classifier = True
+    else:
+        clf, mode = obtain_classifier(clf_params)
+        log.info("+ Creating classifier: {}".format(clf_params))
 
     log.info("+ Loading labels")
     labels = DM.load_slices(y_data)
@@ -176,17 +169,58 @@ def predict_proba(y_data=None, p_data=None,
             labels = labels[svmask]
             if mask is not None:
                 mask = mask[svmask]
+    y = labels
+    y.shape = -1
 
-    if clf is not None:
-        result = _predict_proba(clf, X, labels, mask=mask, mode=mode,
-                                projection=desc_params['projection'])
-        X, y, pred, probs, conf, labels = result
+    spmask = None if mask is None else mask.ravel()
+    labels = np.asarray(list(set(np.unique(y[spmask])) - set([-1])), np.int32)
+
+    if mask is not None:
+        mask.shape = -1
+        idx_train = (y > -1) & mask
+        idx_test = (y == -1) & mask
     else:
+        idx_train = (y > -1)
+        idx_test = (y == -1)
+
+    X_train = X[idx_train]
+    y_train = y[idx_train]
+
+    if clf is not None and old_classifier is False:
+        _train_classifier(clf, X_train, y_train,
+                                project=desc_params['projection'])
+        #X, y, pred, probs, conf, labels = result
+        log.info('+ Saving classifier')
+        DM.add_classifier_to_model(clf)
+        DM.save_classifier()
+    elif clf is None:
         return None
 
+    if old_classifier:
+        log.info("Attempting to use old classifier!")
+    y_pred = np.full(y.size, -1, dtype=y.dtype)
+    classifier_predict(X, clf, y_pred, idx_test)
+    y_pred[idx_train] = y[idx_train]
+    log.info('+ Extracting probabilities')
+    y_probas = np.full((y.size, labels.size), -1, dtype=X.dtype)
+    y_uncertain = np.full(y.size, -1, dtype=X.dtype)
+    probas = clf.predict_proba(X[idx_test])
+    y_probas[idx_test] = probas
+    log.info('+ Measuring uncertainty')
+    uncertain = entropy(probas.T)
+    uncertain -= uncertain.min()
+    uncertain /= uncertain.max()
+    y_uncertain[idx_train] = 1
+    y_uncertain[idx_test] = 1 - uncertain
+    return perform_prediction(X, y_pred, y_uncertain, full_svmask, labels, mask, nsp, out_confidence, out_labels, ref_params, supervoxels,
+                              svmask, y)
+
+
+def perform_prediction(X, pred, conf, full_svmask, labels, mask, nsp, out_confidence, out_labels, ref_params, supervoxels, svmask,
+                       y):
     if supervoxels is not None:
         if ref_params['ref_type'] != 'None':
-            log.info('+ Remaping supervoxels')
+            log.info('+ Remapping supervoxels')
             svmap = np.full(nsp, -1, supervoxels.dtype)
             svmap[full_svmask] = np.arange(svmask.sum())
 
@@ -206,7 +240,7 @@ def predict_proba(y_data=None, p_data=None,
 
             log.info('  * Unary potentials')
             unary = (-np.ma.log(probs)).filled()
-            mapping = np.zeros(y.max()+1, np.int32)
+            mapping = np.zeros(y.max() + 1, np.int32)
             mapping[labels] = np.arange(labels.size)
             idx = np.where(y > -1)[0]
             col = mapping[y[idx]]
@@ -216,7 +250,7 @@ def predict_proba(y_data=None, p_data=None,
             log.info('  * Pairwise potentials')
             if ref_params['ref_type'] == 'Appearance':
                 log.info('+ Extracting descriptive weights')
-                dists = np.sqrt(np.sum((X[edges[:, 0]] - X[edges[:, 1]])**2, axis=1))
+                dists = np.sqrt(np.sum((X[edges[:, 0]] - X[edges[:, 1]]) ** 2, axis=1))
                 pairwise *= np.exp(-dists.mean() * dists)
 
             log.debug("  * Shapes: {}, {}, {}, {}".format(unary.shape, pairwise.shape,
@@ -242,7 +276,7 @@ def predict_proba(y_data=None, p_data=None,
                 pred[~mask] = -1
                 conf[~mask] = -1
         else:
-            pass #TODO pixel refinement
+            pass  # TODO pixel refinement
 
         log.info('+ Mapping predictions back to pixels')
         pred_map = np.empty(nsp, dtype=pred.dtype)
@@ -251,58 +285,40 @@ def predict_proba(y_data=None, p_data=None,
         conf_map[full_svmask] = conf
         pred = pred_map[supervoxels]
         conf = conf_map[supervoxels]
-
     pred.shape = DM.region_shape()
     conf.shape = DM.region_shape()
-
     log.info('+ Saving results to disk')
     DM.create_empty_dataset(out_labels, shape=DM.data_shape, dtype=pred.dtype)
     DM.write_slices(out_labels, pred, params=dict(labels=labels, active=True))
-
     DM.create_empty_dataset(out_confidence, shape=DM.data_shape, dtype=conf.dtype)
     DM.write_slices(out_confidence, conf, params=dict(labels=labels, active=True))
-
     return out_labels, out_confidence, labels
 
 
-def _predict_proba(clf, X, y, mask=None, projection=None, mode=None):
-    y.shape = -1
+def _train_classifier(clf, X_train, y_train, rnd=42, project=None):
 
-    spmask = None if mask is None else mask.ravel()
-    labels = np.asarray(list(set(np.unique(y[spmask])) - set([-1])), np.int32)
-
-    if mask is not None:
-        mask.shape = -1
-        idx_train = (y > -1) & mask
-        idx_test = (y == -1) & mask
-    else:
-        idx_train = (y > -1)
-        idx_test = (y == -1)
-
-    if projection != None and projection != 'None':
+    if ast.literal_eval(project) is not None:
         log.info('+ Projecting features')
-        X = project_features(X[idx_train], projection).transform(X).astype(np.float32)
+        if project == 'rproj':
+            proj = SparseRandomProjection(n_components=X_train.shape[1], random_state=rnd)
+        elif project == 'std':
+            proj = StandardScaler()
+        elif project == 'pca':
+            proj = PCA(n_components='mle', whiten=True, random_state=rnd)
+        else:
+            print(project)
+            print(type(project))
+            log.error('Projection {} not available'.format(project))
+            return
+
+        X_train = proj.fit_transform(X_train)
 
     log.info('+ Training classifier')
-    clf.fit(X[idx_train], y[idx_train])
+    clf.fit(X_train, y_train)
 
+
+
+def classifier_predict(X, clf, y_pred, idx_test):
     log.info('+ Predicting labels')
-    y_pred = np.full(y.size, -1, dtype=y.dtype)
     y_pred[idx_test] = clf.predict(X[idx_test])
-    y_pred[idx_train] = y[idx_train]
-
-    log.info('+ Extracting probabilities')
-    y_probas = np.full((y.size, labels.size), -1, dtype=X.dtype)
-    y_uncertain = np.full(y.size, -1, dtype=X.dtype)
-    probas = clf.predict_proba(X[idx_test])
-    y_probas[idx_test] = probas
-
-    log.info('+ Measuring uncertainty')
-    uncertain = entropy(probas.T)
-    uncertain -= uncertain.min()
-    uncertain /= uncertain.max()
-
-    y_uncertain[idx_train] = 1
-    y_uncertain[idx_test] = 1 - uncertain
-
-    return X, y, y_pred, y_probas, y_uncertain, labels
+    return clf, y_pred

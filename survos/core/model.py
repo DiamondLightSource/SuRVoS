@@ -7,6 +7,7 @@ import logging as log
 import os
 import glob
 import h5py as h5
+from joblib import dump, load
 
 from scipy.stats import gaussian_kde
 
@@ -68,6 +69,9 @@ class DataModel(QtCore.QObject):
         self.mvindex = None
         self.mvtable = None
         self.mvtotal = None
+
+        # Classifier
+        self.clf = None
 
         # GT Labels
         self.gtlevel = 0
@@ -203,6 +207,28 @@ class DataModel(QtCore.QObject):
         if os.path.exists(ds_file):
             os.remove(ds_file)
 
+    def save_classifier(self):
+        """
+        Attempt to save classifier to file
+        """
+        dump(self.clf, os.path.join(self.wspath, "classifier.joblib"))
+
+    def add_classifier_to_model(self, clf):
+        self.clf = clf
+
+    def get_classifier_from_model(self):
+        if not self.clf:
+            print("No Classifier in model")
+        else:
+            return self.clf
+
+    def has_classifier(self):
+        return self.clf is not None
+
+    def load_classifier(self):
+        clf = load(os.path.join(self.wspath, "classifier.joblib"))
+        self.add_classifier_to_model(clf)
+        print("Classifier Loaded:", type(self.clf))
     ##########################################################################
     # ATTRIBUTES AND MEMBERSHIP
     ##########################################################################
