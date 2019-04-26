@@ -150,16 +150,20 @@ class Export(Plugin):
         dataset = self.LBLM.dataset(level)
         data = self.DM.load_ds(dataset)
         fname = os.path.basename(dataset)
-        outpath = os.path.join(dest, fname)
-        if ftype == 'hdf5':
-            attrs = self.DM.attrs(dataset)
-            self.save_hdf5(outpath + '.h5', data, owrite=owrite, attrs=attrs)
-        elif ftype == 'mrc':
-            data = (data + 1).astype(np.int16)
-            self.save_mrc(outpath + '.mrc', data, owrite=owrite)
+        if isinstance(dest, str):
+            outpath = os.path.join(dest, fname)
+            if ftype == 'hdf5':
+                attrs = self.DM.attrs(dataset)
+                self.save_hdf5(outpath + '.h5', data, owrite=owrite, attrs=attrs)
+            elif ftype == 'mrc':
+                data = (data + 1).astype(np.int16)
+                self.save_mrc(outpath + '.mrc', data, owrite=owrite)
+            else:
+                data = (data + 1).astype(np.int16)
+                self.save_tiff(outpath + '.tif', data, owrite=owrite)
         else:
-            data = (data + 1).astype(np.int16)
-            self.save_tiff(outpath + '.tif', data, owrite=owrite)
+            print("No filename given.")
+
 
     def save_mask(self, level, dest, ftype, owrite):
         log.info('+ Loading data into memory')
@@ -222,16 +226,21 @@ class Export(Plugin):
         data /= data.max()
 
         fname = os.path.basename(dataset)
-        outpath = os.path.join(dest, 'data')
-        if ftype == 'hdf5':
-            attrs = self.DM.attrs(dataset)
-            self.save_hdf5(outpath + '.h5', data, owrite=owrite, attrs=attrs)
-        elif ftype == 'mrc':
-            stats = (data.min(), data.max(), data.mean())
-            self.save_mrc(outpath + '.mrc', data, owrite=owrite, stats=stats)
-        else:
-            self.save_tiff(outpath + '.tif', data, owrite=owrite)
 
+        if isinstance(dest, str):
+            outpath = os.path.join(dest, 'data')
+            print("Saving raw data as: {}".format(dest))
+            outpath = os.path.join(dest, fname)
+            if ftype == 'hdf5':
+                attrs = self.DM.attrs(dataset)
+                self.save_hdf5(outpath + '.h5', data, owrite=owrite, attrs=attrs)
+            elif ftype == 'mrc':
+                stats = (data.min(), data.max(), data.mean())
+                self.save_mrc(outpath + '.mrc', data, owrite=owrite, stats=stats)
+            else:
+                self.save_tiff(outpath + '.tif', data, owrite=owrite)
+        else:
+            print("No filename given.")
 
     def check_owrite(self, path, flag=False):
         if flag:
