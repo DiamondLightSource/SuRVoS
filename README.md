@@ -1,5 +1,5 @@
 # SuRVoS
-(Su)per (R)egion (Vo)lume (S)egmentaton workbench
+(Su)per (R)egion (Vo)lume (S)egmentation workbench
 
 
 Visit [https://diamondlightsource.github.io/SuRVoS/](https://diamondlightsource.github.io/SuRVoS/) for Documentation and Installation Instructions.
