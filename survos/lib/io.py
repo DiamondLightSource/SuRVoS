@@ -129,7 +129,7 @@ class MRC(object):
     def read(self, filename):
         print("Reading MRC file {}".format(filename))
         with mrc.open(filename, mode='r+') as mrc_file:
-            print(len(mrc_file.data))
+            print("Read data of len: {}".format(len(mrc_file.data)))
             self.header = mrc_file.header
             self.data = mrc_file.data
             self.header_dict = {}  # FIX: empty dictionary
