@@ -1009,9 +1009,13 @@ class CSlider(QtWidgets.QWidget):
         return self.sld_val.minimum()
 
     def wheelEvent(self, e):
-        if e.delta() > 0 and self.value() < self.maximum():
+        if hasattr(e, 'delta'):
+            wheel_delta = e.delta()
+        else:
+            wheel_delta = e.angleDelta().y()
+        if wheel_delta > 0 and self.value() < self.maximum():
             self.setValue(self.value()+self.interval)
-        elif e.delta() < 0 and self.value() > self.minimum():
+        elif wheel_delta < 0 and self.value() > self.minimum():
             self.setValue(self.value()-self.interval)
 
 
@@ -1043,9 +1047,13 @@ class WSlider(QtWidgets.QSlider):
         self.setSingleStep(1)
 
     def wheelEvent(self, e):
-        if e.delta() > 0 and self.value() < self.maximum():
+        if hasattr(e, 'delta'):
+            wheel_delta = e.delta()
+        else:
+            wheel_delta = e.angleDelta().y()
+        if wheel_delta > 0 and self.value() < self.maximum():
             self.setValue(self.value()+1)
-        elif e.delta() < 0 and self.value() > self.minimum():
+        elif wheel_delta < 0 and self.value() > self.minimum():
             self.setValue(self.value()-1)
 
 class WSliderPane(QtWidgets.QWidget):
