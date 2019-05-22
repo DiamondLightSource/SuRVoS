@@ -28,6 +28,7 @@ class DataModel(QtCore.QObject):
     channel_computed = QtCore.pyqtSignal(str, dict)
     channel_removed = QtCore.pyqtSignal(str)
     feature_updated = QtCore.pyqtSignal(str)
+    classifier_trained = QtCore.pyqtSignal(int)
     voxel_descriptor_computed = QtCore.pyqtSignal()
     voxel_descriptor_removed = QtCore.pyqtSignal()
     supervoxel_descriptor_computed = QtCore.pyqtSignal()
@@ -207,16 +208,28 @@ class DataModel(QtCore.QObject):
         if os.path.exists(ds_file):
             os.remove(ds_file)
 
-    def save_classifier(self):
+    def save_classifier(self, path):
         """
-        Attempt to save classifier to file
+        Save classifier to filepath
+        :param path: filepath for classifier output
         """
-        dump(self.clf, os.path.join(self.wspath, "classifier.joblib"))
+        if self.has_classifier():
+            dump(self.clf, path)
+        else:
+            log.error("Data Model has no classifier!")
 
     def add_classifier_to_model(self, clf):
+        """
+        Add classifier to model object
+        :param clf: classifier to add to object
+        """
         self.clf = clf
 
     def get_classifier_from_model(self):
+        """
+        Retrieves classifier from model
+        :return: classifier
+        """
         if not self.clf:
             print("No Classifier in model")
         else:
@@ -225,10 +238,14 @@ class DataModel(QtCore.QObject):
     def has_classifier(self):
         return self.clf is not None
 
-    def load_classifier(self):
-        clf = load(os.path.join(self.wspath, "classifier.joblib"))
-        self.add_classifier_to_model(clf)
-        print("Classifier Loaded:", type(self.clf))
+    def load_classifier(self, path):
+        if os.path.exists(path):
+            clf = load(path)
+            # TODO: Put in type check here to make sure an sklearn object has been loaded
+            self.add_classifier_to_model(clf)
+            print("Classifier Loaded:", type(self.clf))
+        else:
+            log.error("Cannot load classifier. Does not seem to exist.")
     ##########################################################################
     # ATTRIBUTES AND MEMBERSHIP
     ##########################################################################

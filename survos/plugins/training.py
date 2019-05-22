@@ -1,4 +1,6 @@
 import numpy as np
+import os
+import os.path as op
 from ..qt_compat import QtGui, QtCore, QtWidgets
 
 import logging as log
@@ -20,7 +22,7 @@ from .. import actions as ac
 
 class EnsembleWidget(QtWidgets.QWidget):
 
-    predict = QtCore.pyqtSignal(dict)
+    train_predict = QtCore.pyqtSignal(dict)
 
     def __init__(self, parent=None):
         super(EnsembleWidget, self).__init__(parent=parent)
@@ -55,11 +57,16 @@ class EnsembleWidget(QtWidgets.QWidget):
                                 self.subsample,
                                 stretch=[0,1,0,1]))
 
-        self.btn_predict = ActionButton('Train && Predict')
-        self.btn_predict.clicked.connect(self.on_predict_clicked)
+        self.btn_train_predict = ActionButton('Train && Predict')
+        # self.btn_predict = ActionButton('Predict')
+        # self.btn_predict.setEnabled(False)
+        self.btn_train_predict.clicked.connect(self.on_train_predict_clicked)
+        #self.btn_predict.clicked.connect(self.on_predict_clicked)
         self.n_jobs = PLineEdit(1, parse=int)
-        vbox.addWidget(HWidgets('Num Jobs', self.n_jobs, None, self.btn_predict,
+        vbox.addWidget(HWidgets('Num Jobs', self.n_jobs, None, self.btn_train_predict,
                                 stretch=[0, 0,1,0]))
+        # vbox.addWidget(HWidgets(None, None, None, self.btn_predict,
+        #                         stretch=[0, 0, 1, 0]))
 
     def on_ensemble_changed(self, idx):
         if idx == 2:
@@ -74,7 +81,7 @@ class EnsembleWidget(QtWidgets.QWidget):
             self.lrate.setDefault(1.)
             self.depth.setDefault(None)
 
-    def on_predict_clicked(self):
+    def on_train_predict_clicked(self):
         ttype = ['rf', 'erf', 'ada', 'gbf']
         params = {
             'clf'           : 'ensemble',
@@ -85,7 +92,7 @@ class EnsembleWidget(QtWidgets.QWidget):
             'subsample'     : self.subsample.value(),
             'n_jobs'        : self.n_jobs.value()
         }
-        self.predict.emit(params)
+        self.train_predict.emit(params)
 
 
 class SVMWidget(QtWidgets.QWidget):
@@ -189,6 +196,37 @@ class OnlineWidget(QtWidgets.QWidget):
 
         self.predict.emit(params)
 
+class SaveClassifier(QtWidgets.QWidget):
+
+    def __init__(self, parent=None):
+        super(SaveClassifier, self).__init__(parent=parent)
+
+        self.DM = DataModel.instance()
+
+        vbox = QtWidgets.QVBoxLayout()
+        self.setLayout(vbox)
+
+        self.btn_save_clf = ActionButton('Save Classifier to Disk')
+        self.btn_save_clf.clicked.connect(self.on_save_clf_clicked)
+        vbox.addWidget(HWidgets(None, None, self.btn_save_clf, None,
+                                stretch=[0, 0, 1, 0]))
+
+    def on_save_clf_clicked(self):
+        if not self.DM.has_classifier():
+            QtWidgets.QMessageBox.critical(self, "Error", "A classifier has not been created yet!")
+            return
+        else:
+            root_dir = self.DM.wspath
+            output_dir = op.join(root_dir, "classifiers")
+            os.makedirs(output_dir, exist_ok=True)
+            filename = op.join(output_dir, "classifier.joblib")
+            filter = "Classifier (*.joblib)"
+            path, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save Classifier', filename, filter)
+            # path, _ = QtWidgets.QFileDialog.getSaveFileName(self, , "classifier.joblib")
+            if path is not None and len(path) > 0:
+                log.info('+ Saving classifier to {}'.format(path))
+                self.DM.save_classifier(path)
+
 
 class TrainPredict(QtWidgets.QWidget):
 
@@ -253,11 +291,14 @@ class TrainPredict(QtWidgets.QWidget):
         self.clf_container.setLayout(vbox2)
 
         self.ensembles = EnsembleWidget()
-        self.ensembles.predict.connect(self.on_predict)
+        self.ensembles.train_predict.connect(self.on_train_predict)
         self.svm = SVMWidget()
-        self.svm.predict.connect(self.on_predict)
+        self.svm.predict.connect(self.on_train_predict)
         self.online = OnlineWidget()
-        self.online.predict.connect(self.on_predict)
+        self.online.predict.connect(self.on_train_predict)
+        self.save_clf = SaveClassifier()
+
+
 
         self.clf_container.layout().addWidget(self.ensembles)
         vbox.addWidget(self.clf_container)
@@ -310,7 +351,7 @@ class TrainPredict(QtWidgets.QWidget):
     def on_region_changed(self, idx):
         self.supervoxel_desc_params.setVisible(idx == 1)
 
-    def on_predict(self, params):
+    def on_train_predict(self, params):
         ### LEVEL AND LABEL
         level = self.selected_level
 
@@ -396,6 +437,7 @@ class TrainPredict(QtWidgets.QWidget):
         if not self.LM.isin('Predictions', 'Predictions'):
             self.LM.addLayer(predictions, 'Predictions', 'Predictions', alpha=0.5, visible=True)
         self.DM.level_predicted.emit(self.selected_level)
+
 
 
 class UncertainLabelWidget(QtWidgets.QWidget):
@@ -562,7 +604,7 @@ class Uncertainty(QtWidgets.QWidget):
 
 class Training(Plugin):
 
-    name = 'Model training'
+    name = 'Train classifier'
 
     def __init__(self, parent=None):
         super(Training, self).__init__(ptype=Plugin.Plugin, parent=parent)
@@ -595,7 +637,7 @@ class Training(Plugin):
         self.LBLM.labelRemoved.connect(self.on_label_removed)
 
         self.addWidget(dummy)
-        self.addWidget(HeaderLabel('Train Classifier'))
+        self.addWidget(HeaderLabel('Train New Classifier'))
         self.train_widget = TrainPredict()
         self.addWidget(self.train_widget)
 
@@ -605,6 +647,10 @@ class Training(Plugin):
 
         self.parent_labels = []
         self.levels = self.LBLM.levels()
+
+        self.addWidget(HeaderLabel('Save Trained Classifier'))
+        self.save_classifier_widget = SaveClassifier()
+        self.addWidget(self.save_classifier_widget)
 
     def on_level_selected(self, idx):
         if idx < 0:

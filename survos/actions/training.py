@@ -134,20 +134,12 @@ def predict_proba(y_data=None, p_data=None,
                   level_params=None, desc_params=None,
                   clf_params=None, ref_params=None,
                   out_labels=None, out_confidence=None):
-
     log.info("+ Extracting descriptors: {}".format(desc_params))
     X, supervoxels, svmask = extract_descriptors(**desc_params)
     full_svmask = svmask.copy()
 
-    old_classifier = False
-    if DM.has_classifier():
-        log.info("+ Getting existing classifier")
-        clf = DM.get_classifier_from_model()
-        mode = "ensemble"
-        old_classifier = True
-    else:
-        clf, mode = obtain_classifier(clf_params)
-        log.info("+ Creating classifier: {}".format(clf_params))
+    clf, mode = obtain_classifier(clf_params)
+    log.info("+ Creating classifier: {}".format(clf_params))
 
     log.info("+ Loading labels")
     labels = DM.load_slices(y_data)
@@ -186,18 +178,14 @@ def predict_proba(y_data=None, p_data=None,
     X_train = X[idx_train]
     y_train = y[idx_train]
 
-    if clf is not None and old_classifier is False:
+    if clf is not None:
         _train_classifier(clf, X_train, y_train,
                                 project=desc_params['projection'])
-        #X, y, pred, probs, conf, labels = result
-        log.info('+ Saving classifier')
+        log.info('+ Adding classifier to data model')
         DM.add_classifier_to_model(clf)
-        DM.save_classifier()
     elif clf is None:
         return None
 
-    if old_classifier:
-        log.info("Attempting to use old classifier!")
     y_pred = np.full(y.size, -1, dtype=y.dtype)
     classifier_predict(X, clf, y_pred, idx_test)
     y_pred[idx_train] = y[idx_train]
@@ -212,11 +200,72 @@ def predict_proba(y_data=None, p_data=None,
     uncertain /= uncertain.max()
     y_uncertain[idx_train] = 1
     y_uncertain[idx_test] = 1 - uncertain
-    return perform_prediction(X, y_pred, y_uncertain, full_svmask, labels, mask, nsp, out_confidence, out_labels, ref_params, supervoxels,
-                              svmask, y)
+    return perform_prediction(X, y_pred, y_probas, y_uncertain,
+                              full_svmask, labels, mask, nsp,
+                              out_confidence, out_labels, ref_params, supervoxels, svmask, y)
+
+def predict_only(y_data=None, p_data=None,
+                  level_params=None, desc_params=None,
+                  clf_params=None, ref_params=None,
+                  out_labels=None, out_confidence=None):
+    log.info("+ Running Predict only!")
+    log.info("+ Extracting descriptors: {}".format(desc_params))
+    X, supervoxels, svmask = extract_descriptors(**desc_params)
+    full_svmask = svmask.copy()
+
+    old_classifier = False
+    if DM.has_classifier():
+        log.info("+ Getting existing classifier")
+        clf = DM.get_classifier_from_model()
+        mode = "ensemble"
+        old_classifier = True
+    else:
+        log.error("For some reason, no previous classifier exists!")
+        return
+
+    mask = None
+
+    if supervoxels is not None:
+        log.info('+ Extracting supervoxel labels')
+        nsp = DM.attr(desc_params['supervoxels'], 'num_supervoxels')
+
+        if mask is not None:
+            mask = mask.astype(np.int16)
+            mask = np.bincount(supervoxels.ravel(), weights=mask.ravel()*2-1) > 0
 
 
-def perform_prediction(X, pred, conf, full_svmask, labels, mask, nsp, out_confidence, out_labels, ref_params, supervoxels, svmask,
+    spmask = None if mask is None else mask.ravel()
+
+
+    if old_classifier:
+        log.info("Attempting to use old classifier!")
+    result = classifier_predict2(X, clf)
+    log.info('+ Mapping predictions back to pixels')
+    pred_map = np.empty(nsp, dtype=result['class'].dtype)
+    conf_map = np.empty(nsp, dtype=result['probs'].dtype)
+    log.info('+ Measuring uncertainty')
+    # Slice each list of confidences with the corresponding predicted class
+    # to return the confidence for that class
+    conf_result = list(map(lambda x, y: x[y], result['probs'], result['class']))
+    pred_map[full_svmask] = result['class']
+    conf_map[full_svmask] = conf_result
+    pred = pred_map[supervoxels]
+    conf = conf_map[supervoxels]
+    pred.shape = DM.region_shape()
+    conf.shape = DM.region_shape()
+    print("Predict only Pred Shape: {}".format(pred.shape))
+    log.info('+ Saving results to disk')
+    DM.create_empty_dataset(out_labels, shape=DM.data_shape, dtype=pred.dtype)
+    labels = np.array([0, 1, 2], dtype='i4')
+    print("Labels: {}".format(labels))
+    print("Pred: {}".format(pred))
+    DM.write_slices(out_labels, pred, params=dict(labels=labels, active=True))
+    DM.create_empty_dataset(out_confidence, shape=DM.data_shape, dtype=conf.dtype)
+    DM.write_slices(out_confidence, conf, params=dict(labels=labels, active=True))
+    return out_labels, out_confidence, labels
+
+
+def perform_prediction(X, pred, probs, conf, full_svmask, labels, mask, nsp, out_confidence, out_labels, ref_params, supervoxels, svmask,
                        y):
     if supervoxels is not None:
         if ref_params['ref_type'] != 'None':
@@ -317,8 +366,15 @@ def _train_classifier(clf, X_train, y_train, rnd=42, project=None):
     clf.fit(X_train, y_train)
 
 
-
 def classifier_predict(X, clf, y_pred, idx_test):
     log.info('+ Predicting labels')
     y_pred[idx_test] = clf.predict(X[idx_test])
+    print("Result {}".format(y_pred))
     return clf, y_pred
+
+def classifier_predict2(X, clf):
+    result = {}
+    log.info('+ Predicting labels')
+    result['class'] = clf.predict(X)
+    result['probs'] = clf.predict_proba(X)
+    return result

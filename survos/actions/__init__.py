@@ -5,6 +5,6 @@ from .annotations import refine_label, save_threshold
 from .supervoxels import create_supervoxels
 from .megavoxels import create_megavoxels
 from .channels import compute_channel, compute_all_channel
-from .training import predict_proba
+from .training import predict_proba, predict_only
 from .partition import label_objects, apply_rules
 from .seganalysis import compare_segmentations

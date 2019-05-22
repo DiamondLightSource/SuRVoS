@@ -21,7 +21,7 @@ from ..core import Launcher
 from ..core import DataModel, LayerManager, LabelManager
 from ..plugins import Plugin
 from ..plugins import ROI, SuperRegions, Annotations, Visualization,\
-                      Training, FeatureChannels, Export, LoadClassifier
+                      Training, FeatureChannels, Export, PretrainedClassifier
 from ..widgets import RCheckBox, HeaderButton, HWidgets, BLabel, PicButton, \
                       ComboDialog
 
@@ -264,7 +264,7 @@ class MainWidget(QtWidgets.QWidget):
         attrs = self.DM.attrs('/data')
 
         # Left column
-        self.load_previous_classifier = LoadClassifier()
+        self.load_previous_classifier = PretrainedClassifier()
         self.visualization = Visualization()
         self.roi = ROI()
         self.SuperRegions = SuperRegions()
@@ -276,7 +276,6 @@ class MainWidget(QtWidgets.QWidget):
         self.addWidget(self.visualization, pvisible=True)
 
         self.addWidget(self.roi, pvisible=True, enabled=True, after=self)
-        self.addWidget(self.load_previous_classifier, pvisible=True)
         self.addWidget(self.voxel_channels, pvisible=False, \
                        enabled=True, after=self)
         self.addWidget(self.SuperRegions, pvisible=False, \
@@ -285,6 +284,8 @@ class MainWidget(QtWidgets.QWidget):
                        enabled=True, after=self)
         self.addWidget(self.training, pvisible=False, \
                        enabled=True, after=self)
+        self.addWidget(self.load_previous_classifier,
+                       pvisible=True, after=self)
         self.addWidget(self.export, pvisible=False, \
                        enabled=True, after=self)
 
