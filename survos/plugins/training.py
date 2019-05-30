@@ -411,7 +411,7 @@ class UncertainLabelWidget(QtWidgets.QWidget):
         hbox.setContentsMargins(0, 0, 0, 0)
         self.setLayout(hbox)
 
-        self.name = BLabel(name)
+        self.name = BLabel(str(name))
         self.name.setMinimumWidth(120)
         hbox.addWidget(self.name)
 
