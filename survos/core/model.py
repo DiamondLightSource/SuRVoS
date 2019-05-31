@@ -7,7 +7,7 @@ import logging as log
 import os
 import glob
 import h5py as h5
-from joblib import dump, load
+from pickle import dumps, loads
 
 from scipy.stats import gaussian_kde
 
@@ -73,6 +73,9 @@ class DataModel(QtCore.QObject):
 
         # Classifier
         self.clf = None
+
+        # Parameters to be saved with classifier
+        self.desc_params = None
 
         # GT Labels
         self.gtlevel = 0
@@ -208,15 +211,55 @@ class DataModel(QtCore.QObject):
         if os.path.exists(ds_file):
             os.remove(ds_file)
 
-    def save_classifier(self, path):
+    def save_classifier(self, path, lbl_attrs):
         """
         Save classifier to filepath
         :param path: filepath for classifier output
         """
         if self.has_classifier():
-            dump(self.clf, path)
+            clf_pkl = dumps(self.clf)
+            with h5.File(path, 'w') as out_file:
+                out_file['classifier'] = np.void(clf_pkl)
+                out_file['classifier'].attrs['class'] = type(self.clf).__name__
+                out_file['classifier'].attrs['features'] = self.desc_params.get('features')
+                # Add the label information
+                self.write_attrs_to_empty_dataset(out_file, "lbl_info", lbl_attrs)
+                # Copy the supervoxel information across
+                svds = 'supervoxels/supervoxels'
+                supervox_attrs = self.attrs(svds)
+                self.write_attrs_to_empty_dataset(out_file, "supervox_info", supervox_attrs)
+                # Get the metadata for the feature channels
+                result_list = self.get_channel_metadata()
+                # Create the datasets
+                for result in result_list:
+                    dataset_name = result['feature_name'].replace(" ", "_")
+                    self.write_attrs_to_empty_dataset(out_file, dataset_name, result)
         else:
             log.error("Data Model has no classifier!")
+
+    def write_attrs_to_empty_dataset(self, file, dataset, attrs_dict):
+        """
+        Helper function to create and empty dataset in a file and 
+        populate HDF5 dataset attrs
+        :param file: H5py file object
+        :param dataset: Name of the dataset to create (str)
+        :param attrs_dict: Dictionary of attributes to add to dataset
+        """
+        file.create_dataset(dataset, dtype='f')
+        for k, v in attrs_dict.items():
+            file[dataset].attrs[k] = v
+
+
+    def get_channel_metadata(self):
+        """
+        Get the required metadata from each feature channel file
+        :return metadata: list of dictionaries, each containing data for one channel
+        """
+        result_list = []
+        for feature in self.desc_params.get('features'):
+            feature_attrs = self.attrs(feature)
+            result_list.append(feature_attrs)
+        return result_list
 
     def add_classifier_to_model(self, clf):
         """
@@ -231,7 +274,7 @@ class DataModel(QtCore.QObject):
         :return: classifier
         """
         if not self.clf:
-            print("No Classifier in model")
+            log.error("No Classifier in model")
         else:
             return self.clf
 
@@ -240,12 +283,30 @@ class DataModel(QtCore.QObject):
 
     def load_classifier(self, path):
         if os.path.exists(path):
-            clf = load(path)
-            # TODO: Put in type check here to make sure an sklearn object has been loaded
-            self.add_classifier_to_model(clf)
-            print("Classifier Loaded:", type(self.clf))
-        else:
-            log.error("Cannot load classifier. Does not seem to exist.")
+            with h5.File(path, 'r') as in_file:
+                try:
+                    clf_str = in_file['classifier']
+                    clf = loads(clf_str[()].tostring())
+                    class_str =  in_file['classifier'].attrs['class']
+                except Exception as e:
+                    print(path, e)
+                    print(type(in_file))
+                    return
+
+            if str(class_str) == type(clf).__name__:
+                self.add_classifier_to_model(clf)
+                log.info("Classifier Loaded: {}".format(type(self.clf)))
+            else:
+                log.error("Classifier not loaded. Class description {} does not"
+                          " match classifier type {}".format(str(class_str), type(clf).__name__))
+
+    def add_desc_params_to_model(self, desc_params):
+        """
+        Add desc_params to model object
+        :param desc_params: dictionary of descriptors
+        """
+        self.desc_params = desc_params
+
     ##########################################################################
     # ATTRIBUTES AND MEMBERSHIP
     ##########################################################################

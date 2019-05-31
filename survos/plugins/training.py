@@ -3,6 +3,7 @@ import os
 import os.path as op
 from ..qt_compat import QtGui, QtCore, QtWidgets
 
+from pprint import pprint
 import logging as log
 from collections import defaultdict
 
@@ -12,8 +13,8 @@ from skimage.segmentation import find_boundaries
 
 from ..core import Launcher
 from ..widgets import LCheckBox, HWidgets, BLabel, PLineEdit, TComboBox, \
-                      HeaderLabel, SubHeaderLabel, CSlider, ColorButton, \
-                      HSize3D, MultiSourceCombo, ActionButton
+    HeaderLabel, SubHeaderLabel, CSlider, ColorButton, \
+    HSize3D, MultiSourceCombo, ActionButton
 from ..widgets.conficence_viewer import ConfidenceViewer
 from .base import Plugin
 from ..core import DataModel, LayerManager, LabelManager
@@ -21,22 +22,21 @@ from .. import actions as ac
 
 
 class EnsembleWidget(QtWidgets.QWidget):
-
     train_predict = QtCore.pyqtSignal(dict)
 
     def __init__(self, parent=None):
         super(EnsembleWidget, self).__init__(parent=parent)
 
         vbox = QtWidgets.QVBoxLayout()
-        vbox.setContentsMargins(0,0,0,0)
+        vbox.setContentsMargins(0, 0, 0, 0)
         self.setLayout(vbox)
 
         self.type_combo = TComboBox('Ensemble Type:', [
-                                        'Random Forest',
-                                        'ExtraRandom Forest',
-                                        'AdaBoost',
-                                        'GradientBoosting'
-                                    ])
+            'Random Forest',
+            'ExtraRandom Forest',
+            'AdaBoost',
+            'GradientBoosting'
+        ])
         self.type_combo.currentIndexChanged.connect(self.on_ensemble_changed)
         vbox.addWidget(self.type_combo)
 
@@ -49,22 +49,22 @@ class EnsembleWidget(QtWidgets.QWidget):
                                 self.ntrees,
                                 QtWidgets.QLabel('Max Depth:'),
                                 self.depth,
-                                stretch=[0,1,0,1]))
+                                stretch=[0, 1, 0, 1]))
 
         vbox.addWidget(HWidgets(QtWidgets.QLabel('Learn Rate:'),
                                 self.lrate,
                                 QtWidgets.QLabel('Subsample:'),
                                 self.subsample,
-                                stretch=[0,1,0,1]))
+                                stretch=[0, 1, 0, 1]))
 
         self.btn_train_predict = ActionButton('Train && Predict')
         # self.btn_predict = ActionButton('Predict')
         # self.btn_predict.setEnabled(False)
         self.btn_train_predict.clicked.connect(self.on_train_predict_clicked)
-        #self.btn_predict.clicked.connect(self.on_predict_clicked)
+        # self.btn_predict.clicked.connect(self.on_predict_clicked)
         self.n_jobs = PLineEdit(1, parse=int)
         vbox.addWidget(HWidgets('Num Jobs', self.n_jobs, None, self.btn_train_predict,
-                                stretch=[0, 0,1,0]))
+                                stretch=[0, 0, 1, 0]))
         # vbox.addWidget(HWidgets(None, None, None, self.btn_predict,
         #                         stretch=[0, 0, 1, 0]))
 
@@ -84,34 +84,33 @@ class EnsembleWidget(QtWidgets.QWidget):
     def on_train_predict_clicked(self):
         ttype = ['rf', 'erf', 'ada', 'gbf']
         params = {
-            'clf'           : 'ensemble',
-            'type'          : ttype[self.type_combo.currentIndex()],
-            'n_estimators'  : self.ntrees.value(),
-            'max_depth'     : self.depth.value(),
-            'learning_rate' : self.lrate.value(),
-            'subsample'     : self.subsample.value(),
-            'n_jobs'        : self.n_jobs.value()
+            'clf': 'ensemble',
+            'type': ttype[self.type_combo.currentIndex()],
+            'n_estimators': self.ntrees.value(),
+            'max_depth': self.depth.value(),
+            'learning_rate': self.lrate.value(),
+            'subsample': self.subsample.value(),
+            'n_jobs': self.n_jobs.value()
         }
         self.train_predict.emit(params)
 
 
 class SVMWidget(QtWidgets.QWidget):
-
     predict = QtCore.pyqtSignal(dict)
 
     def __init__(self, parent=None):
         super(SVMWidget, self).__init__(parent=parent)
 
         vbox = QtWidgets.QVBoxLayout()
-        vbox.setContentsMargins(0,0,0,0)
+        vbox.setContentsMargins(0, 0, 0, 0)
         self.setLayout(vbox)
 
         self.type_combo = TComboBox('Kernel Type:', [
-                                        'linear',
-                                        'poly',
-                                        'rbf',
-                                        'sigmoid'
-                                    ])
+            'linear',
+            'poly',
+            'rbf',
+            'sigmoid'
+        ])
         vbox.addWidget(self.type_combo)
 
         self.penaltyc = PLineEdit(1.0, parse=float)
@@ -121,49 +120,48 @@ class SVMWidget(QtWidgets.QWidget):
                                 self.penaltyc,
                                 QtWidgets.QLabel('Gamma:'),
                                 self.gamma,
-                                stretch=[0,1,0,1]))
+                                stretch=[0, 1, 0, 1]))
 
         self.btn_predict = ActionButton('Predict')
         self.btn_predict.clicked.connect(self.on_predict_clicked)
-        vbox.addWidget(HWidgets(None, self.btn_predict, stretch=[1,0]))
+        vbox.addWidget(HWidgets(None, self.btn_predict, stretch=[1, 0]))
 
     def on_predict_clicked(self):
         params = {
-            'clf'       : 'svm',
-            'kernel'    : self.type_combo.currentText(),
-            'C'         : self.penaltyc.value(),
-            'gamma'     : self.gamma.value()
+            'clf': 'svm',
+            'kernel': self.type_combo.currentText(),
+            'C': self.penaltyc.value(),
+            'gamma': self.gamma.value()
         }
 
         self.predict.emit(params)
 
 
 class OnlineWidget(QtWidgets.QWidget):
-
     predict = QtCore.pyqtSignal(dict)
 
     def __init__(self, parent=None):
         super(OnlineWidget, self).__init__(parent=parent)
 
         vbox = QtWidgets.QVBoxLayout()
-        vbox.setContentsMargins(0,0,0,0)
+        vbox.setContentsMargins(0, 0, 0, 0)
         self.setLayout(vbox)
 
         self.type_combo = TComboBox('Loss function:', [
-                                        #'hinge',
-                                        'log',
-                                        'modified_huber',
-                                        #'squared_hinge',
-                                        #'perceptron'
-                                    ])
+            # 'hinge',
+            'log',
+            'modified_huber',
+            # 'squared_hinge',
+            # 'perceptron'
+        ])
         vbox.addWidget(self.type_combo)
 
         self.penalty = TComboBox('Regularization:', [
-                                        'none',
-                                        'l1',
-                                        'l2',
-                                        'elasticnet',
-                                    ])
+            'none',
+            'l1',
+            'l2',
+            'elasticnet',
+        ])
         vbox.addWidget(self.penalty)
 
         self.alpha = PLineEdit(0.0001, parse=float)
@@ -173,7 +171,7 @@ class OnlineWidget(QtWidgets.QWidget):
                                 self.alpha,
                                 QtWidgets.QLabel('Num Iter:'),
                                 self.n_iter,
-                                stretch=[0,1,0,1]))
+                                stretch=[0, 1, 0, 1]))
 
         self.chunks = PLineEdit(None, parse=int)
 
@@ -182,26 +180,28 @@ class OnlineWidget(QtWidgets.QWidget):
         vbox.addWidget(HWidgets(QtWidgets.QLabel('Chunks:'),
                                 self.chunks,
                                 None, self.btn_predict,
-                                stretch=[0,0,1,0]))
+                                stretch=[0, 0, 1, 0]))
 
     def on_predict_clicked(self):
         params = {
-            'clf'       : 'sgd',
-            'loss'      : self.type_combo.currentText(),
-            'penalty'   : self.penalty.currentText(),
-            'alpha'     : self.alpha.value(),
-            'n_iter'    : self.n_iter.value(),
-            'chunks'    : self.chunks.value()
+            'clf': 'sgd',
+            'loss': self.type_combo.currentText(),
+            'penalty': self.penalty.currentText(),
+            'alpha': self.alpha.value(),
+            'n_iter': self.n_iter.value(),
+            'chunks': self.chunks.value()
         }
 
         self.predict.emit(params)
 
-class SaveClassifier(QtWidgets.QWidget):
 
+class SaveClassifier(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(SaveClassifier, self).__init__(parent=parent)
 
         self.DM = DataModel.instance()
+        self.LBLM = LabelManager.instance()
+        self.selected_level = -1
 
         vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
@@ -210,26 +210,36 @@ class SaveClassifier(QtWidgets.QWidget):
         self.btn_save_clf.clicked.connect(self.on_save_clf_clicked)
         vbox.addWidget(HWidgets(None, None, self.btn_save_clf, None,
                                 stretch=[0, 0, 1, 0]))
+        self.DM.level_predicted.connect(self.on_level_predicted)
+
+    def on_level_predicted(self, idx):
+        self.select_level(idx)
+
+    def select_level(self, idx):
+        self.selected_level = idx
 
     def on_save_clf_clicked(self):
         if not self.DM.has_classifier():
             QtWidgets.QMessageBox.critical(self, "Error", "A classifier has not been created yet!")
             return
         else:
+            attrs = {'levelid': self.selected_level, 'label': self.LBLM.idxs(self.selected_level),
+                     'names': self.LBLM.names(self.selected_level), 'colors': self.LBLM.colors(self.selected_level),
+                     'visible': list(map(int, self.LBLM.visibility(self.selected_level))),
+                     'parent_levels': self.LBLM.parent_levels(self.selected_level)}
+
             root_dir = self.DM.wspath
             output_dir = op.join(root_dir, "classifiers")
             os.makedirs(output_dir, exist_ok=True)
-            filename = op.join(output_dir, "classifier.joblib")
-            filter = "Classifier (*.joblib)"
+            filename = op.join(output_dir, "classifier.h5")
+            filter = "Classifier (*.h5)"
             path, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save Classifier', filename, filter)
-            # path, _ = QtWidgets.QFileDialog.getSaveFileName(self, , "classifier.joblib")
             if path is not None and len(path) > 0:
                 log.info('+ Saving classifier to {}'.format(path))
-                self.DM.save_classifier(path)
+                self.DM.save_classifier(path, attrs)
 
 
 class TrainPredict(QtWidgets.QWidget):
-
     def __init__(self, parent=None):
         super(TrainPredict, self).__init__(parent=None)
 
@@ -256,8 +266,8 @@ class TrainPredict(QtWidgets.QWidget):
         self.use_desc = MultiSourceCombo()
 
         self.desc_type = TComboBox('Type:',
-                                    ['Mean', 'Quantized', 'Textons',
-                                     'Covar', 'Sigma Set'])
+                                   ['Mean', 'Quantized', 'Textons',
+                                    'Covar', 'Sigma Set'])
         self.desc_bins = PLineEdit(10, parse=int)
         self.desc_bins.setMaximumWidth(60)
 
@@ -267,27 +277,27 @@ class TrainPredict(QtWidgets.QWidget):
                                     ['None', 'standard', 'random_projection',
                                      'pca', 'random_pca'])
 
-        vbox.addWidget(HWidgets(None, self.use_region, stretch=[1,0]))
-        vbox.addWidget(HWidgets(None, 'Features:', self.use_desc, stretch=[1,0,0]))
+        vbox.addWidget(HWidgets(None, self.use_region, stretch=[1, 0]))
+        vbox.addWidget(HWidgets(None, 'Features:', self.use_desc, stretch=[1, 0, 0]))
         self.supervoxel_desc_params = HWidgets(self.desc_type, 'Bins:',
                                                self.desc_bins, self.nh_order,
-                                               stretch=[1,0,0,1])
+                                               stretch=[1, 0, 0, 1])
         vbox.addWidget(self.supervoxel_desc_params)
-        vbox.addWidget(HWidgets(None, self.preprocess, stretch=[1,0,0]))
+        vbox.addWidget(HWidgets(None, self.preprocess, stretch=[1, 0, 0]))
 
         vbox.addWidget(SubHeaderLabel('Classifier'))
 
         self.train_alg = TComboBox('Classifier type:', [
-                                        'Ensemble',
-                                        'SVM',
-                                        'Online Linear'
-                                   ])
+            'Ensemble',
+            'SVM',
+            'Online Linear'
+        ])
         self.train_alg.currentIndexChanged.connect(self.on_classifier_changed)
         vbox.addWidget(self.train_alg)
 
         self.clf_container = QtWidgets.QWidget()
         vbox2 = QtWidgets.QVBoxLayout()
-        vbox2.setContentsMargins(0,0,0,0)
+        vbox2.setContentsMargins(0, 0, 0, 0)
         self.clf_container.setLayout(vbox2)
 
         self.ensembles = EnsembleWidget()
@@ -297,8 +307,6 @@ class TrainPredict(QtWidgets.QWidget):
         self.online = OnlineWidget()
         self.online.predict.connect(self.on_train_predict)
         self.save_clf = SaveClassifier()
-
-
 
         self.clf_container.layout().addWidget(self.ensembles)
         vbox.addWidget(self.clf_container)
@@ -310,7 +318,7 @@ class TrainPredict(QtWidgets.QWidget):
         self.refinement_lamda.setMaximumWidth(80)
         self.refinement_desc = MultiSourceCombo()
         self.ref_features = HWidgets(None, 'Features:', self.refinement_desc,
-                                     stretch=[1,0,0])
+                                     stretch=[1, 0, 0])
         self.ref_features.setVisible(False)
         vbox.addWidget(HWidgets(self.refinement_combo, 'Lambda:', self.refinement_lamda))
         vbox.addWidget(self.ref_features)
@@ -386,6 +394,7 @@ class TrainPredict(QtWidgets.QWidget):
 
         ### CLASSIFIER
         clf_params = params
+        self.DM.add_desc_params_to_model(desc_params)
 
         ### REFINEMENT
         ref_params = dict()
@@ -439,9 +448,7 @@ class TrainPredict(QtWidgets.QWidget):
         self.DM.level_predicted.emit(self.selected_level)
 
 
-
 class UncertainLabelWidget(QtWidgets.QWidget):
-
     save = QtCore.pyqtSignal(int)
 
     def __init__(self, idx, name, color, parent=None):
@@ -470,7 +477,6 @@ class UncertainLabelWidget(QtWidgets.QWidget):
 
 
 class Uncertainty(QtWidgets.QWidget):
-
     def __init__(self, parent=None):
         super(Uncertainty, self).__init__(parent=parent)
 
@@ -494,7 +500,7 @@ class Uncertainty(QtWidgets.QWidget):
         self.labels = {}
 
         self.slider_thresh = CSlider('none', current=0)
-        vbox.addWidget(HWidgets('Confidence:', self.slider_thresh, stretch=[0,1]))
+        vbox.addWidget(HWidgets('Confidence:', self.slider_thresh, stretch=[0, 1]))
 
         self.txt_from = HSize3D('From', default=(0, 0, 0), txtwidth=50)
         self.txt_to = HSize3D('To', default=self.DM.data_shape, txtwidth=50)
@@ -504,7 +510,6 @@ class Uncertainty(QtWidgets.QWidget):
         self.combo_viz.currentIndexChanged.connect(self.on_viz_changed)
         self.slider_thresh.valueChanged.connect(self.on_thresh_changed)
         self.DM.level_predicted.connect(self.on_level_predicted)
-
 
     def on_level_predicted(self, idx):
         self.select_level(idx)
@@ -520,7 +525,7 @@ class Uncertainty(QtWidgets.QWidget):
             labels = self.DM.attr(labels_name, 'labels')
             colors = self.LBLM.colors(self.selected_level)
             idxs = self.LBLM.idxs(self.selected_level)
-            maxid = 0 if len(idxs) == 0 else max(idxs)+1
+            maxid = 0 if len(idxs) == 0 else max(idxs) + 1
             cmaplist = ['#000000'] * maxid
             for idx, color in zip(idxs, colors):
                 cmaplist[idx] = color
@@ -546,7 +551,6 @@ class Uncertainty(QtWidgets.QWidget):
 
     def on_thresh_changed(self, thresh):
         self.on_viz_changed(self.combo_viz.currentIndex())
-
 
     def select_level(self, level):
         self.level_header.setText('Confidence Tool for Level {}'.format(level))
@@ -603,7 +607,6 @@ class Uncertainty(QtWidgets.QWidget):
 
 
 class Training(Plugin):
-
     name = 'Train classifier'
 
     def __init__(self, parent=None):
@@ -709,7 +712,7 @@ class Training(Plugin):
                     break
             if idx > 0:
                 if self.train_widget.parent_level == level and \
-                        self.train_widget.parent_label == label:
+                                self.train_widget.parent_label == label:
                     self.use_parent.setCurrentIndex(0)
                 del self.parent_labels[idx]
                 self.use_parent.removeItem(idx)

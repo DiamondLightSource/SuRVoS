@@ -213,12 +213,10 @@ def predict_only(y_data=None, p_data=None,
     X, supervoxels, svmask = extract_descriptors(**desc_params)
     full_svmask = svmask.copy()
 
-    old_classifier = False
     if DM.has_classifier():
         log.info("+ Getting existing classifier")
         clf = DM.get_classifier_from_model()
         mode = "ensemble"
-        old_classifier = True
     else:
         log.error("For some reason, no previous classifier exists!")
         return
@@ -236,9 +234,6 @@ def predict_only(y_data=None, p_data=None,
 
     spmask = None if mask is None else mask.ravel()
 
-
-    if old_classifier:
-        log.info("Attempting to use old classifier!")
     result = classifier_predict2(X, clf)
     log.info('+ Mapping predictions back to pixels')
     pred_map = np.empty(nsp, dtype=result['class'].dtype)
@@ -256,9 +251,7 @@ def predict_only(y_data=None, p_data=None,
     print("Predict only Pred Shape: {}".format(pred.shape))
     log.info('+ Saving results to disk')
     DM.create_empty_dataset(out_labels, shape=DM.data_shape, dtype=pred.dtype)
-    labels = np.array([0, 1, 2], dtype='i4')
-    print("Labels: {}".format(labels))
-    print("Pred: {}".format(pred))
+    labels = np.asarray(list(set(np.unique(result['class'][supervoxels])) - set([-1])), np.int32)
     DM.write_slices(out_labels, pred, params=dict(labels=labels, active=True))
     DM.create_empty_dataset(out_confidence, shape=DM.data_shape, dtype=conf.dtype)
     DM.write_slices(out_confidence, conf, params=dict(labels=labels, active=True))

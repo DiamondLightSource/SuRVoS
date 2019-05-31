@@ -432,10 +432,9 @@ class PretrainedClassifier(Plugin):
         vbox.addStretch(1)
 
     def on_load_label(self):
-        print("Button Clicked!")
         root_dir = self.DM.wspath
         input_dir = op.join(root_dir, "classifiers")
-        filter = "Classifier (*.joblib)"
+        filter = "Classifier (*.h5)"
         path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Load Classifier', input_dir, filter)
         if path is not None and len(path) > 0:
             self.DM.load_classifier(path)
