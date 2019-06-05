@@ -19,6 +19,7 @@ class Launcher(QtCore.QObject):
     post = QtCore.pyqtSignal()
     error = QtCore.pyqtSignal(str)
     result = QtCore.pyqtSignal(object)
+    info = QtCore.pyqtSignal(str)
 
     def __init__(self):
         QtCore.QObject.__init__(self)

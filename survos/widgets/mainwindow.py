@@ -67,6 +67,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.launcher.pre.connect(self.overlay.pre)
         self.launcher.post.connect(self.overlay.post)
         self.launcher.error.connect(self.on_error)
+        self.launcher.info.connect(self.on_info)
 
         self.status = self.statusBar()
         self.edit = QtWidgets.QLabel()
@@ -168,6 +169,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_error(self, msg):
         QtWidgets.QMessageBox.critical(self, "Error", msg)
+        log.error(msg)
+        self.overlay.post()
+
+    def on_info(self, msg):
+        QtWidgets.QMessageBox.information(self, "Info", msg)
+        log.info(msg)
         self.overlay.post()
 
     def addWidget(self, widget, ptype=None):

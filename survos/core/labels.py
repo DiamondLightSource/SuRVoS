@@ -142,8 +142,16 @@ class LabelManager(QtCore.QObject):
         self._counts[level] += 1
 
     def loadLabel(self, level, label, name, color, visible, parent_level, parent_label):
-        self._levels[level][label] = Label(name, label, color.decode('UTF-8'), visible, parent_level, parent_label)
-        self.labelLoaded.emit(level, self._datasets[level], label, name.decode('UTF-8'), color.decode('UTF-8'),
+        self._levels[level][label] = Label(name, label, color, visible, parent_level, parent_label)
+
+        # Python 3 string issues
+        try:
+            name = name.decode('UTF-8')
+            color = color.decode('UTF-8')
+        except AttributeError as e:
+            pass
+
+        self.labelLoaded.emit(level, self._datasets[level], label, name, color,
                               visible, parent_level, parent_label)
         if label >= self._counts[level]:
             self._counts[level] = label+1

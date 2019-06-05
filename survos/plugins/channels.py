@@ -362,6 +362,7 @@ class FeatureChannels(Plugin):
         self.addWidget(dummy)
 
         self.btn_add.clicked.connect(self.on_add_feature)
+        self.DM.clf_channel_computed.connect(self.load_channel)
 
         self.features = {}
         self.num_features = 0

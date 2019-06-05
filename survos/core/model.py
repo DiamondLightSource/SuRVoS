@@ -35,6 +35,7 @@ class DataModel(QtCore.QObject):
     supervoxel_descriptor_removed = QtCore.pyqtSignal()
     supervoxel_descriptor_cleared = QtCore.pyqtSignal()
     level_predicted = QtCore.pyqtSignal(int)
+    clf_channel_computed = QtCore.pyqtSignal(int, str, str, bool, dict)
 
     Axial = 0
     Sagittal = 1
@@ -73,6 +74,7 @@ class DataModel(QtCore.QObject):
 
         # Classifier
         self.clf = None
+        self.clf_name = None
 
         # Parameters to be saved with classifier
         self.desc_params = None
@@ -232,7 +234,7 @@ class DataModel(QtCore.QObject):
                 result_list = self.get_channel_metadata()
                 # Create the datasets
                 for result in result_list:
-                    dataset_name = result['feature_name'].replace(" ", "_")
+                    dataset_name = "{}_{}".format(result['feature_idx'], result['feature_type'])
                     self.write_attrs_to_empty_dataset(out_file, dataset_name, result)
         else:
             log.error("Data Model has no classifier!")
@@ -249,17 +251,39 @@ class DataModel(QtCore.QObject):
         for k, v in attrs_dict.items():
             file[dataset].attrs[k] = v
 
+    def load_saved_settings_from_file(self, path):
+        """
+        Returns a dictionary containing all the metadata for settings saved along with the classifier
+        :param path: Path to classifier HDF5 file
+        :return: Dictionary with metadata
+        """
+        result = {}
+        if os.path.exists(path):
+            with h5.File(path, 'r') as in_file:
+                try:
+                    # Get the list of channels used by the classifier
+                    channel_list = in_file['classifier'].attrs['features']
+                    # Store dicts with the metadata for each channel in the list
+                    for channel_string in channel_list:
+                        # channel_string is in form 'channel/name'
+                        name = channel_string.split('/')[1]
+                        result[name] = dict(in_file[name].attrs)
+                        result.setdefault('channel_list', []).append(name)
+                        result[name]['out'] = channel_string
+                    result['lbl_attrs'] = dict(in_file['lbl_info'].attrs.items())
+                    result['sv_attrs'] = dict(in_file['supervox_info'].attrs.items())
+                except Exception as e:
+                    log.error("Could not load attributes: {}".format(e))
+            return result
+        else:
+            log.error("File does not appear to exist")
 
     def get_channel_metadata(self):
         """
         Get the required metadata from each feature channel file
         :return metadata: list of dictionaries, each containing data for one channel
         """
-        result_list = []
-        for feature in self.desc_params.get('features'):
-            feature_attrs = self.attrs(feature)
-            result_list.append(feature_attrs)
-        return result_list
+        return [self.attrs(feature) for feature in self.desc_params.get('features')]
 
     def add_classifier_to_model(self, clf):
         """
@@ -267,6 +291,8 @@ class DataModel(QtCore.QObject):
         :param clf: classifier to add to object
         """
         self.clf = clf
+        self.clf_name = clf.__class__.__name__
+
 
     def get_classifier_from_model(self):
         """
@@ -291,14 +317,19 @@ class DataModel(QtCore.QObject):
                 except Exception as e:
                     print(path, e)
                     print(type(in_file))
-                    return
+                    return False
 
             if str(class_str) == type(clf).__name__:
                 self.add_classifier_to_model(clf)
                 log.info("Classifier Loaded: {}".format(type(self.clf)))
+                return True
             else:
                 log.error("Classifier not loaded. Class description {} does not"
                           " match classifier type {}".format(str(class_str), type(clf).__name__))
+                return False
+        else:
+            log.error("File does not appear to exist")
+            return False
 
     def add_desc_params_to_model(self, desc_params):
         """
