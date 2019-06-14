@@ -175,7 +175,10 @@ class FeatureRow(RoundedWidget):
         self.idx = idx
         self.feature = available_features[ftype]
         if fname is None:
-            self.fname = '{}_{}'.format(idx, self.feature[1])
+            if self.feature[1] is None:
+                raise ValueError("No feature selected!")
+            else:
+                self.fname = '{}_{}'.format(idx, self.feature[1])
         else:
             self.fname = fname
         self.dsname = 'channels/{}'.format(self.fname)
@@ -374,8 +377,12 @@ class FeatureChannels(Plugin):
         if ftype < 0:
             log.info('[[[Error]]] feature {} could not be loaded'.format(fname))
             return
-        feature_row = FeatureRow(fidx, ftype, fname=fname, active=active,
+        try:
+            feature_row = FeatureRow(fidx, ftype, fname=fname, active=active,
                                  load_params=params, parent=self)
+        except ValueError as e:
+            log.error("Creating feature failed: {}".format(e))
+            return
         feature_row.toggled.connect(self.on_toggle_feature)
         feature_row.delete.connect(self.on_delete_feature)
         feature_row.compute.connect(self.on_compute_feature)
@@ -389,7 +396,11 @@ class FeatureChannels(Plugin):
 
     def on_add_feature(self):
         ftype = self.cmb_features.currentIndex()
-        feature_row = FeatureRow(self.num_features, ftype, parent=self)
+        try:
+            feature_row = FeatureRow(self.num_features, ftype, parent=self)
+        except ValueError as e:
+            log.error("Creating feature failed: {}".format(e))
+            return
         feature_row.toggled.connect(self.on_toggle_feature)
         feature_row.delete.connect(self.on_delete_feature)
         feature_row.compute.connect(self.on_compute_feature)
