@@ -362,7 +362,6 @@ def _train_classifier(clf, X_train, y_train, rnd=42, project=None):
 def classifier_predict(X, clf, y_pred, idx_test):
     log.info('+ Predicting labels')
     y_pred[idx_test] = clf.predict(X[idx_test])
-    print("Result {}".format(y_pred))
     return clf, y_pred
 
 def classifier_predict2(X, clf):
