@@ -223,6 +223,17 @@ class CheckableCombo(QtWidgets.QToolButton):
         return [i for i in range(len(self._data))
                 if self._data[i][1].isChecked()]
 
+    def checkGivenItems(self, item_list):
+        """
+        Given a list of items, checks those items in the CheckableCombo
+
+        :param item_list: List of strings. Labels of boxes to be checked 
+        """
+        for i in range(len(self._data)):
+            # Have to truncate the string here as 4 extra spaces were added in AddItem
+            if self._data[i][1].text()[:-4] in item_list:
+                self._data[i][1].setChecked(True)
+
 class CheckableLabels(CheckableCombo):
     def __init__(self, restrict_level=None, parent=None):
         super(CheckableLabels, self).__init__('Select Labels', parent)

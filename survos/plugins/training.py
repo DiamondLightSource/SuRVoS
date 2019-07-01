@@ -260,7 +260,6 @@ class TrainPredict(PredWidgetBase):
         self.svm.predict.connect(self.on_predict)
         self.online = OnlineWidget()
         self.online.predict.connect(self.on_predict)
-        self.save_clf = SaveClassifier()
 
         self.clf_container.layout().addWidget(self.ensembles)
         self.vbox.addWidget(self.clf_container)
@@ -481,6 +480,8 @@ class Training(Plugin):
         self.LBLM.labelNameChanged.connect(self.on_label_name_changed)
         self.LBLM.labelRemoved.connect(self.on_label_removed)
 
+        self.DM.level_predicted.connect(self.on_level_predicted)
+
         self.addWidget(dummy)
         self.addWidget(HeaderLabel('Train New Classifier'))
         self.train_widget = TrainPredict()
@@ -496,6 +497,8 @@ class Training(Plugin):
         self.addWidget(HeaderLabel('Save Trained Classifier'))
         self.save_classifier_widget = SaveClassifier()
         self.addWidget(self.save_classifier_widget)
+        if not self.DM.has_classifier():
+            self.save_classifier_widget.btn_save_clf.setEnabled(False)
 
     def on_level_selected(self, idx):
         if idx < 0:
@@ -558,3 +561,6 @@ class Training(Plugin):
                     self.use_parent.setCurrentIndex(0)
                 del self.parent_labels[idx]
                 self.use_parent.removeItem(idx)
+
+    def on_level_predicted(self, level):
+        self.save_classifier_widget.btn_save_clf.setEnabled(True)

@@ -121,6 +121,8 @@ class PretrainedClassifier(Plugin):
         self.LBLM.labelRemoved.connect(self.on_label_removed)
         self.predict_widget = Predict()
         vbox.addWidget(self.predict_widget)
+        if not self.DM.has_classifier():
+            self.predict_widget.btn_predict.setEnabled(False)
 
         vbox.addWidget(HeaderLabel('Update annotations'))
         self.uncertainty_widget = Uncertainty()
@@ -235,6 +237,7 @@ class PretrainedClassifier(Plugin):
         :param results: 
         :return: 
         """
+        feat_list = []
         for result in results:
             if result is None:
                 continue
@@ -252,7 +255,10 @@ class PretrainedClassifier(Plugin):
             channel_params = {k: params[k] for k in keys}
             log.info('* Channel {} {}'.format(fname, ftype))
             self.DM.clf_channel_computed.emit(idx, name, ftype, active, channel_params)
-            self.calc_supervox.apply.setEnabled(True)
+            feat_list.append(fname)
+        self.calc_supervox.apply.setEnabled(True)
+        self.predict_widget.use_desc.checkGivenItems(feat_list)
+        print("Feat list: ", feat_list)
 
     def calculate_supervoxels(self):
 
@@ -291,6 +297,7 @@ class PretrainedClassifier(Plugin):
     def on_supervoxels(self, params):
         svlabels, svtotal, sortindex, sorttable, edges, weights = params
         self.update_supervoxel_layer(svlabels, sortindex, sorttable, svtotal, visible=True)
+        self.predict_widget.btn_predict.setEnabled(True)
 
     def update_supervoxel_layer(self, svlabels, sortindex, sorttable, total_sv, visible=False):
         if svlabels is not None:
