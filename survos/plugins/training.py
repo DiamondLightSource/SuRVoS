@@ -278,10 +278,13 @@ class TrainPredict(PredWidgetBase):
             self.svm.setParent(None)
             self.ensembles.setParent(None)
 
-    def run_prediction(self, y_data, p_data, level_params, desc_params,
-                       clf_params, ref_params, out_labels, out_confidence, level):
+    def run_prediction(self, y_data, p_data, level_params, desc_params, ref_params,
+                       clf_params, out_labels, out_confidence, level):
+        """
+        Overrides method from parent class
+        """
 
-        self.launcher.run(ac.predict_proba, y_data=y_data, p_data=p_data,
+        self.launcher.run(ac.predict_proba, y_data=y_data, p_data=p_data, train=True,
                           level_params=level_params, desc_params=desc_params,
                           clf_params=clf_params, ref_params=ref_params,
                           out_labels=out_labels, out_confidence=out_confidence,

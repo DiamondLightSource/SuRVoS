@@ -130,7 +130,7 @@ def extract_descriptors(supervoxels=None, features=None,
     return descriptors, sp, mask
 
 
-def predict_proba(y_data=None, p_data=None,
+def predict_proba(y_data=None, p_data=None, train=False,
                   level_params=None, desc_params=None,
                   clf_params=None, ref_params=None,
                   out_labels=None, out_confidence=None):
@@ -138,128 +138,68 @@ def predict_proba(y_data=None, p_data=None,
     X, supervoxels, svmask = extract_descriptors(**desc_params)
     full_svmask = svmask.copy()
 
-    clf, mode = obtain_classifier(clf_params)
-    log.info("+ Creating classifier: {}".format(clf_params))
+    if train:
+        clf, mode = obtain_classifier(clf_params)
+        log.info("+ Creating classifier: {}".format(clf_params))
 
-    log.info("+ Loading labels")
-    labels = DM.load_slices(y_data)
-    if level_params['plevel'] is not None:
-        parent_labels = DM.load_slices(p_data)
-        mask = parent_labels == level_params['plabel']
+        log.info("+ Loading labels")
+        labels = DM.load_slices(y_data)
+        if level_params['plevel'] is not None:
+            parent_labels = DM.load_slices(p_data)
+            mask = parent_labels == level_params['plabel']
+        else:
+            mask = None
     else:
+        if DM.has_classifier():
+            log.info("+ Getting existing classifier")
+            clf = DM.get_classifier_from_model()
+        else:
+            log.error("For some reason, no previous classifier exists!")
+            return
         mask = None
 
     if supervoxels is not None:
-        log.info('+ Extracting supervoxel labels')
         nsp = DM.attr(desc_params['supervoxels'], 'num_supervoxels')
-        nlbl = DM.attr(y_data, 'label').max()+1
-        labels = _sp_labels(supervoxels.ravel(), labels.ravel(), nsp, nlbl, 0)
-        if mask is not None:
-            mask = mask.astype(np.int16)
-            mask = np.bincount(supervoxels.ravel(), weights=mask.ravel()*2-1) > 0
-        if X.shape[0] < labels.shape[0]: # less supervoxels
-            labels = labels[svmask]
+        log.info('+ Extracting supervoxel labels')
+        if train:
+            nlbl = DM.attr(y_data, 'label').max() + 1
+            labels = _sp_labels(supervoxels.ravel(), labels.ravel(), nsp, nlbl, 0)
             if mask is not None:
-                mask = mask[svmask]
-    y = labels
-    y.shape = -1
+                mask = mask.astype(np.int16)
+                mask = np.bincount(supervoxels.ravel(), weights=mask.ravel() * 2 - 1) > 0
+            if X.shape[0] < labels.shape[0]:  # less supervoxels
+                labels = labels[svmask]
+                if mask is not None:
+                    mask = mask[svmask]
+            y = labels
+            y.shape = -1
 
-    spmask = None if mask is None else mask.ravel()
-    labels = np.asarray(list(set(np.unique(y[spmask])) - set([-1])), np.int32)
+            if mask is not None:
+                mask.shape = -1
+                idx_train = (y > -1) & mask
+            else:
+                idx_train = (y > -1)
 
-    if mask is not None:
-        mask.shape = -1
-        idx_train = (y > -1) & mask
-        idx_test = (y == -1) & mask
-    else:
-        idx_train = (y > -1)
-        idx_test = (y == -1)
+            X_train = X[idx_train]
+            y_train = y[idx_train]
 
-    X_train = X[idx_train]
-    y_train = y[idx_train]
+            if clf is not None:
+                _train_classifier(clf, X_train, y_train,
+                                  project=desc_params['projection'])
+                log.info('+ Adding classifier to data model')
+                DM.add_classifier_to_model(clf)
+            elif clf is None:
+                log.error("No Classifier found!")
+                return None
 
-    if clf is not None:
-        _train_classifier(clf, X_train, y_train,
-                                project=desc_params['projection'])
-        log.info('+ Adding classifier to data model')
-        DM.add_classifier_to_model(clf)
-    elif clf is None:
-        return None
-
-    y_pred = np.full(y.size, -1, dtype=y.dtype)
-    classifier_predict(X, clf, y_pred, idx_test)
-    y_pred[idx_train] = y[idx_train]
-    log.info('+ Extracting probabilities')
-    y_probas = np.full((y.size, labels.size), -1, dtype=X.dtype)
-    y_uncertain = np.full(y.size, -1, dtype=X.dtype)
-    probas = clf.predict_proba(X[idx_test])
-    y_probas[idx_test] = probas
-    log.info('+ Measuring uncertainty')
-    uncertain = entropy(probas.T)
-    uncertain -= uncertain.min()
-    uncertain /= uncertain.max()
-    y_uncertain[idx_train] = 1
-    y_uncertain[idx_test] = 1 - uncertain
-    return perform_prediction(X, y_pred, y_probas, y_uncertain,
-                              full_svmask, labels, mask, nsp,
-                              out_confidence, out_labels, ref_params, supervoxels, svmask, y)
-
-def predict_only(y_data=None, p_data=None,
-                  level_params=None, desc_params=None,
-                  clf_params=None, ref_params=None,
-                  out_labels=None, out_confidence=None):
-    log.info("+ Running Predict only!")
-    log.info("+ Extracting descriptors: {}".format(desc_params))
-    X, supervoxels, svmask = extract_descriptors(**desc_params)
-    full_svmask = svmask.copy()
-
-    if DM.has_classifier():
-        log.info("+ Getting existing classifier")
-        clf = DM.get_classifier_from_model()
-        mode = "ensemble"
-    else:
-        log.error("For some reason, no previous classifier exists!")
-        return
-
-    mask = None
-
-    if supervoxels is not None:
-        log.info('+ Extracting supervoxel labels')
-        nsp = DM.attr(desc_params['supervoxels'], 'num_supervoxels')
-
-        if mask is not None:
-            mask = mask.astype(np.int16)
-            mask = np.bincount(supervoxels.ravel(), weights=mask.ravel()*2-1) > 0
+    return predict_and_save(X, clf, full_svmask, nsp, out_confidence, out_labels, supervoxels, ref_params, mask, svmask)
 
 
-    spmask = None if mask is None else mask.ravel()
-
-    result = classifier_predict2(X, clf)
-    log.info('+ Mapping predictions back to pixels')
-    pred_map = np.empty(nsp, dtype=result['class'].dtype)
-    conf_map = np.empty(nsp, dtype=result['probs'].dtype)
-    log.info('+ Measuring uncertainty')
-    # Slice each list of confidences with the corresponding predicted class
-    # to return the confidence for that class
-    conf_result = list(map(lambda x, y: x[y], result['probs'], result['class']))
-    pred_map[full_svmask] = result['class']
-    conf_map[full_svmask] = conf_result
-    pred = pred_map[supervoxels]
-    conf = conf_map[supervoxels]
-    pred.shape = DM.region_shape()
-    conf.shape = DM.region_shape()
-    print("Predict only Pred Shape: {}".format(pred.shape))
-    log.info('+ Saving results to disk')
-    DM.create_empty_dataset(out_labels, shape=DM.data_shape, dtype=pred.dtype)
+def predict_and_save(X, clf, full_svmask, nsp, out_confidence, out_labels, supervoxels, ref_params, mask, svmask):
+    result = classifier_predict(X, clf)
+    probs = result['probs']
     labels = np.asarray(list(set(np.unique(result['class'][supervoxels])) - set([-1])), np.int32)
-    DM.write_slices(out_labels, pred, params=dict(labels=labels, active=True))
-    DM.create_empty_dataset(out_confidence, shape=DM.data_shape, dtype=conf.dtype)
-    DM.write_slices(out_confidence, conf, params=dict(labels=labels, active=True))
-    return out_labels, out_confidence, labels
-
-
-def perform_prediction(X, pred, probs, conf, full_svmask, labels, mask, nsp, out_confidence, out_labels, ref_params, supervoxels, svmask,
-                       y):
+    pred = result['class']
     if supervoxels is not None:
         if ref_params['ref_type'] != 'None':
             log.info('+ Remapping supervoxels')
@@ -282,10 +222,11 @@ def perform_prediction(X, pred, probs, conf, full_svmask, labels, mask, nsp, out
 
             log.info('  * Unary potentials')
             unary = (-np.ma.log(probs)).filled()
-            mapping = np.zeros(y.max() + 1, np.int32)
+            unary = unary.astype(np.float32)
+            mapping = np.zeros(pred.max() + 1, np.int32)
             mapping[labels] = np.arange(labels.size)
-            idx = np.where(y > -1)[0]
-            col = mapping[y[idx]]
+            idx = np.where(pred > -1)[0]
+            col = mapping[pred[idx]]
             unary[idx, col] = 0
             pairwise = edge_weights.astype(np.float32)
 
@@ -307,7 +248,6 @@ def perform_prediction(X, pred, probs, conf, full_svmask, labels, mask, nsp, out
             label_cost = np.ones((labels.size, labels.size), np.float32)
             label_cost[np.diag_indices_from(label_cost)] = 0
             label_cost *= refine_lamda
-
             if label_cost.shape[0] == 2:
                 refined = solve_binary(edges, unary, pairwise, label_cost)
             else:
@@ -316,26 +256,29 @@ def perform_prediction(X, pred, probs, conf, full_svmask, labels, mask, nsp, out
 
             if mask is not None:
                 pred[~mask] = -1
-                conf[~mask] = -1
+                #conf[~mask] = -1
         else:
             pass  # TODO pixel refinement
-
         log.info('+ Mapping predictions back to pixels')
-        pred_map = np.empty(nsp, dtype=pred.dtype)
-        conf_map = np.empty(nsp, dtype=conf.dtype)
-        pred_map[full_svmask] = pred
-        conf_map[full_svmask] = conf
+        pred_map = np.empty(nsp, dtype=result['class'].dtype)
+        conf_map = np.empty(nsp, dtype=result['probs'].dtype)
+        log.info('+ Measuring uncertainty')
+        # Slice each list of confidences with the corresponding predicted class
+        # to return the confidence for that class
+        conf_result = list(map(lambda x, y: x[y], result['probs'], result['class']))
+        pred_map[full_svmask] = result['class']
+        conf_map[full_svmask] = conf_result
         pred = pred_map[supervoxels]
         conf = conf_map[supervoxels]
-    pred.shape = DM.region_shape()
-    conf.shape = DM.region_shape()
+        pred.shape = DM.region_shape()
+        conf.shape = DM.region_shape()
     log.info('+ Saving results to disk')
     DM.create_empty_dataset(out_labels, shape=DM.data_shape, dtype=pred.dtype)
+
     DM.write_slices(out_labels, pred, params=dict(labels=labels, active=True))
     DM.create_empty_dataset(out_confidence, shape=DM.data_shape, dtype=conf.dtype)
     DM.write_slices(out_confidence, conf, params=dict(labels=labels, active=True))
     return out_labels, out_confidence, labels
-
 
 def _train_classifier(clf, X_train, y_train, rnd=42, project=None):
 
@@ -358,13 +301,7 @@ def _train_classifier(clf, X_train, y_train, rnd=42, project=None):
     log.info('+ Training classifier')
     clf.fit(X_train, y_train)
 
-
-def classifier_predict(X, clf, y_pred, idx_test):
-    log.info('+ Predicting labels')
-    y_pred[idx_test] = clf.predict(X[idx_test])
-    return clf, y_pred
-
-def classifier_predict2(X, clf):
+def classifier_predict(X, clf):
     result = {}
     log.info('+ Predicting labels')
     result['class'] = clf.predict(X)

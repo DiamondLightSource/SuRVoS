@@ -219,11 +219,11 @@ class PredWidgetBase(QtWidgets.QWidget):
         log.info("{} {}".format(y_data, p_data))
         log.info("{} {}".format(out_labels, out_confidence))
 
-        self.run_prediction(y_data, p_data, level_params, desc_params,
-                            clf_params, ref_params, out_labels, out_confidence, level)
+        self.run_prediction(y_data, p_data, level_params, desc_params, ref_params,
+                            clf_params, out_labels, out_confidence, level)
 
-    def run_prediction(self, y_data, p_data, level_params, desc_params,
-                       clf_params, ref_params, out_labels, out_confidence, level):
+    def run_prediction(self, y_data, p_data, level_params, desc_params, ref_params,
+                       clf_params, out_labels, out_confidence, level):
         """
         To be implemented in subclasses
         """
