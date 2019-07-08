@@ -4,6 +4,8 @@
 
 Visit [https://diamondlightsource.github.io/SuRVoS/](https://diamondlightsource.github.io/SuRVoS/) for Documentation and Installation Instructions.
 
+# Technologies 
+
 As part of the semi-automatic segmentation pipeline, SuRVoS uses the publicy available QPBO library to solve the underlying MRF models,
 
     Optimizing binary MRFs via extended roof duality.
