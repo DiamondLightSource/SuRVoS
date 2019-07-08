@@ -4,7 +4,8 @@
 
 Visit [https://diamondlightsource.github.io/SuRVoS/](https://diamondlightsource.github.io/SuRVoS/) for Documentation and Installation Instructions.
 
-# Technologies 
+
+## Libraries used by SuRVoS
 
 As part of the semi-automatic segmentation pipeline, SuRVoS uses the publicy available QPBO library to solve the underlying MRF models,
 
@@ -13,6 +14,7 @@ As part of the semi-automatic segmentation pipeline, SuRVoS uses the publicy ava
     CVPR 2007. 
 
 which is available at (http://pub.ist.ac.at/~vnk/software.html) and automatically downloaded and installed through the installation process.
+
 
 # Referencing SuRVoS
 
@@ -32,3 +34,4 @@ If you use SuRVoS for your academic publication, please consider citing the foll
 [Read the article online (Open Access)](http://www.sciencedirect.com/science/article/pii/S1047847717300308).
 
 [![](https://codescene.io/projects/3731/status.svg) Get more details at **codescene.io**.](https://codescene.io/projects/3731/jobs/latest-successful/results)
+
