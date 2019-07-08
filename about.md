@@ -6,9 +6,6 @@ permalink: /about/
 
 SuRVoS is a work in progress project in collaboration of [Diamond Light Source](https://www.diamond.ac.uk/) and [The University of Nottingham](https://www.nottingham.ac.uk/).
 
-### More Information
-
-TODO
 
 ### Contacts
 
