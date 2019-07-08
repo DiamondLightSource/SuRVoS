@@ -13,8 +13,8 @@ TODO
 ### Contacts
 [mark.basham@diamond.ac.uk](mailto:mark.basham@diamond.ac.uk)
 
-[avery.pennington@diamond.ac.uk](mailto:avery.pennington@diamond.ac.uk)
-
 [olly.king@diamond.ac.uk](mailto:olly.king@diamond.ac.uk)
+
+[avery.pennington@diamond.ac.uk](mailto:avery.pennington@diamond.ac.uk)
 
 [imanol.luengo@nottingham.ac.uk](mailto:imanol.luengo@nottingham.ac.uk)
