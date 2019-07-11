@@ -49,27 +49,14 @@ class LoadClassifier(QtWidgets.QWidget):
         vbox.addStretch(1)
         self.setLayout(vbox)
 
-class ApplyFilters(QtWidgets.QWidget):
+class ApplySettings(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
-        super(ApplyFilters, self).__init__(parent=parent)
+        super(ApplySettings, self).__init__(parent=parent)
 
         vbox = QtWidgets.QVBoxLayout()
 
-        self.apply = ActionButton('Calculate Feature Channels')
-        self.apply.setEnabled(False)
-        vbox.addWidget(self.apply)
-        vbox.addStretch(1)
-        self.setLayout(vbox)
-
-class CalcSupervoxels(QtWidgets.QWidget):
-
-    def __init__(self, parent=None):
-        super(CalcSupervoxels, self).__init__(parent=parent)
-
-        vbox = QtWidgets.QVBoxLayout()
-
-        self.apply = ActionButton('Calculate Supervoxels')
+        self.apply = ActionButton('Calculate Channels && Supervoxels')
         self.apply.setEnabled(False)
         vbox.addWidget(self.apply)
         vbox.addStretch(1)
@@ -88,6 +75,9 @@ class PretrainedClassifier(Plugin):
         self.LBLM = LabelManager.instance()
         self.launcher = Launcher.instance()
 
+        # Stores whether launcher post() method is connected to supervoxel calculation function
+        self.svx_conn = False
+
         vbox = QtWidgets.QVBoxLayout()
         self.setLayout(vbox)
         loadLabel = HeaderLabel('Use Pre-Trained Classifier')
@@ -96,13 +86,9 @@ class PretrainedClassifier(Plugin):
         vbox.addWidget(self.load_classifier)
         self.load_classifier.load.clicked.connect(self.on_load_classifier)
 
-        self.apply_filters = ApplyFilters()
-        vbox.addWidget(self.apply_filters)
-        self.apply_filters.apply.clicked.connect(self.on_apply_filters)
-
-        self.calc_supervox = CalcSupervoxels()
-        vbox.addWidget(self.calc_supervox)
-        self.calc_supervox.apply.clicked.connect(self.on_calc_supervox)
+        self.apply_settings = ApplySettings()
+        vbox.addWidget(self.apply_settings)
+        self.apply_settings.apply.clicked.connect(self.on_apply_settings)
 
         # Levels
         self.use_level = TComboBox('Predict Level:', ['Level {}'.format(i) for i in self.LBLM.levels()])
@@ -156,7 +142,7 @@ class PretrainedClassifier(Plugin):
 
             self.launcher.info.emit("{} classifier loaded."
                                     "\nLevel {} loaded:\n{}".format(self.DM.clf_name, level_list, label_names))
-            self.apply_filters.apply.setEnabled(True)
+            self.apply_settings.apply.setEnabled(True)
 
         else:
             self.launcher.error.emit("No classifier was loaded. Not applying settings")
@@ -172,23 +158,21 @@ class PretrainedClassifier(Plugin):
                                      fillvalue=np.nan)
         self.LBLM.loadLevel(levelid, dataset)
 
-    def on_apply_filters(self):
+    def on_apply_settings(self):
+        # Will calculate supervoxels after feature channels calculated
         self.calculate_feature_channels()
-
-    def on_calc_supervox(self):
-        self.calculate_supervoxels()
 
     def calculate_feature_channels(self):
         """
-        
-        :param result: 
-        :return: 
+        Calculates feature channels with settings retrieved from HDF5 file.
+        Attaches signal to the launcher to trigger supervoxel calculation when done.
         """
         # Check whether feature channels already exist
         if len(self.DM.available_channels()) == 0:
             features = []
             channels = self.meta_data_result['channel_list']
-            dialog_result = self.confirm_channel_compute(channels)
+
+            dialog_result = self.confirm_settings_compute()
             if dialog_result == QtWidgets.QMessageBox.Yes:
 
                 # For each feature, create an empty file and generate a dictionary of parameters
@@ -212,6 +196,10 @@ class PretrainedClassifier(Plugin):
                         'idx': metadata['feature_idx'],
                         'feature': metadata['feature_type']
                     })
+
+                # Connect a signal from the launcher to initiate the supervoxel calculation when done
+                self.launcher.post.connect(self.calculate_supervoxels)
+                self.svx_conn = True
                 # Compute the feature channels
                 self.launcher.run(ac.compute_all_channel, features=features,
                                   caption='Computing Multiple Features',
@@ -220,17 +208,29 @@ class PretrainedClassifier(Plugin):
                 log.info("Generation of feature channels cancelled")
         else:
             self.launcher.info.emit('Feature channels already exist. Not calculating new ones.')
-            self.calc_supervox.apply.setEnabled(True)
+            if not self.DM.has_grp('supervoxels'):
+                self.calculate_supervoxels()
+            else:
+                self.launcher.info.emit('Supervoxels already exist. Not calculating new ones.')
+                self.predict_widget.btn_predict.setEnabled(True)
 
-    def confirm_channel_compute(self, channels):
+    def confirm_settings_compute(self):
         """
-        
-        :return: 
+        Helper function to display dialog box
         """
+        channels = self.meta_data_result['channel_list']
+        full_names = [self.meta_data_result[name]['feature_name'] for name in channels]
+        supervox_params = self.meta_data_result['sv_attrs']
         return QtWidgets.QMessageBox.question(self,
                                             "Confirm calculation",
-                                            "The following feature channels"
-                                            "\nwill be calculated:\n\n{}".format("\n".join(channels)),
+                                            "The following feature channels will be calculated:\n\n{}"
+                                            "\n\nThe following supervoxels will be calculated:"
+                                            "\n\nShape: {}\nSpacing: {}\nCompactness: {}\nSource: {}"
+                                            "\n\nWould you like to continue?".format("\n".join(full_names),
+                                                                                    ", ".join(map(str, supervox_params['sp_shape'])),
+                                                                                    ", ".join(map(str, supervox_params['spacing'])),
+                                                                                    supervox_params['compactness'],
+                                                                                    supervox_params['source']),
                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 
     def on_channels_calculated(self, results):
@@ -259,9 +259,7 @@ class PretrainedClassifier(Plugin):
             log.info('* Channel {} {}'.format(fname, ftype))
             self.DM.clf_channel_computed.emit(idx, name, ftype, active, channel_params)
             feat_list.append(fname)
-        self.calc_supervox.apply.setEnabled(True)
         self.predict_widget.use_desc.checkGivenItems(feat_list)
-        print("Feat list: ", feat_list)
 
     def calculate_supervoxels(self):
 
@@ -288,6 +286,10 @@ class PretrainedClassifier(Plugin):
         self.DM.remove_dataset(out_svedges)
         self.DM.remove_dataset(out_svweights)
 
+        # Disconnect the signal from  the launcher to prevent a never-ending loop
+        if self.svx_conn:
+            self.launcher.post.disconnect(self.calculate_supervoxels)
+            self.svx_conn = False
         Launcher.instance().run(ac.create_supervoxels,
                                 dataset=in_data,
                                 out_sv=out_sv,
