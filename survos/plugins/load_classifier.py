@@ -168,16 +168,18 @@ class PretrainedClassifier(Plugin):
         Attaches signal to the launcher to trigger supervoxel calculation when done.
         """
         # Check whether feature channels already exist
+
         if len(self.DM.available_channels()) == 0:
             features = []
             channels = self.meta_data_result['channel_list']
 
             dialog_result = self.confirm_settings_compute()
             if dialog_result == QtWidgets.QMessageBox.Yes:
-
+                append_later = []
                 # For each feature, create an empty file and generate a dictionary of parameters
                 for channel in channels:
                     metadata = self.meta_data_result[channel]
+                    log.info("+ Queueing {}".format(metadata['feature_name']))
                     initial_params = dict(active=False, feature_idx=metadata['feature_idx'],
                                           feature_type=metadata['feature_type'], feature_name=metadata['feature_name'])
                     if len(initial_params) > 0:
@@ -187,15 +189,31 @@ class PretrainedClassifier(Plugin):
                     clamp = None
                     if metadata['clamp'] == True:
                         clamp = metadata['evmin'], metadata['evmax']
-                    features.append({
-                        'name': metadata['feature_name'],
-                        'source': metadata['source'],
-                        'clamp': clamp,
-                        'params': metadata,
-                        'out': metadata['out'],
-                        'idx': metadata['feature_idx'],
-                        'feature': metadata['feature_type']
-                    })
+
+                    info_dict = {
+                            'name': metadata['feature_name'],
+                            'source': metadata['source'],
+                            'clamp': clamp,
+                            'params': metadata,
+                            'out': metadata['out'],
+                            'idx': metadata['feature_idx'],
+                            'feature': metadata['feature_type']
+                        }
+
+                    if metadata['source'] != '/data': # Non standard source for the feature
+                        # Search for source channel
+                        found_dicts = [item for item in features if item['out'] == metadata['source']]
+                        if found_dicts:
+                            # It is found, carry on as before
+                            features.append(info_dict)
+                        else:
+                            # The source isn't there, so put this feature to the back of the queue
+                            append_later.append(info_dict)
+                    else: # Standard source for the feature
+                        features.append(info_dict)
+
+                # Append the final dictionaries with non-standard data sources
+                features += append_later
 
                 # Connect a signal from the launcher to initiate the supervoxel calculation when done
                 self.launcher.post.connect(self.calculate_supervoxels)
