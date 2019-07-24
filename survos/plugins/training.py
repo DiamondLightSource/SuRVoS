@@ -218,11 +218,14 @@ class SaveClassifier(QtWidgets.QWidget):
             QtWidgets.QMessageBox.critical(self, "Error", "A classifier has not been created yet!")
             return
         else:
-            attrs = {'levelid': self.selected_level, 'label': self.LBLM.idxs(self.selected_level),
-                     'names': self.LBLM.names(self.selected_level), 'colors': self.LBLM.colors(self.selected_level),
-                     'visible': list(map(int, self.LBLM.visibility(self.selected_level))),
-                     'parent_levels': self.LBLM.parent_levels(self.selected_level),
-                     'parent_labels': self.LBLM.parent_labels(self.selected_level)}
+            attrs = dict(levelid=self.selected_level, label=self.LBLM.idxs(self.selected_level),
+                         names=self.LBLM.names(self.selected_level), colors=self.LBLM.colors(self.selected_level),
+                         visible=list(map(int, self.LBLM.visibility(self.selected_level))),
+                         parent_levels=self.LBLM.parent_levels(self.selected_level),
+                         parent_labels=self.LBLM.parent_labels(self.selected_level),
+                         parent_colours=[self.LBLM.get(level, label).color for level, label in
+                                         zip(self.LBLM.parent_levels(self.selected_level),
+                                             self.LBLM.parent_labels(self.selected_level))])
 
             root_dir = self.DM.wspath
             output_dir = op.join(root_dir, "classifiers")

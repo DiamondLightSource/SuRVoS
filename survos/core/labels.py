@@ -158,7 +158,13 @@ class LabelManager(QtCore.QObject):
             self._counts[level] = label+1
 
     def get(self, level, label):
-        return self._levels[level][label]
+        """
+        Retrieve a Label from the _levels dict. If not there, return an empty Label object.
+        :param level: Level index  
+        :param label: Label index
+        :return: A Label object
+        """
+        return self._levels.get(level, {}).get(label, Label('Empty', -1))
 
     def removeLabel(self, level, label):
         if label in self._levels[level]:

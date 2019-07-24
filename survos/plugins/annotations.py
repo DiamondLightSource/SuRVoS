@@ -696,7 +696,7 @@ class Annotations(Plugin):
             return
 
         self.launcher.setup('Assigning parent to [{}] of [Level {}]'
-                            .format(str(self.LBLM.labels(level)[label].name,'utf-8'), level))
+                            .format(self.LBLM.labels(level)[label].name, level))
 
         dparent = self.DM.load_ds(parent_dataset)
         dcurrent = self.DM.load_ds(dataset)
