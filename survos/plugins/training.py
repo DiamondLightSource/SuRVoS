@@ -53,15 +53,11 @@ class EnsembleWidget(QtWidgets.QWidget):
                                 stretch=[0, 1, 0, 1]))
 
         self.btn_train_predict = ActionButton('Train && Predict')
-        # self.btn_predict = ActionButton('Predict')
-        # self.btn_predict.setEnabled(False)
         self.btn_train_predict.clicked.connect(self.on_train_predict_clicked)
-        # self.btn_predict.clicked.connect(self.on_predict_clicked)
         self.n_jobs = PLineEdit(1, parse=int)
         vbox.addWidget(HWidgets('Num Jobs', self.n_jobs, None, self.btn_train_predict,
                                 stretch=[0, 0, 1, 0]))
-        # vbox.addWidget(HWidgets(None, None, None, self.btn_predict,
-        #                         stretch=[0, 0, 1, 0]))
+
 
     def on_ensemble_changed(self, idx):
         if idx == 2:

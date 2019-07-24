@@ -5,6 +5,7 @@ import numpy as np
 import logging as log
 
 import os
+import ast
 import glob
 import h5py as h5
 from pickle import dumps, loads
@@ -75,6 +76,9 @@ class DataModel(QtCore.QObject):
         # Classifier
         self.clf = None
         self.clf_name = None
+        self.clf_params = None
+        self.X_train = None
+        self.y_train = None
 
         # Parameters to be saved with classifier
         self.desc_params = None
@@ -213,6 +217,29 @@ class DataModel(QtCore.QObject):
         if os.path.exists(ds_file):
             os.remove(ds_file)
 
+    def add_training_data(self, X_train, y_train):
+        """
+        Adds data used to train classifier to the data model
+        :param X_train: Values
+        :param y_train: Labels
+        """
+        self.X_train = X_train
+        self.y_train = y_train
+
+    def has_training_data(self):
+        return self.X_train is not None and self.y_train is not None
+
+    def get_training_data(self):
+        """
+        :return: A tuple with the training data and labels
+        """
+        if self.has_training_data():
+            return self.X_train, self.y_train
+
+    def new_annotations_added(self, y_data):
+        data = self.load_slices(y_data)
+        return np.any(data > -1)
+
     def save_classifier(self, path, lbl_attrs):
         """
         Save classifier to filepath
@@ -221,9 +248,13 @@ class DataModel(QtCore.QObject):
         if self.has_classifier():
             clf_pkl = dumps(self.clf)
             with h5.File(path, 'w') as out_file:
+                if self.has_training_data():
+                    out_file['X_train'] = self.X_train
+                    out_file['y_train'] = self.y_train
                 out_file['classifier'] = np.void(clf_pkl)
                 out_file['classifier'].attrs['class'] = type(self.clf).__name__
                 out_file['classifier'].attrs['features'] = self.desc_params.get('features')
+                out_file['classifier'].attrs['parameters'] = str(self.clf_params)
                 # Add the label information
                 self.write_attrs_to_empty_dataset(out_file, "lbl_info", lbl_attrs)
                 # Copy the supervoxel information across
@@ -278,6 +309,9 @@ class DataModel(QtCore.QObject):
         else:
             log.error("File does not appear to exist")
 
+    def get_classifier_params(self):
+        return self.clf_params
+
     def get_channel_metadata(self):
         """
         Get the required metadata from each feature channel file
@@ -285,13 +319,14 @@ class DataModel(QtCore.QObject):
         """
         return [self.attrs(feature) for feature in self.desc_params.get('features')]
 
-    def add_classifier_to_model(self, clf):
+    def add_classifier_to_model(self, clf, clf_params):
         """
-        Add classifier to model object
+        Add classifier to model object along with parameters
         :param clf: classifier to add to object
         """
         self.clf = clf
         self.clf_name = clf.__class__.__name__
+        self.clf_params = clf_params
 
 
     def get_classifier_from_model(self):
@@ -312,15 +347,18 @@ class DataModel(QtCore.QObject):
             with h5.File(path, 'r') as in_file:
                 try:
                     clf_str = in_file['classifier']
+                    clf_params = ast.literal_eval(in_file['classifier'].attrs['parameters'])
                     clf = loads(clf_str[()].tostring())
                     class_str =  in_file['classifier'].attrs['class']
+                    X_train = in_file["X_train"][()]
+                    y_train = in_file["y_train"][()]
+                    self.add_training_data(X_train, y_train)
                 except Exception as e:
-                    print(path, e)
-                    print(type(in_file))
+                    log.error(path, e)
                     return False
 
             if str(class_str) == type(clf).__name__:
-                self.add_classifier_to_model(clf)
+                self.add_classifier_to_model(clf, clf_params)
                 log.info("Classifier Loaded: {}".format(type(self.clf)))
                 return True
             else:

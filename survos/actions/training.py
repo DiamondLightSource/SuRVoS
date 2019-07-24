@@ -130,7 +130,7 @@ def extract_descriptors(supervoxels=None, features=None,
     return descriptors, sp, mask
 
 
-def predict_proba(y_data=None, p_data=None, train=False,
+def predict_proba(y_data=None, p_data=None, train=False, append=False,
                   level_params=None, desc_params=None,
                   clf_params=None, ref_params=None,
                   out_labels=None, out_confidence=None):
@@ -182,12 +182,23 @@ def predict_proba(y_data=None, p_data=None, train=False,
 
             X_train = X[idx_train]
             y_train = y[idx_train]
+            log.info("+ Initial X_train shape {}".format(X_train.shape))
+            log.info("+ Initial y_train shape {}".format(y_train.shape))
+
+            if append and DM.has_training_data():
+                previous_X, previous_y = DM.get_training_data()
+                X_train = np.append(previous_X, X_train, axis=0)
+                y_train = np.append(previous_y, y_train)
+                log.info("+ Appended X_train shape {}".format(X_train.shape))
+                log.info("+ Appended y_train shape {}".format(y_train.shape))
+
+            DM.add_training_data(X_train, y_train)
 
             if clf is not None:
                 _train_classifier(clf, X_train, y_train,
                                   project=desc_params['projection'])
                 log.info('+ Adding classifier to data model')
-                DM.add_classifier_to_model(clf)
+                DM.add_classifier_to_model(clf, clf_params)
             elif clf is None:
                 log.error("No Classifier found!")
                 return None

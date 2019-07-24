@@ -15,27 +15,75 @@ from ..widgets import ActionButton
 from ..lib._features import find_boundaries
 
 
+
+class PredictButtonWidget(QtWidgets.QWidget):
+    predict = QtCore.pyqtSignal(dict)
+
+    def __init__(self, parent=None):
+        super(PredictButtonWidget, self).__init__(parent=parent)
+
+        vbox = QtWidgets.QVBoxLayout()
+        vbox.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(vbox)
+        self.DM = DataModel.instance()
+        self.btn_predict = ActionButton('Predict')
+        self.btn_predict.clicked.connect(self.on_predict_clicked)
+        vbox.addWidget(self.btn_predict)
+
+    def on_predict_clicked(self):
+        # Get classifier information from file via DM
+        params = self.DM.get_classifier_params()
+        self.predict.emit(params)
+
+
 class Predict(PredWidgetBase):
     def __init__(self):
         super(Predict, self).__init__(parent=None)
 
-        self.btn_predict = ActionButton('Predict')
-        self.btn_predict.clicked.connect(self.on_predict)
-        self.vbox.addWidget(self.btn_predict)
-
+        self.predict_btn_widget = PredictButtonWidget()
+        self.predict_btn_widget.predict.connect(self.on_predict)
+        self.vbox.addWidget(self.predict_btn_widget)
 
     def run_prediction(self, y_data, p_data, level_params, desc_params, ref_params,
                        clf_params, out_labels, out_confidence, level):
         """
         Overrides method from parent class
         """
+        # Test for new annotations
+        if self.DM.new_annotations_added(y_data):
+            # 1. Ask if they would like to append new data to existing and train a new classifier
+            answer = QtWidgets.QMessageBox.question(self,
+                                           "Append New Data?",
+                                           "Additional annotation data has been added, would you"
+                                           "\nlike to train a new classifier with this data included?"
+                                           "\n\nIf you chose 'No', the prediction will be repeated without\nthis new data.",
+                                           QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 
-        self.launcher.run(ac.predict_proba, y_data=y_data, p_data=p_data,
-                          level_params=level_params, desc_params=desc_params,
-                          clf_params=clf_params, ref_params=ref_params,
-                          out_labels=out_labels, out_confidence=out_confidence,
-                          cb=self.on_predicted,
-                          caption='Predicting labels for Level {}'.format(level))
+            if answer == QtWidgets.QMessageBox.Yes:
+                # Append and train and predict with new classifier
+                self.launcher.run(ac.predict_proba, y_data=y_data, p_data=p_data, train=True,
+                                  append=True, level_params=level_params, desc_params=desc_params,
+                                  clf_params=clf_params, ref_params=ref_params,
+                                  out_labels=out_labels, out_confidence=out_confidence,
+                                  cb=self.on_predicted,
+                                  caption='Predicting labels for Level {}'.format(level))
+
+                # TODO: Ask if they would like to save the new classifier
+            else:
+                self.launcher.run(ac.predict_proba, y_data=y_data, p_data=p_data,
+                                  level_params=level_params, desc_params=desc_params,
+                                  clf_params=clf_params, ref_params=ref_params,
+                                  out_labels=out_labels, out_confidence=out_confidence,
+                                  cb=self.on_predicted,
+                                  caption='Predicting labels for Level {}'.format(level))
+
+        else:
+            self.launcher.run(ac.predict_proba, y_data=y_data, p_data=p_data,
+                              level_params=level_params, desc_params=desc_params,
+                              clf_params=clf_params, ref_params=ref_params,
+                              out_labels=out_labels, out_confidence=out_confidence,
+                              cb=self.on_predicted,
+                              caption='Predicting labels for Level {}'.format(level))
 
 class LoadClassifier(QtWidgets.QWidget):
 
@@ -111,7 +159,7 @@ class PretrainedClassifier(Plugin):
         self.predict_widget = Predict()
         vbox.addWidget(self.predict_widget)
         if not self.DM.has_classifier():
-            self.predict_widget.btn_predict.setEnabled(False)
+            self.predict_widget.predict_btn_widget.btn_predict.setEnabled(False)
 
         vbox.addWidget(HeaderLabel('Update annotations'))
         self.uncertainty_widget = Uncertainty()
@@ -154,8 +202,8 @@ class PretrainedClassifier(Plugin):
         # First create an empty dataset
         dataset = 'annotations/annotations{}'.format(levelid)
         self.DM.create_empty_dataset(dataset, shape=self.DM.data_shape,
-                                     dtype=np.float32, params=params,
-                                     fillvalue=np.nan)
+                                     dtype=np.int16, params=params,
+                                     fillvalue=-1)
         self.LBLM.loadLevel(levelid, dataset)
 
     def on_apply_settings(self):
@@ -230,7 +278,7 @@ class PretrainedClassifier(Plugin):
                 self.calculate_supervoxels()
             else:
                 self.launcher.info.emit('Supervoxels already exist. Not calculating new ones.')
-                self.predict_widget.btn_predict.setEnabled(True)
+                self.predict_widget.predict_btn_widget.btn_predict.setEnabled(True)
 
     def confirm_settings_compute(self):
         """
@@ -320,7 +368,7 @@ class PretrainedClassifier(Plugin):
     def on_supervoxels(self, params):
         svlabels, svtotal, sortindex, sorttable, edges, weights = params
         self.update_supervoxel_layer(svlabels, sortindex, sorttable, svtotal, visible=True)
-        self.predict_widget.btn_predict.setEnabled(True)
+        self.predict_widget.predict_btn_widget.btn_predict.setEnabled(True)
 
     def update_supervoxel_layer(self, svlabels, sortindex, sorttable, total_sv, visible=False):
         if svlabels is not None:
