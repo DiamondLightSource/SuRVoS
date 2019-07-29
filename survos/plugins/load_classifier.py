@@ -2,6 +2,7 @@
 import numpy as np
 from ..qt_compat import QtGui, QtCore, QtWidgets
 import os.path as op
+import os
 import logging as log
 
 from matplotlib.colors import ListedColormap
@@ -13,6 +14,7 @@ from ..core import DataModel, LayerManager, Launcher, LabelManager
 from .. import actions as ac
 from ..widgets import ActionButton
 from ..lib._features import find_boundaries
+
 
 
 
@@ -37,6 +39,8 @@ class PredictButtonWidget(QtWidgets.QWidget):
 
 
 class Predict(PredWidgetBase):
+    save = QtCore.pyqtSignal()
+
     def __init__(self):
         super(Predict, self).__init__(parent=None)
 
@@ -44,11 +48,16 @@ class Predict(PredWidgetBase):
         self.predict_btn_widget.predict.connect(self.on_predict)
         self.vbox.addWidget(self.predict_btn_widget)
 
+        # Stores whether launcher post() method is connected to classifier save function
+        self.sv_clf_conn = False
+
+
     def run_prediction(self, y_data, p_data, level_params, desc_params, ref_params,
                        clf_params, out_labels, out_confidence, level):
         """
         Overrides method from parent class
         """
+        # TODO: Tidy the repeated function calls up...
         # Test for new annotations
         if self.DM.new_annotations_added(y_data):
             # 1. Ask if they would like to append new data to existing and train a new classifier
@@ -60,6 +69,9 @@ class Predict(PredWidgetBase):
                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 
             if answer == QtWidgets.QMessageBox.Yes:
+                # Add a signal here to ask about saving a classifier
+                self.launcher.post.connect(self.ask_to_save_classifer)
+                self.sv_clf_conn = True
                 # Append and train and predict with new classifier
                 self.launcher.run(ac.predict_proba, y_data=y_data, p_data=p_data, train=True,
                                   append=True, level_params=level_params, desc_params=desc_params,
@@ -68,7 +80,7 @@ class Predict(PredWidgetBase):
                                   cb=self.on_predicted,
                                   caption='Predicting labels for Level {}'.format(level))
 
-                # TODO: Ask if they would like to save the new classifier
+
             else:
                 self.launcher.run(ac.predict_proba, y_data=y_data, p_data=p_data,
                                   level_params=level_params, desc_params=desc_params,
@@ -84,6 +96,23 @@ class Predict(PredWidgetBase):
                               out_labels=out_labels, out_confidence=out_confidence,
                               cb=self.on_predicted,
                               caption='Predicting labels for Level {}'.format(level))
+
+    def ask_to_save_classifer(self):
+        answer = QtWidgets.QMessageBox.question(self,
+                                                "Save New Classifier?",
+                                                "A new classifier has been trained"
+                                                "\nwould you like to save it?",
+                                                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+
+        if answer == QtWidgets.QMessageBox.Yes:
+            # Send a signal to save widget
+            self.save.emit()
+        else:
+            log.info("+ Saving modified classifier cancelled")
+
+        if self.sv_clf_conn:
+            self.launcher.post.disconnect(self.ask_to_save_classifer)
+            self.sv_clf_conn = False
 
 class LoadClassifier(QtWidgets.QWidget):
 
@@ -160,11 +189,42 @@ class PretrainedClassifier(Plugin):
         vbox.addWidget(self.predict_widget)
         if not self.DM.has_classifier():
             self.predict_widget.predict_btn_widget.btn_predict.setEnabled(False)
+        self.predict_widget.save.connect(self.on_save_clf_clicked)
 
         vbox.addWidget(HeaderLabel('Update annotations'))
         self.uncertainty_widget = Uncertainty()
         vbox.addWidget(self.uncertainty_widget)
         vbox.addStretch(1)
+
+    def on_save_clf_clicked(self):
+        if not self.DM.has_classifier():
+            QtWidgets.QMessageBox.critical(self, "Error", "A classifier has not been created yet!")
+            return
+        else:
+            current_level = self.predict_widget.selected_level
+            attrs = dict(levelid=current_level,
+                         label=self.LBLM.idxs(current_level),
+                         names=self.LBLM.names(current_level),
+                         colors=self.LBLM.colors(current_level),
+                         visible=list(map(int, self.LBLM.visibility(current_level))),
+                         parent_levels=self.LBLM.parent_levels(current_level),
+                         parent_labels=self.LBLM.parent_labels(current_level),
+                         parent_colours=[self.LBLM.get(level, label).color for level, label in
+                                         zip(self.LBLM.parent_levels(current_level),
+                                             self.LBLM.parent_labels(current_level))])
+
+            root_dir = self.DM.wspath
+            output_dir = op.join(root_dir, "classifiers")
+            os.makedirs(output_dir, exist_ok=True)
+            filename = op.join(output_dir, "modified_classifier.h5")
+            filter = "Classifier (*.h5)"
+            path, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save Classifier', filename, filter)
+            if path is not None and len(path) > 0:
+                log.info('+ Saving classifier to {}'.format(path))
+                self.DM.save_classifier(path, attrs)
+                # Wipe the latest set of annotations to allow for more to be added
+                self.LBLM.removeLevel(current_level, force=True)
+                self.load_label_info()
 
     def on_load_classifier(self):
         root_dir = self.DM.wspath
@@ -302,7 +362,6 @@ class PretrainedClassifier(Plugin):
     def on_channels_calculated(self, results):
         """
         Once the channels have been calculated, add them to the Feature Channels tab
-        Note: This is called multiple times - each time a channel is calculated
         :param results: 
         :return: 
         """

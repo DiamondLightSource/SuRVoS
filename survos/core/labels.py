@@ -30,7 +30,7 @@ class LabelManager(QtCore.QObject):
 
     levelAdded = QtCore.pyqtSignal(int, str)
     levelLoaded = QtCore.pyqtSignal(int, str)
-    levelRemoved = QtCore.pyqtSignal(int, str)
+    levelRemoved = QtCore.pyqtSignal(int, str, bool)
     saveLevel = QtCore.pyqtSignal(int, str)
 
     labelAdded = QtCore.pyqtSignal(int, str, int, str)
@@ -127,12 +127,12 @@ class LabelManager(QtCore.QObject):
         self.next_level += 1
         return levelidx, dataset
 
-    def removeLevel(self, level):
+    def removeLevel(self, level, force=False):
         dataset = self._datasets[level]
         del self._levels[level]
         del self._counts[level]
         del self._datasets[level]
-        self.levelRemoved.emit(level, dataset)
+        self.levelRemoved.emit(level, dataset, force)
 
     def addLabel(self, level):
         idx = self._counts[level]
