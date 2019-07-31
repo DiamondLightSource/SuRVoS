@@ -138,17 +138,18 @@ def predict_proba(y_data=None, p_data=None, train=False, append=False,
     X, supervoxels, svmask = extract_descriptors(**desc_params)
     full_svmask = svmask.copy()
 
+    if level_params['plevel'] is not None:
+        parent_labels = DM.load_slices(p_data)
+        mask = parent_labels == level_params['plabel']
+    else:
+        mask = None
+
     if train:
         clf, mode = obtain_classifier(clf_params)
         log.info("+ Creating classifier: {}".format(clf_params))
 
         log.info("+ Loading labels")
         labels = DM.load_slices(y_data)
-        if level_params['plevel'] is not None:
-            parent_labels = DM.load_slices(p_data)
-            mask = parent_labels == level_params['plabel']
-        else:
-            mask = None
     else:
         if DM.has_classifier():
             log.info("+ Getting existing classifier")
@@ -156,7 +157,12 @@ def predict_proba(y_data=None, p_data=None, train=False, append=False,
         else:
             log.error("For some reason, no previous classifier exists!")
             return
-        mask = None
+
+    if mask is not None:
+        mask = mask.astype(np.int16)
+        mask = np.bincount(supervoxels.ravel(), weights=mask.ravel() * 2 - 1) > 0
+        mask = mask[svmask]
+        mask.shape = -1
 
     if supervoxels is not None:
         nsp = DM.attr(desc_params['supervoxels'], 'num_supervoxels')
@@ -164,18 +170,10 @@ def predict_proba(y_data=None, p_data=None, train=False, append=False,
         if train:
             nlbl = DM.attr(y_data, 'label').max() + 1
             labels = _sp_labels(supervoxels.ravel(), labels.ravel(), nsp, nlbl, 0)
-            if mask is not None:
-                mask = mask.astype(np.int16)
-                mask = np.bincount(supervoxels.ravel(), weights=mask.ravel() * 2 - 1) > 0
-            if X.shape[0] < labels.shape[0]:  # less supervoxels
-                labels = labels[svmask]
-                if mask is not None:
-                    mask = mask[svmask]
             y = labels
             y.shape = -1
 
             if mask is not None:
-                mask.shape = -1
                 idx_train = (y > -1) & mask
             else:
                 idx_train = (y > -1)
@@ -279,6 +277,9 @@ def predict_and_save(X, clf, full_svmask, nsp, out_confidence, out_labels, super
         conf_result = list(map(lambda x, y: x[y], result['probs'], result['class']))
         pred_map[full_svmask] = result['class']
         conf_map[full_svmask] = conf_result
+        if mask is not None:
+            pred_map[~mask] = -1
+            conf_map[~mask] = -1
         pred = pred_map[supervoxels]
         conf = conf_map[supervoxels]
         pred.shape = DM.region_shape()
