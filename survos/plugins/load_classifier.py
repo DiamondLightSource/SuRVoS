@@ -126,6 +126,27 @@ class LoadClassifier(QtWidgets.QWidget):
         vbox.addStretch(1)
         self.setLayout(vbox)
 
+class ClassifierInfo(QtWidgets.QWidget):
+
+    def __init__(self, parent=None):
+        super(ClassifierInfo, self).__init__(parent=parent)
+
+        vbox = QtWidgets.QVBoxLayout()
+
+        self.info_label = QtWidgets.QLabel()
+        self.info_label.setAlignment(QtCore.Qt.AlignCenter)
+        my_font = QtGui.QFont()
+        my_font.setBold(True)
+        self.info_label.setFont(my_font)
+        self.info_label.hide()
+        vbox.addWidget(self.info_label)
+        vbox.addStretch(1)
+        self.setLayout(vbox)
+
+    def set_text(self, text):
+        self.info_label.setText("Using: " + text)
+        self.info_label.show()
+
 class ApplySettings(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
@@ -162,6 +183,9 @@ class PretrainedClassifier(Plugin):
         self.load_classifier =  LoadClassifier()
         vbox.addWidget(self.load_classifier)
         self.load_classifier.load.clicked.connect(self.on_load_classifier)
+
+        self.classifier_info = ClassifierInfo()
+        vbox.addWidget(self.classifier_info)
 
         self.apply_settings = ApplySettings()
         vbox.addWidget(self.apply_settings)
@@ -236,6 +260,7 @@ class PretrainedClassifier(Plugin):
         if path is not None and len(path) > 0:
             success = self.DM.load_classifier(path)
         if success:
+            self.classifier_info.set_text(self.DM.clf_saved_name)
             # Get a dictionary with all the metadata settings
             self.meta_data_result = self.DM.load_saved_settings_from_file(path)
 

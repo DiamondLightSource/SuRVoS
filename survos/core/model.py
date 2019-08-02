@@ -76,6 +76,7 @@ class DataModel(QtCore.QObject):
         # Classifier
         self.clf = None
         self.clf_name = None
+        self.clf_saved_name = None
         self.clf_params = None
         self.X_train = None
         self.y_train = None
@@ -359,7 +360,10 @@ class DataModel(QtCore.QObject):
 
             if str(class_str) == type(clf).__name__:
                 self.add_classifier_to_model(clf, clf_params)
-                log.info("Classifier Loaded: {}".format(type(self.clf)))
+                path = os.path.normpath(path)
+                split_path = path.split(os.sep)
+                self.clf_saved_name = os.sep.join(split_path[-3:])
+                log.info("Classifier {} Loaded: {}".format(self.clf_saved_name, type(self.clf)))
                 return True
             else:
                 log.error("Classifier not loaded. Class description {} does not"
