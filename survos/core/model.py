@@ -266,7 +266,10 @@ class DataModel(QtCore.QObject):
                 result_list = self.get_channel_metadata()
                 # Create the datasets
                 for result in result_list:
-                    dataset_name = "{}_{}".format(result['feature_idx'], result['feature_type'])
+                    dataset_name = "{}_{}".format(result.get('feature_idx', ''), result.get('feature_type', 'data'))
+                    # fix cases where data is used as an input..
+                    if dataset_name == "_data":
+                        dataset_name = dataset_name[1:]
                     self.write_attrs_to_empty_dataset(out_file, dataset_name, result)
         else:
             log.error("Data Model has no classifier!")
@@ -306,6 +309,9 @@ class DataModel(QtCore.QObject):
                     result['sv_attrs'] = dict(in_file['supervox_info'].attrs.items())
                 except Exception as e:
                     log.error("Could not load attributes: {}".format(e))
+            if "data" in result:  # Unfortunate special case - data has been used for prediction
+                result['data']['feature_name'] = "data"
+                result['data']['feature_-dx'] = -1
             return result
         else:
             log.error("File does not appear to exist")

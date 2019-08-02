@@ -311,39 +311,40 @@ class PretrainedClassifier(Plugin):
                 append_later = []
                 # For each feature, create an empty file and generate a dictionary of parameters
                 for channel in channels:
-                    metadata = self.meta_data_result[channel]
-                    log.info("+ Queueing {}".format(metadata['feature_name']))
-                    initial_params = dict(active=False, feature_idx=metadata['feature_idx'],
-                                          feature_type=metadata['feature_type'], feature_name=metadata['feature_name'])
-                    if len(initial_params) > 0:
-                        self.DM.create_empty_dataset(metadata['out'], shape=self.DM.data_shape,
-                                                     dtype=np.float32, params=initial_params,
-                                                     fillvalue=np.nan)
-                    clamp = None
-                    if metadata['clamp'] == True:
-                        clamp = metadata['evmin'], metadata['evmax']
+                    if channel != 'data':
+                        metadata = self.meta_data_result[channel]
+                        log.info("+ Queueing {}".format(metadata['feature_name']))
+                        initial_params = dict(active=False, feature_idx=metadata['feature_idx'],
+                                              feature_type=metadata['feature_type'], feature_name=metadata['feature_name'])
+                        if len(initial_params) > 0:
+                            self.DM.create_empty_dataset(metadata['out'], shape=self.DM.data_shape,
+                                                         dtype=np.float32, params=initial_params,
+                                                         fillvalue=np.nan)
+                        clamp = None
+                        if metadata['clamp'] == True:
+                            clamp = metadata['evmin'], metadata['evmax']
 
-                    info_dict = {
-                            'name': metadata['feature_name'],
-                            'source': metadata['source'],
-                            'clamp': clamp,
-                            'params': metadata,
-                            'out': metadata['out'],
-                            'idx': metadata['feature_idx'],
-                            'feature': metadata['feature_type']
-                        }
+                        info_dict = {
+                                'name': metadata['feature_name'],
+                                'source': metadata['source'],
+                                'clamp': clamp,
+                                'params': metadata,
+                                'out': metadata['out'],
+                                'idx': metadata['feature_idx'],
+                                'feature': metadata['feature_type']
+                            }
 
-                    if metadata['source'] != '/data': # Non standard source for the feature
-                        # Search for source channel
-                        found_dicts = [item for item in features if item['out'] == metadata['source']]
-                        if found_dicts:
-                            # It is found, carry on as before
+                        if metadata['source'] != '/data': # Non standard source for the feature
+                            # Search for source channel
+                            found_dicts = [item for item in features if item['out'] == metadata['source']]
+                            if found_dicts:
+                                # It is found, carry on as before
+                                features.append(info_dict)
+                            else:
+                                # The source isn't there, so put this feature to the back of the queue
+                                append_later.append(info_dict)
+                        else: # Standard source for the feature
                             features.append(info_dict)
-                        else:
-                            # The source isn't there, so put this feature to the back of the queue
-                            append_later.append(info_dict)
-                    else: # Standard source for the feature
-                        features.append(info_dict)
 
                 # Append the final dictionaries with non-standard data sources
                 features += append_later
@@ -370,7 +371,9 @@ class PretrainedClassifier(Plugin):
         Helper function to display dialog box
         """
         channels = self.meta_data_result['channel_list']
-        full_names = [self.meta_data_result[name]['feature_name'] for name in channels]
+        full_names = [self.meta_data_result[name]['feature_name']
+                      for name in channels
+                      if self.meta_data_result[name]['feature_name'] != "data"]
         supervox_params = self.meta_data_result['sv_attrs']
         return QtWidgets.QMessageBox.question(self,
                                             "Confirm calculation",
@@ -409,6 +412,9 @@ class PretrainedClassifier(Plugin):
             log.info('* Channel {} {}'.format(fname, ftype))
             self.DM.clf_channel_computed.emit(idx, name, ftype, active, channel_params)
             feat_list.append(fname)
+        # Unfortunate special case - Data
+        if 'data' in self.meta_data_result['channel_list']:
+            feat_list.append('Data')
         self.predict_widget.use_desc.checkGivenItems(feat_list)
 
     def calculate_supervoxels(self):
