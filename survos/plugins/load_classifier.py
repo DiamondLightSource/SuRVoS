@@ -39,7 +39,7 @@ class PredictButtonWidget(QtWidgets.QWidget):
 
 
 class Predict(PredWidgetBase):
-    save = QtCore.pyqtSignal()
+    save_signal = QtCore.pyqtSignal()
 
     def __init__(self):
         super(Predict, self).__init__(parent=None)
@@ -57,7 +57,9 @@ class Predict(PredWidgetBase):
         """
         Overrides method from parent class
         """
-        # TODO: Tidy the repeated function calls up...
+        append = False
+        train = False
+
         # Test for new annotations
         if self.DM.new_annotations_added(y_data):
             # 1. Ask if they would like to append new data to existing and train a new classifier
@@ -69,50 +71,28 @@ class Predict(PredWidgetBase):
                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 
             if answer == QtWidgets.QMessageBox.Yes:
-                # Add a signal here to ask about saving a classifier
-                self.launcher.post.connect(self.ask_to_save_classifer)
+                # Add a signal here to enable "Save new classifier" button
+                self.launcher.post.connect(self.enable_save_classifer_btn)
                 self.sv_clf_conn = True
                 # Append and train and predict with new classifier
-                self.launcher.run(ac.predict_proba, y_data=y_data, p_data=p_data, train=True,
-                                  append=True, level_params=level_params, desc_params=desc_params,
-                                  clf_params=clf_params, ref_params=ref_params,
-                                  out_labels=out_labels, out_confidence=out_confidence,
-                                  cb=self.on_predicted,
-                                  caption='Predicting labels for Level {}'.format(level))
+                append = True
+                train = True
 
+        self.launcher.run(ac.predict_proba, y_data=y_data, p_data=p_data, append=append,
+                          train=train, level_params=level_params, desc_params=desc_params,
+                          clf_params=clf_params, ref_params=ref_params,
+                          out_labels=out_labels, out_confidence=out_confidence,
+                          cb=self.on_predicted,
+                          caption='Predicting labels for Level {}'.format(level))
 
-            else:
-                self.launcher.run(ac.predict_proba, y_data=y_data, p_data=p_data,
-                                  level_params=level_params, desc_params=desc_params,
-                                  clf_params=clf_params, ref_params=ref_params,
-                                  out_labels=out_labels, out_confidence=out_confidence,
-                                  cb=self.on_predicted,
-                                  caption='Predicting labels for Level {}'.format(level))
+    def enable_save_classifer_btn(self):
 
-        else:
-            self.launcher.run(ac.predict_proba, y_data=y_data, p_data=p_data,
-                              level_params=level_params, desc_params=desc_params,
-                              clf_params=clf_params, ref_params=ref_params,
-                              out_labels=out_labels, out_confidence=out_confidence,
-                              cb=self.on_predicted,
-                              caption='Predicting labels for Level {}'.format(level))
-
-    def ask_to_save_classifer(self):
-        answer = QtWidgets.QMessageBox.question(self,
-                                                "Save New Classifier?",
-                                                "A new classifier has been trained"
-                                                "\nwould you like to save it?",
-                                                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
-
-        if answer == QtWidgets.QMessageBox.Yes:
-            # Send a signal to save widget
-            self.save.emit()
-        else:
-            log.info("+ Saving modified classifier cancelled")
+        self.save_signal.emit()
 
         if self.sv_clf_conn:
-            self.launcher.post.disconnect(self.ask_to_save_classifer)
+            self.launcher.post.disconnect(self.enable_save_classifer_btn)
             self.sv_clf_conn = False
+
 
 class LoadClassifier(QtWidgets.QWidget):
 
@@ -144,7 +124,7 @@ class ClassifierInfo(QtWidgets.QWidget):
         self.setLayout(vbox)
 
     def set_text(self, text):
-        self.info_label.setText("Using: " + text)
+        self.info_label.setText(text)
         self.info_label.show()
 
 class ApplySettings(QtWidgets.QWidget):
@@ -157,6 +137,20 @@ class ApplySettings(QtWidgets.QWidget):
         self.apply = ActionButton('Calculate Channels && Supervoxels')
         self.apply.setEnabled(False)
         vbox.addWidget(self.apply)
+        vbox.addStretch(1)
+        self.setLayout(vbox)
+
+
+class SaveClassifier(QtWidgets.QWidget):
+
+    def __init__(self, parent=None):
+        super(SaveClassifier, self).__init__(parent=parent)
+
+        vbox = QtWidgets.QVBoxLayout()
+
+        self.save = ActionButton('Save New Classifier')
+        self.save.setEnabled(False)
+        vbox.addWidget(self.save)
         vbox.addStretch(1)
         self.setLayout(vbox)
 
@@ -213,12 +207,21 @@ class PretrainedClassifier(Plugin):
         vbox.addWidget(self.predict_widget)
         if not self.DM.has_classifier():
             self.predict_widget.predict_btn_widget.btn_predict.setEnabled(False)
-        self.predict_widget.save.connect(self.on_save_clf_clicked)
+        self.predict_widget.save_signal.connect(self.enable_save_button)
 
         vbox.addWidget(HeaderLabel('Update annotations'))
         self.uncertainty_widget = Uncertainty()
         vbox.addWidget(self.uncertainty_widget)
         vbox.addStretch(1)
+
+        vbox.addWidget(HeaderLabel('Save Modified Classifier'))
+        self.save_clf_widget = SaveClassifier()
+        self.save_clf_widget.save.clicked.connect(self.on_save_clf_clicked)
+        vbox.addWidget(self.save_clf_widget)
+        vbox.addStretch(1)
+
+    def enable_save_button(self):
+        self.save_clf_widget.save.setEnabled(True)
 
     def on_save_clf_clicked(self):
         if not self.DM.has_classifier():
@@ -260,6 +263,7 @@ class PretrainedClassifier(Plugin):
         if path is not None and len(path) > 0:
             success = self.DM.load_classifier(path)
         if success:
+            self.disable_train_tab()
             self.classifier_info.set_text(self.DM.clf_saved_name)
             # Get a dictionary with all the metadata settings
             self.meta_data_result = self.DM.load_saved_settings_from_file(path)
@@ -280,6 +284,11 @@ class PretrainedClassifier(Plugin):
         else:
             self.launcher.error.emit("No classifier was loaded. Not applying settings")
 
+    def disable_train_tab(self):
+        plugins = self.parent().findChildren(Plugin)
+        for plugin in plugins:
+            if plugin.name == "Train classifier":
+                plugin.setEnabled(False)
 
     def load_label_info(self):
         params = self.meta_data_result['lbl_attrs']

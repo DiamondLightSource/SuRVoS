@@ -368,7 +368,7 @@ class DataModel(QtCore.QObject):
                 self.add_classifier_to_model(clf, clf_params)
                 path = os.path.normpath(path)
                 split_path = path.split(os.sep)
-                self.clf_saved_name = os.sep.join(split_path[-3:])
+                self.clf_saved_name = " - ".join(split_path[-3::2])
                 log.info("Classifier {} Loaded: {}".format(self.clf_saved_name, type(self.clf)))
                 return True
             else:
