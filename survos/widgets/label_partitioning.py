@@ -372,6 +372,8 @@ class LabelExplorer(QtWidgets.QWidget):
     def on_export_plot(self):
         full_path = QtWidgets.QFileDialog.getSaveFileName(self, "Select output filename",
                                                       filter='*.png')
+        if isinstance(full_path, tuple):
+            full_path = full_path[0]
         if full_path is not None and len(full_path) > 0:
             if not full_path.endswith('.png'):
                 full_path += '.png'
@@ -397,6 +399,9 @@ class LabelExplorer(QtWidgets.QWidget):
 
         full_path = QtWidgets.QFileDialog.getSaveFileName(self, "Select output filename",
                                                       filter='*.csv')
+
+        if isinstance(full_path, tuple):
+            full_path = full_path[0]
         if full_path is not None and len(full_path) > 0:
             if not full_path.endswith('.csv'):
                 full_path += '.csv'
