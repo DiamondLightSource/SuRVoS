@@ -6,9 +6,9 @@ Visit [https://diamondlightsource.github.io/SuRVoS/](https://diamondlightsource.
 
 ## User Support
 
-<a href="https://forum.image.sc/"><img src="https://aws1.discourse-cdn.com/business4/uploads/imagej/original/2X/a/a8bb0afa608549b70f9141516502fe7fb4693171.png" height="36"></a>
+<a href="https://forum.image.sc/tags/survos"><img src="https://aws1.discourse-cdn.com/business4/uploads/imagej/original/2X/a/a8bb0afa608549b70f9141516502fe7fb4693171.png" height="36"></a>
 
-For user support please ask a question on the [image.sc forums](https://forum.image.sc/)
+For user support please ask a question on the [image.sc forums](https://forum.image.sc/tags/survos)
 
 ## Libraries used by SuRVoS
 
