@@ -169,8 +169,8 @@ extensions = [
     ]    
 setup(
      name = 'survos',
-	 version = "1.1.3",
-	 description = '(Su)per (R)egion (Vo)lume (S)egmentaton workbench',
+	 version = "1.5.0",
+	 description = '(Su)per (R)egion (Vo)lume (S)egmentation workbench',
 	 license='GPL',
      packages = find_packages(),
      include_package_data=True,
