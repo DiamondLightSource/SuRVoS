@@ -165,7 +165,15 @@ class Level(RoundedWidget):
         self.LBLM.addLabel(self.level)
 
     def on_remove_label(self, label):
-        self.LBLM.removeLabel(self.level, label)
+        answer = QtWidgets.QMessageBox.question(self,
+                                                "Confirm deletion",
+                                                "Do you want to permanently delete this annotation?",
+                                                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+
+        if answer == QtWidgets.QMessageBox.Yes:
+            self.LBLM.removeLabel(self.level, label)
+        else:
+            log.info("+ Deleting annnotation was cancelled")
 
     def on_erase(self):
         self.erase.emit(self.level)
