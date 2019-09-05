@@ -201,20 +201,36 @@ class MainWindow(QtWidgets.QMainWindow):
                 event.key() == QtCore.Qt.Key_Z:
             # CTRL + Z
             log.debug('* DEBUG: CTRL+Z clicked')
-            if self.DM.last_changes is not None:
-                ds, slices, indexes, values, active_roi = self.DM.last_changes
-                slice_z, slice_y, slice_x = slices
+            self.undo_redo_changes(self.DM.last_changes, self.DM.redo_changes)
+        elif modifiers == (QtCore.Qt.ControlModifier | QtCore.Qt.ShiftModifier) \
+                and event.key() == QtCore.Qt.Key_Z:
+            # CTRL + shift + Z
+            log.debug('* DEBUG: CTRL+SHIFT+Z clicked')
+            self.undo_redo_changes(self.DM.redo_changes, self.DM.last_changes)
 
-                hdata = self.DM.load_slices(ds, slice_z, slice_y, slice_x,
-                                            apply_roi=active_roi)
-                prev_values = hdata[indexes[:, 0], indexes[:, 1], indexes[:, 2]]
-                hdata[indexes[:, 0], indexes[:, 1], indexes[:, 2]] = values
-                self.DM.write_slices(ds, hdata, slice_z, slice_y, slice_x,
-                                     apply_roi=active_roi)
-                self.DM.last_changes = (ds, (slice_z, slice_y, slice_x),
-                                        indexes, prev_values, active_roi)
-                self.LM.update()
-                log.info('+ Done')
+    def undo_redo_changes(self, source, destination):
+        """
+        Reapplies previous annotation changes to enable undo/redo functionality 
+
+        :param source: The source queue for changes to be applied
+        :param destination: The destination queue for the current state
+        """
+        if source:
+            ds, slices, indexes, values, active_roi = source.pop()
+            slice_z, slice_y, slice_x = slices
+
+            hdata = self.DM.load_slices(ds, slice_z, slice_y, slice_x,
+                                        apply_roi=active_roi)
+            prev_values = hdata[indexes[:, 0], indexes[:, 1], indexes[:, 2]]
+            hdata[indexes[:, 0], indexes[:, 1], indexes[:, 2]] = values
+            self.DM.write_slices(ds, hdata, slice_z, slice_y, slice_x,
+                                 apply_roi=active_roi)
+            destination.append((ds, (slice_z, slice_y, slice_x),
+                                         indexes, prev_values, active_roi))
+            self.LM.update()
+            log.info('+ Done')
+        else:
+            log.info('+ No changes in history to apply!')
 
     def mousePressEvent(self, event):
         self.setFocus()
