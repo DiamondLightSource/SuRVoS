@@ -324,8 +324,8 @@ class Annotations(Plugin):
         slice_x = slice(xmin, xmax+1)
 
         level = self.DM.gtselected['level']
-        self.DM.last_changes = (level, (slice_z, slice_y, slice_x),
-                                indexes, values, False)
+        self.DM.last_changes.append((level, (slice_z, slice_y, slice_x),
+                                indexes, values, False))
         self.LM.update()
 
     def on_add_level(self, idx, ds):
@@ -710,7 +710,7 @@ class Annotations(Plugin):
 
             slices = slice(None), slice(None), slice(None)
             indexes = np.column_stack(np.where(mcurrent))
-            self.DM.last_changes = (dataset, slices, indexes, label)
+            self.DM.last_changes.append((dataset, slices, indexes, label))
 
         self.LBLM.setLabelParent(level, label, parent_level, parent_label)
         self.launcher.cleanup()

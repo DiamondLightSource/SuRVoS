@@ -3,6 +3,7 @@ from ..qt_compat import QtGui, QtCore
 
 import numpy as np
 import logging as log
+from collections import deque
 
 import os
 import glob
@@ -74,7 +75,8 @@ class DataModel(QtCore.QObject):
         self.gtradius = 1
         self.gtinterpolation = 'linear'
         self.gtselected = None
-        self.last_changes = None
+        self.last_changes = deque(maxlen=10)
+        self.redo_changes = deque(maxlen=10)
         self.growing_bbox = ['data', 1., [10, 50, 50], 0]
 
         # KDE plots
