@@ -21,7 +21,7 @@ requirements:
     - numpy
     - scipy
     - cudatoolkit ==9.0
-    - matplotlib
+    - matplotlib ==3.0.2
     - tifffile
     - scikit-image
     - scikit-learn
