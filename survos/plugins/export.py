@@ -162,7 +162,7 @@ class Export(Plugin):
                 data = (data + 1).astype(np.int16)
                 self.save_tiff(outpath + '.tif', data, owrite=owrite)
         else:
-            print("No filename given.")
+            log.warning("No filename given.")
 
 
     def save_mask(self, level, dest, ftype, owrite):
@@ -228,8 +228,7 @@ class Export(Plugin):
         fname = os.path.basename(dataset)
 
         if isinstance(dest, str):
-            outpath = os.path.join(dest, 'data')
-            print("Saving raw data as: {}".format(dest))
+
             outpath = os.path.join(dest, fname)
             if ftype == 'hdf5':
                 attrs = self.DM.attrs(dataset)
@@ -240,7 +239,7 @@ class Export(Plugin):
             else:
                 self.save_tiff(outpath + '.tif', data, owrite=owrite)
         else:
-            print("No filename given.")
+            log.warning("No filename given.")
 
     def check_owrite(self, path, flag=False):
         if flag:
