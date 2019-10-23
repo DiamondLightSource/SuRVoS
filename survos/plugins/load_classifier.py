@@ -420,8 +420,10 @@ class PretrainedClassifier(Plugin):
             channel_params = {k: params[k] for k in keys}
             log.info('* Channel {} {}'.format(fname, ftype))
             self.DM.clf_channel_computed.emit(idx, name, ftype, active, channel_params)
-            feat_list.append(fname)
-        # Unfortunate special case - Data
+        # Special case 1 - Supervoxel Source Channel
+            if not params.get('unique_sv_source', None):
+                feat_list.append(fname)
+        # Special case 2 - Data
         if 'data' in self.meta_data_result['channel_list']:
             feat_list.append('Data')
         self.predict_widget.use_desc.checkGivenItems(feat_list)

@@ -266,6 +266,18 @@ class DataModel(QtCore.QObject):
                 self.write_attrs_to_empty_dataset(out_file, "supervox_info", supervox_attrs)
                 # Get the metadata for the feature channels
                 result_list = self.get_channel_metadata()
+
+                # Fix for case where source feature for supervoxel calculation is not used for prediction
+                sv_source = supervox_attrs['source']
+                sv_source_name = sv_source.split('/')[1]
+                sv_source_index, sv_source_type = sv_source_name.split('_')
+                # Check if the supervoxel source is in the result_list
+                if not any(d.get('feature_idx', None) == int(sv_source_index) for d in result_list):
+                    # It is not there, add it from the channel metadata
+                    sv_source_attrs = self.attrs(sv_source)
+                    sv_source_attrs['unique_sv_source'] = True
+                    result_list.append(sv_source_attrs)
+
                 # Create the datasets
                 for result in result_list:
                     dataset_name = "{}_{}".format(result.get('feature_idx', ''), result.get('feature_type', 'data'))
@@ -302,21 +314,31 @@ class DataModel(QtCore.QObject):
                     channel_list = in_file['classifier'].attrs['features']
                     # Store dicts with the metadata for each channel in the list
                     for channel_string in channel_list:
-                        # channel_string is in form 'channel/name'
-                        name = channel_string.split('/')[1]
-                        result[name] = dict(in_file[name].attrs)
-                        result.setdefault('channel_list', []).append(name)
-                        result[name]['out'] = channel_string
+                        self.add_channel_to_result(channel_string, in_file, result)
                     result['lbl_attrs'] = dict(in_file['lbl_info'].attrs.items())
                     result['sv_attrs'] = dict(in_file['supervox_info'].attrs.items())
+
+                    # Check if the source channel for calculating supervoxels is present in channel list, add if not
+                    sv_source = result['sv_attrs']['source']
+                    name = sv_source.split('/')[1]
+                    if name not in result['channel_list']:
+                        log.info("Supervoxel source channel is not a feature channel. Adding to result dictionary.")
+                        self.add_channel_to_result(sv_source, in_file, result)
                 except Exception as e:
                     log.error("Could not load attributes: {}".format(e))
-            if "data" in result:  # Unfortunate special case - data has been used for prediction
+            if "data" in result:  # Special case - data has been used for prediction
                 result['data']['feature_name'] = "data"
                 result['data']['feature_-dx'] = -1
             return result
         else:
             log.error("File does not appear to exist")
+
+    def add_channel_to_result(self, channel_string, in_file, result):
+        # channel_string is in form 'channel/name'
+        name = channel_string.split('/')[1]
+        result[name] = dict(in_file[name].attrs)
+        result.setdefault('channel_list', []).append(name)
+        result[name]['out'] = channel_string
 
     def get_classifier_params(self):
         return self.clf_params
