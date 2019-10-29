@@ -6,7 +6,7 @@ toc-section: 1
 
 ## Requirements
 
-- Python Distribution (Python 2.7 or 3.6)/ Anaconda (recommended)
+- Python Distribution (Python 3.6)/ Anaconda
 
 - NVIDIA GPU with at least 1024 threads
 
@@ -16,9 +16,6 @@ toc-section: 1
 
   [https://developer.nvidia.com/cuda-downloads](https://developer.nvidia.com/cuda-downloads)
 
-
-> NOTE: SuRVoS is not supported on Windows Python 2.7
-
    
  
 ## 1. Installing a Python distribution
@@ -27,7 +24,11 @@ If there is no Python distribution installed on your system, we recommend instal
 
 ### 1.1 Download Anaconda:
 
-[https://www.continuum.io/downloads](https://www.continuum.io/downloads)
+Download anaconda from their website [https://www.anaconda.com/distribution/](https://www.anaconda.com/distribution/).
+Alternatively on Linux, use *wget* to download Miniconda (a minimalist version of Anaconda) -
+```bash
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+```
 
 ### 1.2 Install Anaconda :
 
@@ -35,28 +36,38 @@ If there is no Python distribution installed on your system, we recommend instal
 
 **(MacOSX)** Just double click on the installer and follow instructions.
 
-**(Linux)** Open a terminal and type the following commands:
+**(Linux)** Run the *.sh script that you downloaded (e.g. `./miniconda.sh` or  `./Anaconda3-2019.10-Linux-x86_64.sh`)
 
-```bash
-$> cd /path/to/anaconda/
-$> chmod a+x Anaconda2-4.0.0-Linux-x86_64.sh
-$> ./Anaconda2-4.0.0-Linux-x86_64.sh
-    1. press ENTER
-    2. press Q
-    3. enter "yes"
-    4. pres ENTER
-    5. enter "yes"
-$> source ~/.bashrc
-```
-
-**NOTE:** Replace **2-4.0.0** with your version of Anaconda.
 
 ## 2. Install SuRVoS from conda channel
 
+We recommend creating a Python 3.6 [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) for installation of SuRVoS.
+
 ```bash
-$> conda install -c conda-forge -c numba -c ccpi survos
+$> conda create -n survos-env python=3.6
 ```
 
+Once this is installed, activate this new environment:
+
+```bash
+$> conda activate survos-env
+```
+
+Check that you are now using Python 3.6:
+```bash
+$> python --version
+```
+Finally, install SuRVoS from the survos conda channel
+
+```bash
+$> conda install -c conda-forge -c numba -c survos survos
+```
+
+To run SuRVoS, make sure you have your `survos-env` environment activated and type 'SuRVoS' to run.
+
+```bash
+$> SuRVoS
+```
 
 ## 3. Install SuRVoS from source
 
@@ -91,7 +102,6 @@ $[ccpi]> export LD_LIBRARY_PATH=<CUDA_HOME>/lib64:$LD_LIBRARY_PATH
 $[ccpi]> conda build conda-recipe -c conda-forge -c numba --python=3.6
 $[ccpi]> conda install --use-local survos -c conda-forge -c numba --python=3.6
 ```
-**NOTE:** Replace **3.6** with 2.7 for building using python 2.7.
 
 #### 3.2.3 MacOSX
 Replace the &lt;CUDA_HOME&gt; with the path to the CUDA install directory. Generally CUDA SDK 9.0 is installed in /Developer/NVIDIA/CUDA-9.1/.
@@ -103,7 +113,7 @@ $[ccpi]> export PATH=<CUDA_HOME>/bin:$PATH
 $[ccpi]> conda build conda-recipe -c conda-forge -c numba --python=3.6
 $[ccpi]> conda install --use-local survos -c conda-forge -c numba --python=3.6
 ```
-**NOTE:** Replace **3.6** with 2.7 for building using python 2.7.
+
 ### 3.3 Using standard python
 
 #### 3.3.1 Windows
