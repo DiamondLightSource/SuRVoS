@@ -5,9 +5,13 @@ toc-section: 3
 toc-subsection: 10
 ---
 
-**This feature is currently experimental and only available upon request**
 
-It is now possible to perform label prediction on data using a classifier that has been trained on a different dataset. This is likely to be particularly useful when segmenting a number of similar datasets, enabling the same model to applied across all of them and reducing the need for manual annotation. 
+
+It is now possible to perform label prediction on data using a classifier that has been trained on a different dataset. This is likely to be particularly useful when segmenting a number of similar datasets, enabling the same model to applied across all of them, reducing the need for manual annotation.
+
+## Saving a classifier
+
+Training of, and subsequent prediction with, a machine learning classifier is performed by pressing the **Train & Predict** button which is found in the *Train Classifier* tab. After this step, the **Save Classifier** button at the bottom of the tab will become active. Pressing this button will bring up a dialog to save the classifier in a folder called *classifiers* which is generated automatically. The default filename is *classifier.h5*.
 
 ## The "Use Pre-trained Classifier" component
 
@@ -35,5 +39,9 @@ The feature channel and supervoxel information is saved along with the classifie
 
 ### 3. Perform the prediction
 
-To preform prediction, click the **Predict** button. If required, prediction refinement can be selected also, before performing the prediction step. 
+To perform prediction, click the **Predict** button. If required, prediction refinement can be selected also, before performing the prediction step.
+
+### (Optional) 4. Add additional training data, retrain and save a modified classifier
+
+If the prediction is not as expected and needs modification, it is possible to go back to the *Annotations* tab, select a label and add annotations to the data to correct areas that have been misclassified. Upon returning to the *Pretrained classifier* tab, if the **Predict** button is pressed a dialog box will now appear asking if you would like to append this new data to the training data and train a new classifier. Upon choosing 'Yes', training and prediction of a new classifier will be performed and the **Save new classifier** button at the bottom of the tab will become activated. Pressing this button will bring up a dialog to save this modified classifier in a new file.
 
