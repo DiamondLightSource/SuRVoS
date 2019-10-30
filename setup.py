@@ -184,7 +184,7 @@ setup(
                   },
 	 entry_points={
 					'console_scripts': [
-										'SuRVos=survos.launcher.survos_launcher:main'
+										'SuRVoS=survos.launcher.survos_launcher:main'
 									   ],
 				  },
      
