@@ -21,7 +21,7 @@ from ..core import Launcher
 from ..core import DataModel, LayerManager, LabelManager
 from ..plugins import Plugin
 from ..plugins import ROI, SuperRegions, Annotations, Visualization,\
-                      Training, FeatureChannels, Export
+                      Training, FeatureChannels, Export, PretrainedClassifier
 from ..widgets import RCheckBox, HeaderButton, HWidgets, BLabel, PicButton, \
                       ComboDialog
 
@@ -67,6 +67,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.launcher.pre.connect(self.overlay.pre)
         self.launcher.post.connect(self.overlay.post)
         self.launcher.error.connect(self.on_error)
+        self.launcher.info.connect(self.on_info)
 
         self.status = self.statusBar()
         self.edit = QtWidgets.QLabel()
@@ -168,6 +169,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def on_error(self, msg):
         QtWidgets.QMessageBox.critical(self, "Error", msg)
+        log.error(msg)
+        self.overlay.post()
+
+    def on_info(self, msg):
+        QtWidgets.QMessageBox.information(self, "Info", msg)
+        log.info(msg)
         self.overlay.post()
 
     def addWidget(self, widget, ptype=None):
@@ -194,20 +201,36 @@ class MainWindow(QtWidgets.QMainWindow):
                 event.key() == QtCore.Qt.Key_Z:
             # CTRL + Z
             log.debug('* DEBUG: CTRL+Z clicked')
-            if self.DM.last_changes is not None:
-                ds, slices, indexes, values, active_roi = self.DM.last_changes
-                slice_z, slice_y, slice_x = slices
+            self.undo_redo_changes(self.DM.last_changes, self.DM.redo_changes)
+        elif modifiers == (QtCore.Qt.ControlModifier | QtCore.Qt.ShiftModifier) \
+                and event.key() == QtCore.Qt.Key_Z:
+            # CTRL + shift + Z
+            log.debug('* DEBUG: CTRL+SHIFT+Z clicked')
+            self.undo_redo_changes(self.DM.redo_changes, self.DM.last_changes)
 
-                hdata = self.DM.load_slices(ds, slice_z, slice_y, slice_x,
-                                            apply_roi=active_roi)
-                prev_values = hdata[indexes[:, 0], indexes[:, 1], indexes[:, 2]]
-                hdata[indexes[:, 0], indexes[:, 1], indexes[:, 2]] = values
-                self.DM.write_slices(ds, hdata, slice_z, slice_y, slice_x,
-                                     apply_roi=active_roi)
-                self.DM.last_changes = (ds, (slice_z, slice_y, slice_x),
-                                        indexes, prev_values, active_roi)
-                self.LM.update()
-                log.info('+ Done')
+    def undo_redo_changes(self, source, destination):
+        """
+        Reapplies previous annotation changes to enable undo/redo functionality 
+
+        :param source: The source queue for changes to be applied
+        :param destination: The destination queue for the current state
+        """
+        if source:
+            ds, slices, indexes, values, active_roi = source.pop()
+            slice_z, slice_y, slice_x = slices
+
+            hdata = self.DM.load_slices(ds, slice_z, slice_y, slice_x,
+                                        apply_roi=active_roi)
+            prev_values = hdata[indexes[:, 0], indexes[:, 1], indexes[:, 2]]
+            hdata[indexes[:, 0], indexes[:, 1], indexes[:, 2]] = values
+            self.DM.write_slices(ds, hdata, slice_z, slice_y, slice_x,
+                                 apply_roi=active_roi)
+            destination.append((ds, (slice_z, slice_y, slice_x),
+                                         indexes, prev_values, active_roi))
+            self.LM.update()
+            log.info('+ Done')
+        else:
+            log.info('+ No changes in history to apply!')
 
     def mousePressEvent(self, event):
         self.setFocus()
@@ -264,6 +287,7 @@ class MainWidget(QtWidgets.QWidget):
         attrs = self.DM.attrs('/data')
 
         # Left column
+        self.load_previous_classifier = PretrainedClassifier()
         self.visualization = Visualization()
         self.roi = ROI()
         self.SuperRegions = SuperRegions()
@@ -283,6 +307,8 @@ class MainWidget(QtWidgets.QWidget):
                        enabled=True, after=self)
         self.addWidget(self.training, pvisible=False, \
                        enabled=True, after=self)
+        self.addWidget(self.load_previous_classifier,
+                       pvisible=True, after=self)
         self.addWidget(self.export, pvisible=False, \
                        enabled=True, after=self)
 

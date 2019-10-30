@@ -30,7 +30,7 @@ class LabelManager(QtCore.QObject):
 
     levelAdded = QtCore.pyqtSignal(int, str)
     levelLoaded = QtCore.pyqtSignal(int, str)
-    levelRemoved = QtCore.pyqtSignal(int, str)
+    levelRemoved = QtCore.pyqtSignal(int, str, bool)
     saveLevel = QtCore.pyqtSignal(int, str)
 
     labelAdded = QtCore.pyqtSignal(int, str, int, str)
@@ -127,12 +127,12 @@ class LabelManager(QtCore.QObject):
         self.next_level += 1
         return levelidx, dataset
 
-    def removeLevel(self, level):
+    def removeLevel(self, level, force=False):
         dataset = self._datasets[level]
         del self._levels[level]
         del self._counts[level]
         del self._datasets[level]
-        self.levelRemoved.emit(level, dataset)
+        self.levelRemoved.emit(level, dataset, force)
 
     def addLabel(self, level):
         idx = self._counts[level]
@@ -142,14 +142,29 @@ class LabelManager(QtCore.QObject):
         self._counts[level] += 1
 
     def loadLabel(self, level, label, name, color, visible, parent_level, parent_label):
-        self._levels[level][label] = Label(name, label, color.decode('UTF-8'), visible, parent_level, parent_label)
-        self.labelLoaded.emit(level, self._datasets[level], label, name.decode('UTF-8'), color.decode('UTF-8'),
+
+        # Fix for Python3 string issues
+        try:
+            name = name.decode('UTF-8')
+            color = color.decode('UTF-8')
+        except AttributeError as e:
+            pass
+
+        self._levels[level][label] = Label(name, label, color, visible, parent_level, parent_label)
+
+        self.labelLoaded.emit(level, self._datasets[level], label, name, color,
                               visible, parent_level, parent_label)
         if label >= self._counts[level]:
             self._counts[level] = label+1
 
     def get(self, level, label):
-        return self._levels[level][label]
+        """
+        Retrieve a Label from the _levels dict. If not there, return an empty Label object.
+        :param level: Level index  
+        :param label: Label index
+        :return: A Label object
+        """
+        return self._levels.get(level, {}).get(label, Label('Empty', -1))
 
     def removeLabel(self, level, label):
         if label in self._levels[level]:

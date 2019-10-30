@@ -40,7 +40,7 @@ def compute_gaussian(data=None, params=None):
     return gauss
 
 def compute_tvdenoise(data=None, params=None):
-    return tvdenoising(data, params['Lambda'], spacing=params['Spacing'],
+    return tvdenoising(data, params['Lambda'], spacing=tuple(params['Spacing']),
                        max_iter=params['Max Iter'], gpu=DM.selected_gpu)
 
 ### LOCAL STATISTICS
@@ -502,9 +502,7 @@ def compute_channel(source=None, clamp=None, feature=None,
         params['default_evmin'] = evmin
         params['default_evmax'] = evmax
         params['active'] = True
-
         DM.write_slices(out, result, params=params)
-
         return out, idx, params
 
     return None

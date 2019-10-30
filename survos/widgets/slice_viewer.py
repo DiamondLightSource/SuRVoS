@@ -407,7 +407,7 @@ class LayeredCanvas(PerspectiveCanvas):
         level = self.DM.gtselected['level']
         label = self.DM.gtselected['label']
         data = self.DM.gtselected['data']
-        self.DM.last_changes = (level, label, indexes, values)
+        self.DM.last_changes.append((level, label, indexes, values))
         self.LM.update()
 
     def update_gt(self, ev):
@@ -586,8 +586,8 @@ class LayeredCanvas(PerspectiveCanvas):
         values = hdata[indexes[:, 0], indexes[:, 1], indexes[:, 2]]
         hdata[indexes[:, 0], indexes[:, 1], indexes[:, 2]] = label
         self.DM.write_slices(level, hdata, slice_z, slice_y, slice_x, apply_roi=apply_roi)
-        self.DM.last_changes = (level, (slice_z, slice_y, slice_x),
-                                indexes, values, apply_roi)
+        self.DM.last_changes.append((level, (slice_z, slice_y, slice_x),
+                                indexes, values, apply_roi))
 
         print("Time Replace Data:", time.time() - t0)
 

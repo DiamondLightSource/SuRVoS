@@ -7,3 +7,4 @@ from .channels import FeatureChannels
 from .training import Training
 from .annotations import Annotations
 from .export import Export
+from .load_classifier import PretrainedClassifier

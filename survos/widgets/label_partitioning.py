@@ -19,22 +19,21 @@ import logging as log
 
 FEATURE_OPTIONS = [
     'Average Intensity',
-    #'Median Intensity',
     'Sum Intensity',
-    'Standard Devitation',
+    'Standard Deviation',
     'Variance',
-    'Size (Area)',
-    'Log10(Size) (Area)',
-    'Size (Bounding Box)',
+    'Volume',
+    'Log10(Volume)',
+    'Volume (Bounding Box)',
     'Depth (Bounding Box)',
     'Height (Bounding Box)',
     'Width (Bounding Box)',
-    'Log10(Size) (Bounding Box)',
-    'Size (Oriented Bounding Box)',
+    'Log10(Volume) (Bounding Box)',
+    'Volume (Oriented Bounding Box)',
     '1st Axis (Oriented Bounding Box)',
     '2nd Axis (Oriented Bounding Box)',
     '3rd Axis (Oriented Bounding Box)',
-    'Log10(Size) (Oriented Bounding Box)',
+    'Log10(Volume) (Oriented Bounding Box)',
     'Position (X)',
     'Position (Y)',
     'Position (Z)'
@@ -42,25 +41,24 @@ FEATURE_OPTIONS = [
 
 FEATURE_TYPES = [
     'intensity',
-    #'median',
     'sum',
     'std',
     'var',
-    'area',
-    'log_area',
-    'size_bbox',
+    'volume',
+    'log_volume',
+    'volume_bbox',
     'depth_bbox',
     'height_bbox',
     'width_bbox',
-    'log_size_bbox',
-    'size_ori_bbox',
+    'log_volume_bbox',
+    'volume_ori_bbox',
     'depth_ori_bbox',
     'height_ori_bbox',
     'width_ori_bbox',
-    'log_size_ori_bbox',
-    'z_pos',
+    'log_volume_ori_bbox',
+    'x_pos',
     'y_pos',
-    'x_pos'
+    'z_pos'
 ]
 
 class LabelCanvas(PerspectiveCanvas):
@@ -211,13 +209,10 @@ class LabelExplorer(QtWidgets.QWidget):
         self.label_rules = LabelRules()
 
         self.feature_combo = TComboBox('Select measure:', FEATURE_OPTIONS)
-        self.kernels = TComboBox('Fit kernel:', ['gau', 'cos', 'biw', 'epa',
-                                                'tri', 'triw'],
-                                 selected=2)
         self.export_plot = QtWidgets.QPushButton('Export plot')
         self.export_stats = QtWidgets.QPushButton('Export Stats')
         vbox.addWidget(HWidgets(self.feature_combo, None,
-                                self.kernels, self.export_plot, self.export_stats,
+                                self.export_plot, self.export_stats,
                                 stretch=[0, 1, 0, 0, 0]))
 
         splitter = QtWidgets.QSplitter(0)
@@ -236,7 +231,6 @@ class LabelExplorer(QtWidgets.QWidget):
         self.label_canvas.labelSelected.connect(self.on_label_selected)
         self.export_plot.clicked.connect(self.on_export_plot)
         self.export_stats.clicked.connect(self.on_export_stats)
-        self.kernels.currentIndexChanged.connect(self.on_kernel_changed)
         self.label_rules.computed.connect(self.on_rules_computed)
         self.label_rules.compute_others.connect(self.on_rules_computed)
 
@@ -326,28 +320,45 @@ class LabelExplorer(QtWidgets.QWidget):
             self.title = 'Standard deviation of intensity inside objects'
         elif stype == 'var':
             self.title = 'Variance of intensity inside objects'
-        elif stype == 'area':
-            self.title = 'Area of objects (size in voxels)'
-        elif stype == 'logarea':
-            self.title = 'log10(Area) of objects (log size in voxels)'
-        elif stype == 'bbox':
-            self.title = 'Size of bounding box enclosing objects'
-        elif stype == 'logbbox':
-            self.title = 'log10(Size) of bounding box enclosing objects'
-        elif stype == 'posx':
+        elif stype == 'volume':
+            self.title = 'Volume of objects (voxels)'
+        elif stype == 'log_volume':
+            self.title = 'log10(Volume) of objects (voxels)'
+        elif stype == 'volume_bbox':
+            self.title = 'Volume of bounding box enclosing objects (voxels)'
+        elif stype == 'log_volume_bbox':
+            self.title = 'log10(Volume) of bounding box enclosing objects'
+        elif stype == 'depth_bbox':
+            self.title = 'Depth of bounding box enclosing objects'
+        elif stype == 'height_bbox':
+            self.title = 'Height of bounding box enclosing objects'
+        elif stype == 'width_bbox':
+            self.title = 'Width of bounding box enclosing objects'
+        elif stype == 'volume_ori_bbox':
+            self.title = 'Volume of orientated bounding box enclosing objects'
+        elif stype == 'depth_ori_bbox':
+            self.title = 'First axis of orientated bounding box enclosing objects'
+        elif stype == 'height_ori_bbox':
+            self.title = 'Second axis orientated box enclosing objects'
+        elif stype == 'width_ori_bbox':
+            self.title = 'Third axis orientated bounding box enclosing objects'
+        elif stype == 'log_volume_ori_bbox':
+            self.title = 'Log volume of orientated bounding box enclosing objects'
+        elif stype == 'x_pos':
             self.title = 'Position (X) of the center of mass of the objects'
-        elif stype == 'posy':
+        elif stype == 'y_pos':
             self.title = 'Position (Y) of the center of mass of the objects'
-        elif stype == 'posz':
+        elif stype == 'z_pos':
             self.title = 'Position (Z) of the center of mass of the objects'
+        else:
+            log.warning('Title not found!')
 
         self.feature = self.DM.load_ds('objects/{}'.format(stype))
         self.replot()
 
     def replot(self):
         self.mplcanvas.ax.clear()
-        sns.distplot(self.feature, hist=False, kde=True, rug=False,
-                     kde_kws={'lw': 3, 'shade': True, 'kernel': self.kernel},
+        sns.distplot(self.feature, hist=True, kde=False, rug=False,
                      ax=self.mplcanvas.ax)
         if self.labels is None:
             sns.rugplot(self.feature, ax=self.mplcanvas.ax)
@@ -361,8 +372,9 @@ class LabelExplorer(QtWidgets.QWidget):
         if self.selected_label is not None:
             f = self.feature[self.selected_label - 1]
             self.mplcanvas.ax.axvline(f, ymax=0.08, linewidth=3, color='#FF0000')
-            self.mplcanvas.ax.set_title('Selectec value: {}'.format(f))
+            self.mplcanvas.ax.set_title('Selected value: {}'.format(f))
         self.mplcanvas.ax.set_xlabel(self.title)
+        self.mplcanvas.ax.set_ylabel("Number of Objects")
         self.mplcanvas.redraw()
 
     def on_label_selected(self, label):
@@ -407,10 +419,6 @@ class LabelExplorer(QtWidgets.QWidget):
                 full_path += '.csv'
             df = pd.DataFrame(data, columns=features)
             df.to_csv(full_path)
-
-    def on_kernel_changed(self):
-        self.kernel = self.kernels.currentText()
-        self.replot()
 
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Escape \

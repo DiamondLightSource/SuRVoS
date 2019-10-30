@@ -332,8 +332,8 @@ class Annotations(Plugin):
         slice_x = slice(xmin, xmax+1)
 
         level = self.DM.gtselected['level']
-        self.DM.last_changes = (level, (slice_z, slice_y, slice_x),
-                                indexes, values, False)
+        self.DM.last_changes.append((level, (slice_z, slice_y, slice_x),
+                                indexes, values, False))
         self.LM.update()
 
     def on_add_level(self, idx, ds):
@@ -478,7 +478,7 @@ class Annotations(Plugin):
         log.info('+ Ready.')
         self.launcher.cleanup()
 
-    def on_remove_level(self, idx, ds):
+    def on_remove_level(self, idx, ds, force):
         visible = self.levels[idx].visible()
 
         log.info('+ Removing [Level {}]'.format(idx))
@@ -488,7 +488,7 @@ class Annotations(Plugin):
             self.DM.gtselected = None
 
         log.info('+ Clearing annotations [Level {}]'.format(idx))
-        self.remove_level_ds(idx, ds)
+        self.remove_level_ds(idx, ds, force)
 
         log.info('+ Removing widgets')
         self.levels[idx].setParent(None)
@@ -644,17 +644,21 @@ class Annotations(Plugin):
         return ds, self.DM.create_empty_dataset(ds, self.DM.data_shape,
                                                 dtype=np.int16)
 
-    def remove_level_ds(self, idx, ds):
-        quit_msg = "Do you want to permanently remove the data from [Level {}]?".format(idx)
-        wipe = QtWidgets.QMessageBox.question(self, 'Message', quit_msg,
-                                          QtWidgets.QMessageBox.Yes,
-                                          QtWidgets.QMessageBox.No)
-        if wipe == QtWidgets.QMessageBox.Yes:
+    def remove_level_ds(self, idx, ds, force):
+        if not force:
+            quit_msg = "Do you want to permanently remove the data from [Level {}]?".format(idx)
+            wipe = QtWidgets.QMessageBox.question(self, 'Message', quit_msg,
+                                              QtWidgets.QMessageBox.Yes,
+                                              QtWidgets.QMessageBox.No)
+            if wipe == QtWidgets.QMessageBox.Yes:
+                log.info('### Removing [Level {}] annotations ###'.format(idx))
+                self.DM.remove_dataset(ds)
+            else:
+                log.info('### Disabling [Level {}] annotations ###'.format(idx))
+                self.DM.set_attrs(ds, dict(active=False))
+        else: # Force removal of the dataset - only used when appending data to classifier
             log.info('### Removing [Level {}] annotations ###'.format(idx))
             self.DM.remove_dataset(ds)
-        else:
-            log.info('### Disabling [Level {}] annotations ###'.format(idx))
-            self.DM.set_attrs(ds, dict(active=False))
 
     def on_request_parent(self, level, label):
         if level == 0:
@@ -696,7 +700,7 @@ class Annotations(Plugin):
             return
 
         self.launcher.setup('Assigning parent to [{}] of [Level {}]'
-                            .format(str(self.LBLM.labels(level)[label].name,'utf-8'), level))
+                            .format(self.LBLM.labels(level)[label].name, level))
 
         dparent = self.DM.load_ds(parent_dataset)
         dcurrent = self.DM.load_ds(dataset)
@@ -718,7 +722,7 @@ class Annotations(Plugin):
 
             slices = slice(None), slice(None), slice(None)
             indexes = np.column_stack(np.where(mcurrent))
-            self.DM.last_changes = (dataset, slices, indexes, label)
+            self.DM.last_changes.append((dataset, slices, indexes, label))
 
         self.LBLM.setLabelParent(level, label, parent_level, parent_label)
         self.launcher.cleanup()
