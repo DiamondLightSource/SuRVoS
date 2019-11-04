@@ -1,14 +1,11 @@
 
 import math
-import numpy as np
 
 from ..qt_compat import QtGui, QtCore, QtWidgets
 
 import six
 import logging as log
 import time
-import re
-import shutil
 
 from .slice_viewer import SliceViewer
 from .label_partitioning import LabelSplitter
@@ -22,15 +19,12 @@ from ..core import DataModel, LayerManager, LabelManager
 from ..plugins import Plugin
 from ..plugins import ROI, SuperRegions, Annotations, Visualization,\
                       Training, FeatureChannels, Export, PretrainedClassifier
-from ..widgets import RCheckBox, HeaderButton, HWidgets, BLabel, PicButton, \
-                      ComboDialog
 
-from time import sleep
 
 from .. import actions as ac
 
 import os
-import fnmatch
+import os.path as op
 import h5py as h5
 
 class QPlainTextEditLogger(log.Handler):
@@ -91,17 +85,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.openAction.triggered.connect(self.load_data_view)
         self.pre_widget.open.clicked.connect(self.load_data_view)
 
-        self.loadAction = QtWidgets.QAction('&Load Workspace..', self)
-        self.loadAction.setShortcut('Ctrl+L')
-        self.loadAction.setStatusTip('Load previously created workspace.')
-        self.loadAction.triggered.connect(self.load_workspace)
+        self.workspaceLoadAction = QtWidgets.QAction('&Load Workspace..', self)
+        self.workspaceLoadAction.setShortcut('Ctrl+L')
+        self.workspaceLoadAction.setStatusTip('Load previously created workspace.')
+        self.workspaceLoadAction.triggered.connect(self.load_workspace)
         self.pre_widget.load.clicked.connect(self.load_workspace)
 
-        self.saveAction = QtWidgets.QAction('&Save annotations', self)
-        self.saveAction.setShortcut('Ctrl+S')
-        self.saveAction.setStatusTip('Save and backup current annotations.')
-        self.saveAction.triggered.connect(self.main_widget.save_backup)
-        self.saveAction.setEnabled(False)
+        self.annoSaveAction = QtWidgets.QAction('&Save annotations', self)
+        self.annoSaveAction.setShortcut('Ctrl+S')
+        self.annoSaveAction.setStatusTip('Save and backup current annotations.')
+        self.annoSaveAction.triggered.connect(self.main_widget.save_backup)
+        self.annoSaveAction.setEnabled(False)
+
+        self.settingsLoadAction = QtWidgets.QAction('&Load Settings', self)
+        self.settingsLoadAction.setStatusTip('Load filters and supervoxel settings.')
+        self.settingsLoadAction.triggered.connect(self.load_settings)
+
+        self.settingsSaveAction = QtWidgets.QAction('&Save settings', self)
+        self.settingsSaveAction.setStatusTip('Save current filters and supervoxel settings.')
+        self.settingsSaveAction.triggered.connect(self.save_settings)
+        #self.settingsSaveAction.setEnabled(False)
 
         exitAction = QtWidgets.QAction('&Exit', self)
         exitAction.setShortcut('Ctrl+Q')
@@ -109,8 +112,11 @@ class MainWindow(QtWidgets.QMainWindow):
         exitAction.triggered.connect(QtWidgets.qApp.quit)
 
         fileMenu.addAction(self.openAction)
-        fileMenu.addAction(self.loadAction)
-        fileMenu.addAction(self.saveAction)
+        fileMenu.addAction(self.workspaceLoadAction)
+        fileMenu.addAction(self.annoSaveAction)
+        fileMenu.addSeparator()
+        fileMenu.addAction(self.settingsLoadAction)
+        fileMenu.addAction(self.settingsSaveAction)
         fileMenu.addSeparator()
         fileMenu.addAction(exitAction)
 
@@ -166,6 +172,38 @@ class MainWindow(QtWidgets.QMainWindow):
 
         if self.main_widget.load_workspace(path):
             self.main_container.setCurrentIndex(2)
+
+    def load_settings(self):
+        """
+        Loads supervoxel and filter settings from an HDF5 file and apply those settings through a PretrainedClassifier
+        plugin instance
+        """
+        root_dir = self.DM.wspath
+        input_dir = op.join(root_dir, "settings")
+        filter = "Settings (*.h5)"
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Load Settings', input_dir, filter)
+        PTC = PretrainedClassifier.instance()
+        PTC.meta_data_result = self.DM.load_saved_settings_from_file(path)
+        PTC.calculate_feature_channels()
+
+    def save_settings(self):
+        """
+        Saves supervoxel and filter settings to an HDF5 file
+        """
+        if len(self.DM.available_channels()) == 0:
+            self.launcher.error.emit("You do not appear to have settings to save!")
+        else:
+            root_dir = self.DM.wspath
+            output_dir = op.join(root_dir, "settings")
+            os.makedirs(output_dir, exist_ok=True)
+            filename = op.join(output_dir, "settings.h5")
+            filter = "Settings (*.h5)"
+            path, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save Settings File', filename, filter)
+            if path is not None and len(path) > 0:
+                log.info('+ Saving settings to {}'.format(path))
+                self.DM.save_settings_file(path)
+            else:
+                log.error("There was a problem with the settings filepath.")
 
     def on_error(self, msg):
         QtWidgets.QMessageBox.critical(self, "Error", msg)
@@ -287,7 +325,7 @@ class MainWidget(QtWidgets.QWidget):
         attrs = self.DM.attrs('/data')
 
         # Left column
-        self.load_previous_classifier = PretrainedClassifier()
+        self.load_previous_classifier = PretrainedClassifier.instance()
         self.visualization = Visualization()
         self.roi = ROI()
         self.SuperRegions = SuperRegions()
@@ -332,8 +370,8 @@ class MainWidget(QtWidgets.QWidget):
         self.DM.wspath = wdir
 
         self.DM.main_window.openAction.setEnabled(False)
-        self.DM.main_window.loadAction.setEnabled(False)
-        self.DM.main_window.saveAction.setEnabled(True)
+        self.DM.main_window.workspaceLoadAction.setEnabled(False)
+        self.DM.main_window.annoSaveAction.setEnabled(True)
 
     def load_workspace(self, ws_path):
         self.DM.wspath = ws_path
