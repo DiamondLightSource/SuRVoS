@@ -260,33 +260,47 @@ class DataModel(QtCore.QObject):
                 out_file['classifier'].attrs['parameters'] = str(self.clf_params)
                 # Add the label information
                 self.write_attrs_to_empty_dataset(out_file, "lbl_info", lbl_attrs)
-                # Copy the supervoxel information across
-                svds = 'supervoxels/supervoxels'
-                supervox_attrs = self.attrs(svds)
-                self.write_attrs_to_empty_dataset(out_file, "supervox_info", supervox_attrs)
-                # Get the metadata for the feature channels
-                result_list = self.get_channel_metadata()
-
-                # Fix for case where source feature for supervoxel calculation is not used for prediction
-                sv_source = supervox_attrs['source']
-                sv_source_name = sv_source.split('/')[1]
-                sv_source_index, sv_source_type = sv_source_name.split('_')
-                # Check if the supervoxel source is in the result_list
-                if not any(d.get('feature_idx', None) == int(sv_source_index) for d in result_list):
-                    # It is not there, add it from the channel metadata
-                    sv_source_attrs = self.attrs(sv_source)
-                    sv_source_attrs['unique_sv_source'] = True
-                    result_list.append(sv_source_attrs)
-
-                # Create the datasets
-                for result in result_list:
-                    dataset_name = "{}_{}".format(result.get('feature_idx', ''), result.get('feature_type', 'data'))
-                    # fix cases where data is used as an input..
-                    if dataset_name == "_data":
-                        dataset_name = dataset_name[1:]
-                    self.write_attrs_to_empty_dataset(out_file, dataset_name, result)
+                self.save_supervox_and_filter_settings(out_file, has_classifier=True)
         else:
             log.error("Data Model has no classifier!")
+
+    def save_settings_file(self, path):
+        """
+        Saves a supervoxel and filter settings HDF5 file
+        :param path: File path to save to
+        """
+        with h5.File(path, 'w') as out_file:
+            self.save_supervox_and_filter_settings(out_file, has_classifier=False)
+
+    def save_supervox_and_filter_settings(self, out_file, has_classifier):
+        # Copy the supervoxel information across
+        svds = 'supervoxels/supervoxels'
+        supervox_attrs = self.attrs(svds)
+        self.write_attrs_to_empty_dataset(out_file, "supervox_info", supervox_attrs)
+        # Get the metadata for the feature channels
+        result_list = self.get_channel_metadata(has_classifier)
+        # Fix for case where source feature for supervoxel calculation is not used for prediction
+        sv_source = supervox_attrs['source']
+        sv_source_name = sv_source.split('/')[1]
+        sv_source_index, sv_source_type = sv_source_name.split('_')
+        # Check if the supervoxel source is in the result_list
+        if not any(d.get('feature_idx', None) == int(sv_source_index) for d in result_list):
+            # It is not there, add it from the channel metadata
+            sv_source_attrs = self.attrs(sv_source)
+            sv_source_attrs['unique_sv_source'] = True
+            result_list.append(sv_source_attrs)
+
+        # Create the datasets
+        channel_dict = {}
+        for result in result_list:
+            dataset_name = "{}_{}".format(result.get('feature_idx', ''), result.get('feature_type', 'data'))
+            channel_dict.setdefault('channel_list', []).append(dataset_name)
+            # fix cases where data is used as an input..
+            if dataset_name == "_data":
+                dataset_name = dataset_name[1:]
+            self.write_attrs_to_empty_dataset(out_file, dataset_name, result)
+        # Write a dataset with the channel list as an attribute
+        self.write_attrs_to_empty_dataset(out_file, "channel_list", channel_dict)
 
     def write_attrs_to_empty_dataset(self, file, dataset, attrs_dict):
         """
@@ -300,22 +314,31 @@ class DataModel(QtCore.QObject):
         for k, v in attrs_dict.items():
             file[dataset].attrs[k] = v
 
-    def load_saved_settings_from_file(self, path):
+    def load_saved_settings_from_file(self, path, has_classifier=False):
         """
-        Returns a dictionary containing all the metadata for settings saved along with the classifier
-        :param path: Path to classifier HDF5 file
+        Returns a dictionary containing all the metadata for settings saved
+        :param path: Path to classifier or settings HDF5 file
         :return: Dictionary with metadata
         """
         result = {}
         if os.path.exists(path):
             with h5.File(path, 'r') as in_file:
                 try:
-                    # Get the list of channels used by the classifier
-                    channel_list = in_file['classifier'].attrs['features']
-                    # Store dicts with the metadata for each channel in the list
-                    for channel_string in channel_list:
-                        self.add_channel_to_result(channel_string, in_file, result)
-                    result['lbl_attrs'] = dict(in_file['lbl_info'].attrs.items())
+                    if has_classifier:
+                        # Get the list of channels used by the classifier
+                        channel_list = in_file['classifier'].attrs['features']
+                        # Store dicts with the metadata for each channel in the list
+                        for channel_string in channel_list:
+                            self.add_channel_to_result(channel_string, in_file, result)
+                        result['lbl_attrs'] = dict(in_file['lbl_info'].attrs.items())
+                    else:
+                        # This is a settings file
+                        channel_list = in_file['channel_list'].attrs['channel_list']
+                        result['channel_list'] = channel_list
+                        for channel in channel_list:
+                            result[channel] = dict(in_file[channel].attrs)
+                            result[channel]['out'] = "channels/{}".format(channel)
+
                     result['sv_attrs'] = dict(in_file['supervox_info'].attrs.items())
 
                     # Check if the source channel for calculating supervoxels is present in channel list, add if not
@@ -343,12 +366,17 @@ class DataModel(QtCore.QObject):
     def get_classifier_params(self):
         return self.clf_params
 
-    def get_channel_metadata(self):
+    def get_channel_metadata(self, classifier=True):
         """
         Get the required metadata from each feature channel file
         :return metadata: list of dictionaries, each containing data for one channel
         """
-        return [self.attrs(feature) for feature in self.desc_params.get('features')]
+        if classifier:
+            return [self.attrs(feature) for feature in self.desc_params.get('features')]
+        results_list = []
+        for channel in self.available_channels():
+            results_list.append(self.attrs(channel[1]))
+        return results_list
 
     def add_classifier_to_model(self, clf, clf_params):
         """

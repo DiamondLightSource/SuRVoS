@@ -4,6 +4,7 @@ from ..qt_compat import QtGui, QtCore, QtWidgets
 import os.path as op
 import os
 import logging as log
+from ..core import Singleton
 
 from matplotlib.colors import ListedColormap
 
@@ -155,12 +156,13 @@ class SaveClassifier(QtWidgets.QWidget):
         self.setLayout(vbox)
 
 
+@Singleton
 class PretrainedClassifier(Plugin):
 
     name = 'Pretrained classifier'
 
     def __init__(self, parent=None):
-        super(PretrainedClassifier, self).__init__(ptype=Plugin.Plugin, parent=parent)
+        super().__init__(ptype=Plugin.Plugin, parent=parent)
 
         self.DM = DataModel.instance()
         self.LM = LayerManager.instance()
@@ -266,7 +268,7 @@ class PretrainedClassifier(Plugin):
             self.disable_train_tab()
             self.classifier_info.set_text(self.DM.clf_saved_name)
             # Get a dictionary with all the metadata settings
-            self.meta_data_result = self.DM.load_saved_settings_from_file(path)
+            self.meta_data_result = self.DM.load_saved_settings_from_file(path, has_classifier=True)
 
             ##### Labels #####
             self.load_label_info()
