@@ -361,8 +361,9 @@ class PretrainedClassifier(Plugin):
                 features += append_later
 
                 # Connect a signal from the launcher to initiate the supervoxel calculation when done
-                self.launcher.post.connect(self.calculate_supervoxels)
-                self.svx_conn = True
+                if self.meta_data_result.get('sv_attrs', None):
+                    self.launcher.post.connect(self.calculate_supervoxels)
+                    self.svx_conn = True
                 # Compute the feature channels
                 self.launcher.run(ac.compute_all_channel, features=features,
                                   caption='Computing Multiple Features',
@@ -371,10 +372,13 @@ class PretrainedClassifier(Plugin):
                 log.info("Generation of feature channels cancelled")
         else:
             self.launcher.info.emit('Feature channels already exist. Not calculating new ones.')
-            if not self.DM.has_grp('supervoxels'):
+            if not self.DM.has_grp('supervoxels') and self.meta_data_result.get('sv_attrs', None):
                 self.calculate_supervoxels()
+            elif self.meta_data_result.get('sv_attrs', None):
+                pass
             else:
                 self.launcher.info.emit('Supervoxels already exist. Not calculating new ones.')
+            if self.DM.has_classifier():
                 self.predict_widget.predict_btn_widget.btn_predict.setEnabled(True)
 
     def confirm_settings_compute(self):
@@ -385,17 +389,17 @@ class PretrainedClassifier(Plugin):
         full_names = [self.meta_data_result[name]['feature_name']
                       for name in channels
                       if self.meta_data_result[name]['feature_name'] != "data"]
-        supervox_params = self.meta_data_result['sv_attrs']
+        supervox_params = self.meta_data_result.get('sv_attrs', None)
+        supervox_string = "" if supervox_params is None else "\n\nThe following supervoxels will be" \
+                                                             " calculated:\n\nShape: {}\nSpacing: {}\nCompactness:" \
+                                                             " {}\nSource: {}".format(", ".join(map(str, supervox_params['sp_shape'])),
+                                                             ", ".join(map(str, supervox_params['spacing'])),
+                                                             supervox_params['compactness'],
+                                                             supervox_params['source'])
         return QtWidgets.QMessageBox.question(self,
                                             "Confirm calculation",
-                                            "The following feature channels will be calculated:\n\n{}"
-                                            "\n\nThe following supervoxels will be calculated:"
-                                            "\n\nShape: {}\nSpacing: {}\nCompactness: {}\nSource: {}"
-                                            "\n\nWould you like to continue?".format("\n".join(full_names),
-                                                                                    ", ".join(map(str, supervox_params['sp_shape'])),
-                                                                                    ", ".join(map(str, supervox_params['spacing'])),
-                                                                                    supervox_params['compactness'],
-                                                                                    supervox_params['source']),
+                                            "The following feature channels will be calculated:\n\n{}{}"
+                                            .format("\n".join(full_names), "" if not supervox_string else supervox_string),
                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
 
     def on_channels_calculated(self, results):
@@ -471,7 +475,8 @@ class PretrainedClassifier(Plugin):
     def on_supervoxels(self, params):
         svlabels, svtotal, sortindex, sorttable, edges, weights = params
         self.update_supervoxel_layer(svlabels, sortindex, sorttable, svtotal, visible=True)
-        self.predict_widget.predict_btn_widget.btn_predict.setEnabled(True)
+        if self.DM.has_classifier():
+            self.predict_widget.predict_btn_widget.btn_predict.setEnabled(True)
 
     def update_supervoxel_layer(self, svlabels, sortindex, sorttable, total_sv, visible=False):
         if svlabels is not None:
