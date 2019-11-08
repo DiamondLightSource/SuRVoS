@@ -203,8 +203,6 @@ class MainWindow(QtWidgets.QMainWindow):
             if path is not None and len(path) > 0:
                 log.info('+ Saving settings to {}'.format(path))
                 self.DM.save_settings_file(path)
-            else:
-                log.error("There was a problem with the settings filepath.")
 
     def on_error(self, msg):
         QtWidgets.QMessageBox.critical(self, "Error", msg)
