@@ -182,9 +182,10 @@ class MainWindow(QtWidgets.QMainWindow):
         input_dir = op.join(root_dir, "settings")
         filter = "Settings (*.h5)"
         path, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Load Settings', input_dir, filter)
-        PTC = PretrainedClassifier.instance()
-        PTC.meta_data_result = self.DM.load_saved_settings_from_file(path)
-        PTC.calculate_feature_channels()
+        if path is not None and len(path) > 0:
+            PTC = PretrainedClassifier.instance()
+            PTC.meta_data_result = self.DM.load_saved_settings_from_file(path)
+            PTC.calculate_feature_channels()
 
     def save_settings(self):
         """
