@@ -386,6 +386,8 @@ class Annotations(Plugin):
         self.launcher.setup("Importing annotation level")
         path = QtWidgets.QFileDialog.getOpenFileName(self, "Select input source",
                                                  filter='*.h5 *.hdf5 *.h5.bak')
+        if isinstance(path, tuple):
+            path = path[0]
         if path is None or len(path) == 0:
             self.launcher.cleanup()
             return
