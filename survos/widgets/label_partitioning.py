@@ -189,6 +189,7 @@ class LabelExplorer(QtWidgets.QWidget):
 
         self.label_canvas = label_canvas
         self.DM = DataModel.instance()
+        self.launcher = Launcher.instance()
         self.LBLM = LabelManager.instance()
 
         vbox = QtWidgets.QVBoxLayout()
@@ -276,6 +277,9 @@ class LabelExplorer(QtWidgets.QWidget):
         self.computed_level = level
         self.LBLM.save(level)
         labels = self.label_combo.getSelectedLabels()
+        if not labels:
+            self.launcher.info.emit("No labels selected!")
+            return
 
         in_dset = self.LBLM.dataset(level)
         out_dset = 'objects/objects'
@@ -290,7 +294,7 @@ class LabelExplorer(QtWidgets.QWidget):
         self.DM.remove_dataset('objects/objects')
         self.DM.remove_dataset('objects/objlabels')
 
-        Launcher.instance().run(ac.label_objects, dataset=in_dset, source=source,
+        self.launcher.run(ac.label_objects, dataset=in_dset, source=source,
                                 out=out_dset, out_features=out_features,
                                 labels=labels, caption='Labelling objects...',
                                 cb=self.on_objects_labelled)
@@ -353,8 +357,12 @@ class LabelExplorer(QtWidgets.QWidget):
         else:
             log.warning('Title not found!')
 
-        self.feature = self.DM.load_ds('objects/{}'.format(stype))
-        self.replot()
+        try:
+            self.feature = self.DM.load_ds('objects/{}'.format(stype))
+            self.replot()
+        except OSError:
+            self.launcher.info.emit("Could not find data for labelled objects.\nDid you press the 'Label' button?")
+
 
     def replot(self):
         self.mplcanvas.ax.clear()
