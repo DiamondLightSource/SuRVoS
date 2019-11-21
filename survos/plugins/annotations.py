@@ -542,7 +542,7 @@ class Annotations(Plugin):
                 if slabel == label:
                     self.DM.gtselected = None
 
-        self.launcher.setup('Removing label [{}] form [Level {}]'
+        self.launcher.setup('Removing label [{}] from [Level {}]'
                             .format(label_name, level))
         log.info('+ Loading annotation data into memory')
         data = self.DM.load_ds(dataset)
@@ -701,8 +701,11 @@ class Annotations(Plugin):
             self.save_labels(level)
             return
 
+        # If a label has been deleted, the 'label' variable no longer corresponds to the list returned
+        # by self.LBLM.labels(level)
+        dict_map = dict(zip(self.LBLM.idxs(level), range(len(self.LBLM.idxs(level)))))
         self.launcher.setup('Assigning parent to [{}] of [Level {}]'
-                            .format(self.LBLM.labels(level)[label].name, level))
+                            .format(self.LBLM.labels(level)[dict_map[label]].name, level))
 
         dparent = self.DM.load_ds(parent_dataset)
         dcurrent = self.DM.load_ds(dataset)
