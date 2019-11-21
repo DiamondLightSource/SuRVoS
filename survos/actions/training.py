@@ -268,13 +268,16 @@ def predict_and_save(X, clf, full_svmask, nsp, out_confidence, out_labels, super
                 #conf[~mask] = -1
         else:
             pass  # TODO pixel refinement
-        log.info('+ Mapping predictions back to pixels')
+        log.info('+ Mapping predictions and probabilities back to pixels')
         pred_map = np.empty(nsp, dtype=result['class'].dtype)
         conf_map = np.empty(nsp, dtype=result['probs'].dtype)
-        log.info('+ Measuring uncertainty')
+        # Get a list of label classes since when labels have been deleted some will be missing
+        label_classes = np.unique(result['class'])
+        # Make a dict mapping from label to sequential numbers beginning from 0
+        dict_map = dict(zip(label_classes, range(len(label_classes))))
         # Slice each list of confidences with the corresponding predicted class
         # to return the confidence for that class
-        conf_result = list(map(lambda x, y: x[y], result['probs'], result['class']))
+        conf_result = list(map(lambda x, y: x[dict_map[y]], result['probs'], result['class']))
         pred_map[full_svmask] = result['class']
         conf_map[full_svmask] = conf_result
         if mask is not None:
