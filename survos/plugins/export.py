@@ -134,6 +134,9 @@ class Export(Plugin):
             return self.save_raw_data('data', dest, ftype, owrite)
 
         self.launcher.setup('Exporting Levels')
+        if not levels:
+            self.launcher.error.emit("Please select a level!")
+            return
         for level in levels:
             log.info('+ Exporting [Level {}]'.format(level))
             if otype == 'raw':
@@ -162,7 +165,7 @@ class Export(Plugin):
                 data = (data + 1).astype(np.int16)
                 self.save_tiff(outpath + '.tif', data, owrite=owrite)
         else:
-            log.warning("No filename given.")
+            self.launcher.error.emit("No output folder specified.")
 
 
     def save_mask(self, level, dest, ftype, owrite):
@@ -170,54 +173,59 @@ class Export(Plugin):
         dataset = self.LBLM.dataset(level)
         data = self.DM.load_ds(dataset)
         fname = os.path.basename(dataset)
-        for label in self.LBLM.labels(level):
-            log.info('+ Saving [{}] from [Level {}]'.format(label.name, level))
-            outpath = os.path.join(dest, '{}-mask{}'.format(fname, label.idx))
-            mask = img_as_ubyte(data == label.idx)
-            if ftype == 'hdf5':
-                self.save_hdf5(outpath + '.h5', mask, owrite=owrite)
-            elif ftype == 'mrc':
-                self.save_mrc(outpath + '.mrc', mask, owrite=owrite)
-            else:
-                self.save_tiff(outpath + '.tif', mask, owrite=owrite)
+        if isinstance(dest, str):
+            for label in self.LBLM.labels(level):
+                log.info('+ Saving [{}] from [Level {}]'.format(label.name, level))
+                outpath = os.path.join(dest, '{}-mask{}'.format(fname, label.idx))
+                mask = img_as_ubyte(data == label.idx)
+                if ftype == 'hdf5':
+                    self.save_hdf5(outpath + '.h5', mask, owrite=owrite)
+                elif ftype == 'mrc':
+                    self.save_mrc(outpath + '.mrc', mask, owrite=owrite)
+                else:
+                    self.save_tiff(outpath + '.tif', mask, owrite=owrite)
+        else:
+            self.launcher.error.emit("No output folder specified.")
 
     def save_data(self, level, dest, ftype, owrite, source_ds, scale=True, invert=False):
         log.info('+ Loading data into memory')
         dataset = self.LBLM.dataset(level)
         data = self.DM.load_ds(dataset)
         fname = os.path.basename(dataset)
+        if isinstance(dest, str):
+            source = self.DM.load_ds(source_ds)
+            source[np.isinf(source)] = np.nan
+            if invert:
+                source = -source
 
-        source = self.DM.load_ds(source_ds)
-        source[np.isinf(source)] = np.nan
-        if invert:
-            source = -source
+            log.info('+ Extracting data stats')
+            mask = ~np.isnan(source)
+            amin = np.min(source[mask]); amax = np.max(source[mask]);
+            if scale:
+                source[mask] -= amin
+                source[mask] /= (amax - amin)
+                source[~mask] = 0
+                amin = 0; amax = 1;
+            amean = source.mean()
 
-        log.info('+ Extracting data stats')
-        mask = ~np.isnan(source)
-        amin = np.min(source[mask]); amax = np.max(source[mask]);
-        if scale:
-            source[mask] -= amin
-            source[mask] /= (amax - amin)
-            source[~mask] = 0
-            amin = 0; amax = 1;
-        amean = source.mean()
+            fillval = amax if invert else amin
 
-        fillval = amax if invert else amin
+            for label in self.LBLM.labels(level):
+                log.info('+ Saving [{}] from [Level {}]'.format(label.name, level))
+                outpath = os.path.join(dest, '{}-data{}'.format(fname, label.idx))
+                mask = (data == label.idx)
+                final = np.full(source.shape, fillval, np.float32)
+                final[mask] = source[mask]
 
-        for label in self.LBLM.labels(level):
-            log.info('+ Saving [{}] from [Level {}]'.format(label.name, level))
-            outpath = os.path.join(dest, '{}-data{}'.format(fname, label.idx))
-            mask = (data == label.idx)
-            final = np.full(source.shape, fillval, np.float32)
-            final[mask] = source[mask]
-
-            if ftype == 'hdf5':
-                attrs = self.DM.attrs(source_ds)
-                self.save_hdf5(outpath + '.h5', final, owrite=owrite, attrs=attrs)
-            elif ftype == 'mrc':
-                self.save_mrc(outpath + '.mrc', final, owrite=owrite)
-            else:
-                self.save_tiff(outpath + '.tif', final, owrite=owrite)
+                if ftype == 'hdf5':
+                    attrs = self.DM.attrs(source_ds)
+                    self.save_hdf5(outpath + '.h5', final, owrite=owrite, attrs=attrs)
+                elif ftype == 'mrc':
+                    self.save_mrc(outpath + '.mrc', final, owrite=owrite)
+                else:
+                    self.save_tiff(outpath + '.tif', final, owrite=owrite)
+        else:
+            self.launcher.error.emit("No output folder specified.")
 
     def save_raw_data(self, dataset, dest, ftype, owrite):
         log.info('+ Loading data into memory')
@@ -228,7 +236,6 @@ class Export(Plugin):
         fname = os.path.basename(dataset)
 
         if isinstance(dest, str):
-
             outpath = os.path.join(dest, fname)
             if ftype == 'hdf5':
                 attrs = self.DM.attrs(dataset)
@@ -239,7 +246,7 @@ class Export(Plugin):
             else:
                 self.save_tiff(outpath + '.tif', data, owrite=owrite)
         else:
-            log.warning("No filename given.")
+            self.launcher.error.emit("No output folder specified.")
 
     def check_owrite(self, path, flag=False):
         if flag:
@@ -258,9 +265,7 @@ class Export(Plugin):
     def save_hdf5(self, outpath, data, owrite=True, attrs=None):
         if not self.check_owrite(outpath, owrite):
             return
-
         log.info(' * Writing file [{}]'.format(outpath))
-
         with h5.File(outpath, 'w') as f:
             d = f.create_dataset('data', data=data)
             if attrs is not None:
