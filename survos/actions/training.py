@@ -1,8 +1,6 @@
 
-import h5py as h5
 import numpy as np
 import logging as log
-import ast
 
 import networkx as nx
 from sklearn.decomposition import PCA, IncrementalPCA
@@ -16,9 +14,6 @@ from sklearn.svm import SVC
 from sklearn.cluster import MiniBatchKMeans
 
 from sklearn.linear_model import SGDClassifier
-from scipy.stats import entropy
-
-from skimage.segmentation import relabel_sequential
 
 from ..lib._spencoding import _sp_labels
 from ..lib.spencoding import spmeans, sphist, spstats
@@ -297,17 +292,21 @@ def predict_and_save(X, clf, full_svmask, nsp, out_confidence, out_labels, super
 
 def _train_classifier(clf, X_train, y_train, rnd=42, project=None):
 
-    if ast.literal_eval(project) is not None:
+    if project is not None and project != 'None':
         log.info('+ Projecting features')
-        if project == 'rproj':
+        if project == 'random_projection':
+            log.info('  * Sparse Random Projection')
             proj = SparseRandomProjection(n_components=X_train.shape[1], random_state=rnd)
-        elif project == 'std':
+        elif project == 'standard':
+            log.info('  * Standard Projection')
             proj = StandardScaler()
         elif project == 'pca':
-            proj = PCA(n_components='mle', whiten=True, random_state=rnd)
+            log.info('  * Principle Component Analysis')
+            proj = IncrementalPCA(batch_size=100)
+        elif project == 'random_pca':
+            log.info('  * Randomized Principle Component Analysis')
+            proj = PCA(n_components=X_train.shape[1], svd_solver='randomized', whiten=True, random_state=rnd)
         else:
-            print(project)
-            print(type(project))
             log.error('Projection {} not available'.format(project))
             return
 
