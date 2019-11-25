@@ -53,9 +53,6 @@ available_features = [
     ('Local Gradient Magnitude', 'local_mag', [
         ('Radius', Int3d, 4),
     ]),
-    ('Local Gradient Orientation', 'local_ori', [
-        ('Radius', Int3d, 4),
-    ]),
     ##################################################
     ('Gaussian Features', None, None),
     ('Gaussian Centering', 'gauss_center', [
@@ -65,10 +62,6 @@ available_features = [
         ('Sigma', Float3d, 2.),
     ]),
     ('Gaussian Gradient Magnitude', 'gauss_mag', [
-        ('Sigma', Float3d, 2.),
-    ]),
-    ('Gaussian Gradient Orientation', 'gauss_ori', [
-        ('Radius', Int3d, 3),
         ('Sigma', Float3d, 2.),
     ]),
     ##################################################
@@ -144,7 +137,6 @@ available_features = [
     ]),
     ##################################################
     ('Activation Layers', None, None),
-    ('Maximum Response', 'max_response', []),
     ('Rectified Linear Unit', 'relu', [
         ('Type', Choice(['Standard', 'Noisy', 'Leaky']), 'Standard'),
         ('Alpha', float, 0.01)
