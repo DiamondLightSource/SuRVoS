@@ -6,6 +6,9 @@ import os
 from collections import defaultdict
 from ..core import DataModel, LabelManager
 
+DEFAULT_DIR_KEY = "default_dir"
+DEFAULT_DATA_KEY = "default_data_dir"
+
 class SectionCombo(QtWidgets.QToolButton):
 
     currentIndexChanged = QtCore.pyqtSignal(int)
@@ -119,22 +122,28 @@ class FileWidget(QtWidgets.QWidget):
     def open_dialog(self):
         selected = False
         path = None
+        settings = QtCore.QSettings()
         if self.folder:
             flags = QtWidgets.QFileDialog.ShowDirsOnly
             message = 'Select Output Folder'
             path = QtWidgets.QFileDialog.getExistingDirectory(self, message,
-                                                          self.path.text(), flags)
+                                                              settings.value(DEFAULT_DIR_KEY), flags)
             if path is not None and len(path) > 0 and os.path.isdir(path):
                 selected = True
+                settings.setValue(DEFAULT_DIR_KEY, path)
         else:
+            folder = settings.value(DEFAULT_DATA_KEY)
+            if not folder:
+                folder = settings.value(DEFAULT_DIR_KEY)
             if self.save:
-                path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Select input source",
+                path, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Select input source", folder,
                                                          filter=self.extensions)
             else:
-                path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select input source",
+                path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select input source", folder,
                                                          filter=self.extensions)
             if path is not None and len(path) > 0:
                 selected = True
+                settings.setValue(DEFAULT_DATA_KEY, os.path.dirname(path))
 
         if selected:
             self.path.setText(path)
