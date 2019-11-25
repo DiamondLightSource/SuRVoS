@@ -384,7 +384,7 @@ class Annotations(Plugin):
 
     def on_load_external_level(self):
         self.launcher.setup("Importing annotation level")
-        path = QtWidgets.QFileDialog.getOpenFileName(self, "Select input source",
+        path = QtWidgets.QFileDialog.getOpenFileName(self, "Select input source", self.DM.wspath,
                                                  filter='*.h5 *.hdf5 *.h5.bak')
         if isinstance(path, tuple):
             path = path[0]

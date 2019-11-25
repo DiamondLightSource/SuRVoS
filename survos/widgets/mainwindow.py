@@ -27,6 +27,8 @@ import os
 import os.path as op
 import h5py as h5
 
+DEFAULT_DIR_KEY = "default_dir"
+
 class QPlainTextEditLogger(log.Handler):
     def __init__(self, parent):
         super(QPlainTextEditLogger, self).__init__()
@@ -42,7 +44,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, title="SuRVoS: Super-Region Volume Segmentation workbench"):
         super(MainWindow, self).__init__()
-
         self.DM = None
 
         self.pre_widget = PreWidget()
@@ -166,10 +167,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if type(path) not in six.string_types:
             msg = "Select the workspace folder"
             flags = QtWidgets.QFileDialog.ShowDirsOnly
-            path = QtWidgets.QFileDialog.getExistingDirectory(self, msg, '.', flags)
+            settings = QtCore.QSettings()
+            path = QtWidgets.QFileDialog.getExistingDirectory(self, msg, settings.value(DEFAULT_DIR_KEY), flags)
             if path is None or len(path) == 0:
                 return
-
+            settings.setValue(DEFAULT_DIR_KEY, path)
         if self.main_widget.load_workspace(path):
             self.main_container.setCurrentIndex(2)
 

@@ -38,6 +38,8 @@ def main():
     root.addHandler(ch)
 
     app = QtWidgets.QApplication(sys.argv)
+    app.setOrganizationName("DLS")
+    app.setApplicationName("SuRVoS")
 
     with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'survos.qcs')) as f:
         css = f.read()

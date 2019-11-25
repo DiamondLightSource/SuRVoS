@@ -207,7 +207,7 @@ class LevelStats(Plugin):
             self.mplcanvas.redraw()
 
     def on_export_plot(self):
-        full_path = QtWidgets.QFileDialog.getSaveFileName(self, "Select output filename",
+        full_path = QtWidgets.QFileDialog.getSaveFileName(self, "Select output filename", self.DM.wspath,
                                                       filter='*.png')
 
         if isinstance(full_path, tuple):
@@ -228,7 +228,7 @@ class LevelStats(Plugin):
             feature = self.DM.load_ds('objects/{}'.format(ftype))
             data[:, n] = feature
 
-        full_path = QtWidgets.QFileDialog.getSaveFileName(self, "Select output filename",
+        full_path = QtWidgets.QFileDialog.getSaveFileName(self, "Select output filename", self.DM.wspath,
                                                       filter='*.csv')
         if isinstance(full_path, tuple):
             full_path = full_path[0]
