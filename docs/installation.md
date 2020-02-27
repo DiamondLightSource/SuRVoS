@@ -34,14 +34,14 @@ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O mi
 
 **(Windows)** Just double click on the installer and follow instructions.
 
-**(MacOSX)** Just double click on the installer and follow instructions.
-
 **(Linux)** Run the *.sh script that you downloaded (e.g. `./miniconda.sh` or  `./Anaconda3-2019.10-Linux-x86_64.sh`)
 
 
 ## 2. Install SuRVoS from conda channel
 
-We recommend creating a Python 3.6 [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) for installation of SuRVoS.
+We recommend creating a Python 3.6 [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) for installation of SuRVoS.
+
+On linux, open a terminal. On windows open Anaconda Prompt.
 
 ```bash
 $> conda create -n survos-env python=3.6
@@ -56,14 +56,20 @@ $> conda activate survos-env
 Check that you are now using Python 3.6:
 ```bash
 $> python --version
+Python 3.6.7
 ```
-Finally, install SuRVoS from the survos conda channel
+Install SuRVoS from the survos conda channel
 
 ```bash
-$> conda install -c conda-forge -c numba -c survos survos
+$> conda install -c conda-forge -c numba -c ccpi survos
 ```
 
-To run SuRVoS, make sure you have your `survos-env` environment activated and type 'SuRVoS' to run.
+Because of an issue with the matplotlib library, you need to downgrade to version 3.0.2
+```bash
+$> conda install -c conda-forge matplotlib-base=3.0.2
+```
+
+To run SuRVoS, make sure you have your `survos-env` environment activated ("conda activate survos-env") and type 'SuRVoS' to run.
 
 ```bash
 $> SuRVoS
