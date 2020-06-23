@@ -129,9 +129,9 @@ class NavigationToolbar(NavigationToolbar2QT):
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
 
-        self.buttons = {}
+        #self.buttons = {}
 
-        self.adj_window = None
+        #self.adj_window = None
 
     def _update_buttons_checked(self):
         self._actions['pan'].setChecked(self._active == 'PAN')
@@ -603,7 +603,7 @@ class LayeredCanvas(PerspectiveCanvas):
 class GtTool(HWidgets):
 
     def __init__(self):
-        items = ['Voxels', 'SuperVoxels', 'MegaVoxels']
+        items = ['Voxels', 'SuperVoxels']
         self.DM = DataModel.instance()
         self.launcher = Launcher.instance()
         self.alevel_combo = TComboBox('Annotation Level:', items,
@@ -622,9 +622,6 @@ class GtTool(HWidgets):
     def on_annotation_level(self, idx):
         if idx == 1 and self.DM.svlabels is None:
             self.launcher.error.emit('SuperVoxels need to be created first')
-            self.alevel_combo.setCurrentIndex(self.DM.gtlevel)
-        elif idx == 2 and self.DM.mvlabels is None:
-            self.launcher.error.emit('MegaVoxels need to be created first')
             self.alevel_combo.setCurrentIndex(self.DM.gtlevel)
         else:
             self.DM.gtlevel = idx
@@ -681,10 +678,6 @@ class GrowTool(HWidgets):
 
         if level == 1 and self.DM.svlabels is None:
             self.launcher.error.emit('SuperVoxels need to be created first')
-            self.alevel_combo.setCurrentIndex(0)
-            return
-        elif level == 2 and self.DM.mvlabels is None:
-            self.launcher.error.emit('MegaVoxels need to be created first')
             self.alevel_combo.setCurrentIndex(0)
             return
 
