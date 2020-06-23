@@ -38,6 +38,8 @@ def main():
     ch.setLevel(logging.DEBUG)
     root.addHandler(ch)
 
+    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app = QtWidgets.QApplication(sys.argv)
     app.setOrganizationName("DLS")
     app.setApplicationName("SuRVoS")
