@@ -129,10 +129,7 @@ class NavigationToolbar(NavigationToolbar2QT):
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
 
-        #self.buttons = {}
-
-        #self.adj_window = None
-
+    
     def _update_buttons_checked(self):
         self._actions['pan'].setChecked(self._active == 'PAN')
         self._actions['zoom'].setChecked(self._active == 'ZOOM')
