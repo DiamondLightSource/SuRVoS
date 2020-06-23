@@ -23,6 +23,7 @@ def main():
 
     import matplotlib as mpl
     mpl.use('Qt5Agg')
+    logging.getLogger('matplotlib.font_manager').disabled = True
 
     from matplotlib import style
     style.use( u'seaborn-ticks')
