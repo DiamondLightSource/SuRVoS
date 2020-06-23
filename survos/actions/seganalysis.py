@@ -5,7 +5,7 @@ from __future__ import division
 import numpy as np
 import logging as log
 
-from sklearn.metrics import cohen_kappa_score, jaccard_similarity_score
+from sklearn.metrics import cohen_kappa_score, jaccard_score
 
 from ..core import DataModel
 
@@ -62,7 +62,7 @@ def compare_segmentations(levelA=None, levelB=None, labelsA=None, labelsB=None,
     if dice:
         result['dice'] = (2 * ninter) / float(nnzA + nnzB)
     if jacc:
-        result['jacc'] = jaccard_similarity_score(dB.ravel(), dA.ravel())
+        result['jacc'] = jaccard_score(dB.ravel(), dA.ravel())
     if cohen:
         result['cohen'] = cohen_kappa_score(mappingB.ravel(), mappingA.ravel(),
                                             labels=[i + 1 for i in indexes])
