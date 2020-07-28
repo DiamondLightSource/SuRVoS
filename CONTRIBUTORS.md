@@ -61,7 +61,7 @@ representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement at
-[INSERT CONTACT METHOD].
+[Mark Basham](https://github.com/markbasham), [Olly King](https://github.com/OllyK), [Avery Pennington](https://github.com/penningav).
 
 All complaints will be reviewed and investigated promptly and fairly.
 
