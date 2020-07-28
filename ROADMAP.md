@@ -4,9 +4,6 @@
 <h2>SuRVoS 2 Roadmap</h2>
 
 
-<h2>Roadmap</h2>
-
-
 <h4>Make Improved Interactive Segmentation Tool</h4>
 
 
