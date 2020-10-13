@@ -64,6 +64,11 @@ Install SuRVoS from the survos conda channel
 $> conda install -c conda-forge -c numba -c ccpi survos
 ```
 
+Because of an issue with the matplotlib library, you need to downgrade to version 3.2.2
+```bash
+$> conda install matplotlib-base=3.2.2
+```
+
 To run SuRVoS, make sure you have your `survos-env` environment activated ("conda activate survos-env") and type 'SuRVoS' to run.
 
 ```bash
