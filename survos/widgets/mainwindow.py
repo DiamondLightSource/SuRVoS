@@ -460,23 +460,6 @@ class MainWidget(QtWidgets.QWidget):
                                                 source, sp_shape, spacing,
                                                 compactness, sptotal)
 
-        if self.DM.has_ds('megavoxels/megavoxels') and \
-                self.DM.has_ds('megavoxels/megavoxels_idx') and \
-                self.DM.has_ds('megavoxels/megavoxels_table'):
-            log.info('+ Loading MegaVoxels')
-            mvds = 'megavoxels/megavoxels'
-            mvidx = 'megavoxels/megavoxels_idx'
-            mvtable = 'megavoxels/megavoxels_table'
-            attrs =  self.DM.attrs(mvds)
-            source = attrs['source']
-            lamda = attrs['lamda']
-            nbins = attrs['nbins']
-            gamma = attrs['gamma']
-            mptotal = attrs['num_megavoxels']
-            self.SuperRegions.load_megavoxels(mvds, mvidx, mvtable,
-                                               source, lamda, nbins, gamma,
-                                               mptotal)
-
         if self.DM.has_grp('annotations'):
             for levelid, dataset, active in sorted(self.DM.available_annotations()):
                 if active != True:

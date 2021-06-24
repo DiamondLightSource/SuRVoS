@@ -518,45 +518,7 @@ class LayeredCanvas(PerspectiveCanvas):
             indexes[:, 1] -= ymin
             indexes[:, 2] -= xmin
             apply_roi = False
-        elif self.DM.gtlevel == 2:
-            mv = self.DM.load_slices(self.DM.mvlabels, slice_z, slice_y, slice_x)
-            mv = mv[0, pos[:, 0], pos[:, 1]]
-            mv = np.unique(mv)
-            if np.isnan(mv).any() or (mv < 0).any():
-                self.launcher.show_error('MegaVoxels are not created for this ROI')
-                return
 
-            total_idx = np.array([], np.int32)
-
-            with h5.File(self.DM.ds_path(self.DM.mvtable), 'r') as t1, \
-                 h5.File(self.DM.ds_path(self.DM.mvindex), 'r') as t2:
-
-                mvtable = t1['data']
-                mvindex = t2['data']
-
-                for v in mv:
-                    if v == self.DM.mvtotal - 1:
-                        slc = slice(mvtable[v], None)
-                    else:
-                        slc = slice(mvtable[v], mvtable[v+1])
-                    total_idx = np.append(total_idx, mvindex[slc])
-
-            indexes = np.column_stack(np.unravel_index(total_idx, self.DM.data_shape))
-            if self.DM.data_shape != self.DM.region_shape():
-                log.debug('* Filtering indexes')
-                mask = np.ones(indexes.shape[0], np.bool)
-                for i, axis in enumerate(self.DM.active_roi):
-                    curr = indexes[:, i]
-                    mask[curr < axis.start] = False
-                    mask[curr >= axis.stop] = False
-                indexes = indexes[mask]
-
-            zmin, ymin, xmin = indexes.min(0)
-            zmax, ymax, xmax = indexes.max(0)
-            indexes[:, 0] -= zmin
-            indexes[:, 1] -= ymin
-            indexes[:, 2] -= xmin
-            apply_roi = False
         else:
             zmin = zmax = self.idx
             indexes = np.empty((pos.shape[0], 3), np.int32)
@@ -649,7 +611,7 @@ class GrowTool(HWidgets):
         items = ['data', 'stretch', 'smooth', 'denoised']
         self.bbox_source = TComboBox('Source:', items,
                                      selected=items.index(self.DM.growing_bbox[0]))
-        items = ['Voxels', 'SuperVoxels', 'MegaVoxels']
+        items = ['Voxels', 'SuperVoxels']
         self.alevel_combo = TComboBox('Annotation Level:', items,
                                       selected=self.DM.growing_bbox[3])
         super(GrowTool, self).__init__(self.alevel_combo, 'ROI:',
