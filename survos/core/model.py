@@ -68,12 +68,6 @@ class DataModel(QtCore.QObject):
         self.svtable = None
         self.svtotal = None
 
-        # Megavoxels
-        self.mvlabels = None
-        self.mvindex = None
-        self.mvtable = None
-        self.mvtotal = None
-
         # Classifier
         self.clf = None
         self.clf_name = None
