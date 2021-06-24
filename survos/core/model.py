@@ -285,12 +285,13 @@ class DataModel(QtCore.QObject):
             sv_source = supervox_attrs['source']
             sv_source_name = sv_source.split('/')[1]
             sv_source_index = sv_source_name.split('_')[0]
-            # Check if the supervoxel source is in the result_list
-            if not any(d.get('feature_idx', None) == int(sv_source_index) for d in result_list):
-                # It is not there, add it from the channel metadata
-                sv_source_attrs = self.attrs(sv_source)
-                sv_source_attrs['unique_sv_source'] = True
-                result_list.append(sv_source_attrs)
+            if sv_source_index != "data":
+                # Check if the supervoxel source is in the result_list
+                if not any(d.get('feature_idx', None) == int(sv_source_index) for d in result_list):
+                    # It is not there, add it from the channel metadata
+                    sv_source_attrs = self.attrs(sv_source)
+                    sv_source_attrs['unique_sv_source'] = True
+                    result_list.append(sv_source_attrs)
 
         # Create the datasets
         channel_dict = {}
